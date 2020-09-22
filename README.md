@@ -8,7 +8,7 @@
 ##### Play and addToQueue supports error handlers - look [Error Support](#handle-errors)
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
-*This package was made by **Androz2091** and rewritten by **IamSushi** using the MIT License Rules.*
+*This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
 ## Installation
 
