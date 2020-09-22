@@ -1,8 +1,8 @@
-# Discord Music Player (Update)
+# Discord Music Player
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-# **4.0.8 Update (IMPORTANT):**
+# **4.0.8 Update:**
 ##### Play and addToQueue actions are now a DataRequest's.
 ##### Please check the Play and addToQueue changes.
 ##### Play and addToQueue supports error handlers - look [Error Support](#handle-errors)
