@@ -2,7 +2,7 @@
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-# **5.0.2 Update:**
+# **5.0.4 Update:**
 - Fixed Music Errors,
 - Tokens are not more needed to run the Node,
 - Player constructor does not accept YouTube_Token after 5.0.3 update - **please use *new Player(client, { options })* instead**.

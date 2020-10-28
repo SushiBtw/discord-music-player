@@ -30,7 +30,7 @@ class Player {
      */
     constructor(client, options = {}){
         if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
-        if (typeof options != object) throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
+        if (typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
         /**
          * Your Discord Client instance.
          * @type {Client}
