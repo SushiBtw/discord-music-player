@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,13 @@
     "queue",
     "youtube"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SushiBtw/discord-music-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SushiBtw/discord-music-player/issues"
+  },
   "author": "SushiBtw",
   "license": "MIT",
   "dependencies": {
