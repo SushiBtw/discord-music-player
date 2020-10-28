@@ -4,7 +4,8 @@
 
 # **5.0.2 Update:**
 - Fixed Music Errors,
-- Tokens are not more needed to run the Node.
+- Tokens are not more needed to run the Node,
+- Player constructor does not accept YouTube_Token after 5.0.3 update - **please use *new Player(client, { options })* instead**.
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
