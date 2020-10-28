@@ -2,10 +2,9 @@
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-# **4.0.8 Update:**
-##### Play and addToQueue actions are now a DataRequest's.
-##### Please check the Play and addToQueue changes.
-##### Play and addToQueue supports error handlers - look [Error Support](#handle-errors)
+# **5.0.2 Update:**
+- Fixed Music Errors,
+- Tokens are not more needed to run the Node.
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
@@ -35,8 +34,7 @@ settings = {
 };
 
 const { Player } = require("discord-music-player");
-// Create a new Player (Youtube API key is your Youtube Data v3 key)
-const player = new Player(client, "YouTube_API_Key");
+const player = new Player(client);
 // To easily access the player
 client.player = player;
 

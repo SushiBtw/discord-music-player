@@ -1,7 +1,6 @@
 const ytdl = require('ytdl-core');
-const SYA = require('simple-youtube-api');
 const mergeOptions = require('merge-options');
-const ytsr = require('ytsr');
+const ytsr = require('./ytsearch/main');
 
 const { VoiceChannel, version } = require("discord.js");
 if(version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
@@ -27,27 +26,15 @@ class Player {
 
     /**
      * @param {Client} client Your Discord Client instance.
-     * @param {string} youtubeToken Your Youtube Data v3 API key.
      * @param {PlayerOptions} options The PlayerOptions object.
      */
-    constructor(client, youtubeToken, options = {}){
+    constructor(client, options = {}){
         if(!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
-        if(!youtubeToken) throw new SyntaxError('[Discord_Token_Invalid] Invalid Token per Discord Client');
         /**
          * Your Discord Client instance.
          * @type {Client}
          */
         this.client = client;
-        /**
-         * Your Youtube Data v3 API key.
-         * @type {string}
-         */
-        this.youtubeToken = youtubeToken;
-        /**
-         * The Simple Youtube API Client.
-         * @type {Youtube}
-         */
-        this.SYA = new SYA(this.youtubeToken);
         /**
          * The guilds data.
          * @type {Queue[]}
@@ -106,7 +93,7 @@ class Player {
             if(!voiceChannel || typeof voiceChannel !== "object") return reject("voiceChannel must be type of VoiceChannel. value="+voiceChannel);
             if(typeof songName !== "string") return reject("songName must be type of string. value="+songName);
             // Searches the song
-            let video = await Util.getFirstSearch(songName, this.ytsr);
+            let video = await Util.getFirstSearch(songName);
             if (!video || video == "err") {
                 return resolve({ error: { type: 'YouTube_Not_Found', message: 'No Song was found with that query.' }, song: null });
             } else if (!video || video == "errQuota") {
@@ -228,7 +215,7 @@ class Player {
             let queue = this.queues.find((g) => g.guildID === guildID);
             if(!queue) return reject('Not playing');
             // Searches the song
-            let video = await Util.getFirstSearch(songName, this.ytsr);
+            let video = await Util.getFirstSearch(songName);
             if (!video || video == "err") {
                 return resolve({ error: { type: 'YouTube_Not_Found', message: 'No Song was found with that query.' }, song: null });
             } else if (!video || video == "errQuota") {

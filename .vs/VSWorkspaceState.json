@@ -3,8 +3,9 @@
     "",
     "\\.github",
     "\\.github\\workflows",
-    "\\src"
+    "\\src",
+    "\\src\\ytsearch"
   ],
-  "SelectedNode": "\\package.json",
+  "SelectedNode": "\\src\\Player.js",
   "PreviewInSolutionExplorer": false
 }
