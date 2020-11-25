@@ -1,11 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\.github",
-    "\\.github\\workflows",
     "\\src",
-    "\\src\\ytsearch"
+    "\\src\\ytsearch",
+    "\\test"
   ],
-  "SelectedNode": "\\src\\Player.js",
+  "SelectedNode": "\\src\\ytsearch\\main.js",
   "PreviewInSolutionExplorer": false
 }

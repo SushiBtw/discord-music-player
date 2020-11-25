@@ -1,4 +1,4 @@
-const ytsr = require('./ytsearch/main');
+const ytsr = require('ytsr');
 /**
  * Utilities.
  * @ignore
@@ -16,11 +16,20 @@ class Util {
      */
     static getFirstSearch(search) {
         return new Promise(async (resolve, reject) => {
-            search = search.replace(/<(.+)>/g, "$1");
-            console.log(search)
-            ytsr(search).then(searchResults => {
+
+            const filters = await ytsr.getFilters(search);
+            const filterVideo = filters.get('Type').find(o => o.name === 'Video');
+
+            const options = {
+                limit: 1,
+                nextpageRef: filterVideo.ref,
+            }
+
+            ytsr(filterVideo.query, options).then(searchResults => {
                 if (!searchResults.items || !searchResults.items[0]) return resolve('err');
                 resolve(searchResults.items[0]);
+            }).catch((error) => {
+                return resolve('err');
             });
         });
     }

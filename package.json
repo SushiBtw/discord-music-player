@@ -1,10 +1,10 @@
 {
   "name": "discord-music-player",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js",
+    "test": "node test/test.js",
     "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose"
   },
   "keywords": [
@@ -30,7 +30,8 @@
     "ffmpeg-static": "^4.1.1",
     "merge-options": "^2.0.0",
     "simple-youtube-api": "^5.2.1",
-    "ytdl-core": "^3.0.0"
+    "ytdl-core": "^3.0.0",
+    "ytsr": "github:TimeForANinja/node-ytsr#wip-api-adjustments"
   },
   "devDependencies": {
     "discord.js": "discordjs/discord.js",
