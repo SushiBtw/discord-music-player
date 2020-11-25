@@ -28,8 +28,8 @@ Install [FFMPEG](https://www.ffmpeg.org/download.html) and you're done!
 
 ```js
 const Discord = require("discord.js"),
-client = new Discord.Client(),
-settings = {
+const client = new Discord.Client(),
+const settings = {
     prefix: "!",
     token: "Client_Token"
 };
@@ -109,7 +109,7 @@ client.player.getQueue(guildID)
 
 ### Play
 
-To play a song, use the `client.player.play()` function.  
+To play a song, use the `client.player.play();` function.  
 
 **Usage:**
 
@@ -133,7 +133,7 @@ client.on('message', async (message) => {
         song = song.song;
         message.channel.send(`Currently playing ${song.name}! - Requested by ${song.requestedBy}`);
     }
-
+});
 ```
 
 ### Pause
@@ -158,7 +158,6 @@ client.on('message', async (message) => {
         let song = await client.player.pause(message.guild.id);
         message.channel.send(`${song.name} paused!`);
     }
-
 });
 ```
 
@@ -184,7 +183,6 @@ client.on('message', async (message) => {
         let song = await client.player.resume(message.guild.id);
         message.channel.send(`${song.name} resumed!`);
     }
-
 });
 ```
 
@@ -210,7 +208,6 @@ client.on('message', (message) => {
         client.player.stop(message.guild.id);
         message.channel.send('Music stopped!');
     }
-
 });
 ```
 
@@ -236,7 +233,6 @@ client.on('message', (message) => {
         client.player.setVolume(message.guild.id, parseInt(args[0]));
         message.channel.send(`Volume set to ${args[0]} !`);
     }
-
 });
 ```
 
@@ -275,7 +271,6 @@ client.on('message', async (message) => {
             message.channel.send(`Currently playing ${song.name}!`);
         }
     }
-
 });
 ```
 
@@ -301,7 +296,6 @@ client.on('message', (message) => {
         client.player.clearQueue(message.guild.id);
         message.channel.send('Queue cleared!');
     }
-
 });
 ```
 
@@ -329,7 +323,6 @@ client.on('message', (message) => {
             return `${i === 0 ? 'Current' : `#${i+1}`} - ${song.name} | ${song.author}`
         }).join('\n')));
     }
-
     /**
      * Output:
      *
@@ -339,7 +332,6 @@ client.on('message', (message) => {
      * #3 - Dance Monkey | Tones And I
      * #4 - Circles | Post Malone
      */
-
 });
 ```
 
@@ -365,7 +357,6 @@ client.on('message', async (message) => {
         let song = await client.player.skip(message.guild.id);
         message.channel.send(`${song.name} skipped!`);
     }
-
 });
 ```
 
@@ -391,7 +382,6 @@ client.on('message', async (message) => {
         let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`Currently playing ${song.name}...`);
     }
-
 });
 ```
 
@@ -428,7 +418,6 @@ client.on('message', async (message) => {
         let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
     }
-
 });
 ```
 
@@ -482,7 +471,7 @@ client.on('message', (message) => {
             }
         });
     }
-
+});
 ```
 
 ## Handle errors
@@ -563,7 +552,6 @@ client.on('message', (message) => {
         // you are sure it works:
         client.player.getQueue(message.guild.id);
     }
-
 });
 ```
 
