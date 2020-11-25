@@ -2,7 +2,8 @@
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-# **5.0.5 Update:**
+# **5.0.6 Update:**
+- Fixed Unknown Package error
 - Fixed ``SyntaxError: Unexpected end of JSON input`` error,
 - Other minor fixes.
 
@@ -16,7 +17,7 @@ npm install --save discord-music-player
 ```
 
 Install **opusscript** or **@discordjs/opus**:
-
+*If something goes wrong use ``*@discordjs/opus``.*
 ```sh
 npm install --save opusscript
 ```
@@ -487,7 +488,7 @@ client.on('message', (message) => {
 ## Handle errors
 
 ##### Catching errors while using ``play`` and ``addToQueue``:
-```
+```js
     play(message.member.voice.channel, args[0]).then(async body => {
             // If Song won't be found - *body.error* will be NOT null and *body.song* null.
             // You should catch the error using .catch() method or use:
@@ -497,14 +498,16 @@ client.on('message', (message) => {
         }).catch(err => {
             // Catch and Debug it, whatever you need.
             console.log(err);
-            // Will Debug:
-            // {
-            //   error: {
-            //      type: 'YouTube_Not_Found',
-            //      message: 'No Song was found with that query.'
-            //   }
-            //   song: null
-            // }
+            /**
+            * Will Debug:
+            * {
+            *   error: {
+            *      type: 'YouTube_Not_Found',
+            *      message: 'No Song was found with that query.'
+            *   }
+            *   song: null
+            * }
+            */
         });
         
     play(message.member.voice.channel, args[0]).then(async body => {
@@ -516,15 +519,17 @@ client.on('message', (message) => {
         }).catch(err => {
             // Catch and Debug it, whatever you need.
             console.log(err);
-            // Will Debug:
-            // {
-            //   error: {
-            //      type: 'YouTube_API_Error',
-            //      message: 'Your API Key has been rate-limited.\nRead more: ' +
-            //          'https://developers.google.com/youtube/v3/getting-started#quota.'
-            //   }
-            //   song: null
-            // }
+            /**
+            * Will Debug:
+            * {
+            *   error: {
+            *      type: 'YouTube_API_Error',
+            *      message: 'Your API Key has been rate-limited.\nRead more: ' +
+            *          'https://developers.google.com/youtube/v3/getting-started#quota.'
+            *   },
+            *   song: null
+            * }
+            */
         });
 ```
 

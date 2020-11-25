@@ -1,6 +1,6 @@
 let TestStrings = [
     'Never Gonna Give You Up',
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+    'This is the Life'
 ]
 
 
@@ -10,12 +10,13 @@ const client = new Discord.Client();
 const Util = require('../src/Util');
 const { Player } = require('../index');
 let player = new Player(client);
+const ytsr = require('../src/node-ytsr-wip/main');
 
 for (var String in TestStrings) {
 
     console.log(String);
 
-    Util.getFirstSearch(TestStrings[String]).then(async result => {
+    Util.getFirstSearch(TestStrings[String], ytsr).then(async result => {
         console.log(result.title);
     });
 

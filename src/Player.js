@@ -1,6 +1,6 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
-const ytsr = require('ytsr');
+const ytsr = require('./node-ytsr-wip/main');
 
 const { VoiceChannel, version } = require("discord.js");
 if(version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
@@ -94,7 +94,7 @@ class Player {
             if(!voiceChannel || typeof voiceChannel !== "object") return reject("voiceChannel must be type of VoiceChannel. value="+voiceChannel);
             if(typeof songName !== "string") return reject("songName must be type of string. value="+songName);
             // Searches the song
-            let video = await Util.getFirstSearch(songName);
+            let video = await Util.getFirstSearch(songName, ytsr);
             if (!video || video == "err") {
                 return resolve({ error: { type: 'YouTube_Not_Found', message: 'No Song was found with that query.' }, song: null });
             } else if (!video || video == "errQuota") {
@@ -216,7 +216,7 @@ class Player {
             let queue = this.queues.find((g) => g.guildID === guildID);
             if(!queue) return reject('Not playing');
             // Searches the song
-            let video = await Util.getFirstSearch(songName);
+            let video = await Util.getFirstSearch(songName, ytsr);
             if (!video || video == "err") {
                 return resolve({ error: { type: 'YouTube_Not_Found', message: 'No Song was found with that query.' }, song: null });
             } else if (!video || video == "errQuota") {

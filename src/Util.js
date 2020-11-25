@@ -1,4 +1,3 @@
-const ytsr = require('ytsr');
 /**
  * Utilities.
  * @ignore
@@ -14,7 +13,7 @@ class Util {
      * @param {ytsr} ytsr ytsr.
      * @returns {Promise<Video>}
      */
-    static getFirstSearch(search) {
+    static getFirstSearch(search, ytsr) {
         return new Promise(async (resolve, reject) => {
 
             const filters = await ytsr.getFilters(search);
