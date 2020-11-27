@@ -8,6 +8,22 @@ const Queue = require('./Queue');
 const Util = require('./Util');
 const Song = require('./Song');
 
+
+/**
+ * Specific errors.
+ *
+ * @property {string} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
+ * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
+ * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
+ */
+const customErrors = {
+    'SearchIsNull': 'No Song was found with that query.',
+    'VoiceChannelTypeInvalid': 'Voice Channel must be a type of VoiceChannel.',
+    'SongTypeInvalid': 'Song must be a type of String.',
+    'QueueIsNull': 'The Guild Queue is NULL.'
+}
+
+
 /**
  * Player options.
  * @typedef {PlayerOptions}
@@ -91,15 +107,11 @@ class Player {
     play(voiceChannel, songName, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
         return new Promise(async (resolve, reject) => {
-            if(!voiceChannel || typeof voiceChannel !== "object") return reject("voiceChannel must be type of VoiceChannel. value="+voiceChannel);
-            if(typeof songName !== "string") return reject("songName must be type of string. value="+songName);
-            // Searches the song
-            let video = await Util.getFirstSearch(songName, ytsr);
-            if (!video || video == "err") {
-                return resolve({ error: { type: 'YouTube_Not_Found', message: 'No Song was found with that query.' }, song: null });
-            } else if (!video || video == "errQuota") {
-                return resolve({ error: { type: 'YouTube_API_Error', message: 'Your API Key has been rate-limited. Read more: https://developers.google.com/youtube/v3/getting-started#quota.' }, song: null });
-            } else {
+            if (!voiceChannel || typeof voiceChannel !== 'object') return reject(customErrors['VoiceChannelTypeInvalid']);
+            if (typeof songName !== 'string') return reject(customErrors['SongTypeInvalid']);
+            try {
+                // Searches the song
+                let video = await Util.getFirstSearch(songName, ytsr);
                 // Joins the voice channel
                 let connection = await voiceChannel.join();
                 // Creates a new guild with data
@@ -114,8 +126,14 @@ class Player {
 
                 return resolve({ error: null, song: song });
             }
-            // Resolves the song.
-            
+            catch (err) {
+                return resolve({
+                    error: {
+                        type: 'SearchIsNull',
+                        message: customErrors['SearchIsNull']
+                    }, song: null
+                });
+            }
         });
     }
 
@@ -128,7 +146,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Pauses the dispatcher
             queue.dispatcher.pause();
             queue.playing = false;
@@ -146,7 +164,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Pauses the dispatcher
             queue.dispatcher.resume();
             queue.playing = true;
@@ -164,7 +182,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Stops the dispatcher
             queue.stopped = true;
             queue.songs = [];
@@ -184,7 +202,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Updates volume
             queue.dispatcher.setVolumeLogarithmic(percent / 200);
             // Resolves guild queue
@@ -214,20 +232,26 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
-            // Searches the song
-            let video = await Util.getFirstSearch(songName, ytsr);
-            if (!video || video == "err") {
-                return resolve({ error: { type: 'YouTube_Not_Found', message: 'No Song was found with that query.' }, song: null });
-            } else if (!video || video == "errQuota") {
-                return resolve({ error: { type: 'YouTube_API_Error', message: 'Your API Key has been rate-limited. Read more: https://developers.google.com/youtube/v3/getting-started#quota.' }, song: null });
-            } else {
+            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (typeof songName !== 'string') return reject(customErrors['SongTypeInvalid']);
+            try {
+                // Searches the song
+                let video = await Util.getFirstSearch(songName, ytsr);
+                // Define the song
                 let song = new Song(video, queue, requestedBy);
                 // Updates queue
                 queue.songs.push(song);
                 // Resolves the song
                 return resolve({ error: null, song: song });
             }
+            catch (err) {
+                return resolve({
+                    error: {
+                        type: 'SearchIsNull',
+                        message: customErrors['SearchIsNull']
+                    }, song: null
+                });
+            };
         });
     }
 
@@ -241,7 +265,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Updates queue
             queue.songs = songs;
             // Resolves the queue
@@ -258,7 +282,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Clears queue
             let currentlyPlaying = queue.songs.shift();
             queue.songs = [ currentlyPlaying ];
@@ -276,7 +300,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             let currentSong = queue.songs[0];
             // Ends the dispatcher
             queue.dispatcher.end();
@@ -295,7 +319,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             let currentSong = queue.songs[0];
             // Resolves the current song
             resolve(currentSong);
@@ -312,7 +336,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Enable/Disable repeat mode
             queue.repeatMode = enabled;
             // Resolve
@@ -329,7 +353,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Shuffle the queue (except the first song)
             let currentSong = queue.songs.shift();
             queue.songs = queue.songs.sort(() => Math.random() - 0.5);
@@ -349,7 +373,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if(!queue) return reject('Not playing');
+            if (!queue) return reject(customErrors['QueueIsNull']);
             // Remove the song from the queue
             let songFound = null;
             if(typeof song === "number"){

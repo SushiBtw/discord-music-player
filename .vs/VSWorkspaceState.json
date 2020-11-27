@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\src",
+    "\\src\\node-ytsr-wip",
     "\\test"
   ],
-  "SelectedNode": "\\README.md",
+  "SelectedNode": "\\test\\test.js",
   "PreviewInSolutionExplorer": false
 }
