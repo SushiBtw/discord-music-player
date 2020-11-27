@@ -1,7 +1,6 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
 const ytsr = require('./node-ytsr-wip/main');
-
 const { VoiceChannel, version } = require("discord.js");
 if(version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
@@ -20,7 +19,21 @@ const customErrors = {
     'SearchIsNull': 'No Song was found with that query.',
     'VoiceChannelTypeInvalid': 'Voice Channel must be a type of VoiceChannel.',
     'SongTypeInvalid': 'Song must be a type of String.',
-    'QueueIsNull': 'The Guild Queue is NULL.'
+    'QueueIsNull': 'The Guild Queue is NULL.',
+    'OptionsTypeInvalid': 'The Search Options must be a type of Object.'
+}
+
+/**
+ * Default search options
+ * 
+ * @property {string} uploadDate Upload date [Options: 'hour', 'today', 'week', 'month', 'year'] | Default: none
+ * @property {string} duration Duration [Options: 'short', 'long'] | Default: none
+ * @property {string} sortBy Sort by [Options: 'relevance', 'date', 'view count', 'rating'] | Default: relevance
+ */
+const defaultSearchOptions = {
+    uploadDate: null,
+    duration: null,
+    sortBy: 'relevance',
 }
 
 
@@ -101,17 +114,19 @@ class Player {
      * Plays a song in a voice channel.
      * @param {voiceChannel} voiceChannel The voice channel in which the song will be played.
      * @param {string} songName The name of the song to play.
+     * @param {object} options Search options.
      * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    play(voiceChannel, songName, requestedBy) {
+    play(voiceChannel, songName, options = {}, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
         return new Promise(async (resolve, reject) => {
-            if (!voiceChannel || typeof voiceChannel !== 'object') return reject(customErrors['VoiceChannelTypeInvalid']);
-            if (typeof songName !== 'string') return reject(customErrors['SongTypeInvalid']);
+            if (!voiceChannel || typeof voiceChannel !== 'object') return reject({ error: { type: 'VoiceChannelTypeInvalid', message: customErrors['VoiceChannelTypeInvalid'] }, song: null });
+            if (typeof songName !== 'string') return reject({ error: { type: 'SongTypeInvalid', message: customErrors['SongTypeInvalid'] }, song: null });
+            if (typeof options != 'object') return reject({ error: { type: 'OptionsTypeInvalid', message: customErrors['OptionsTypeInvalid'] }, song: null });
             try {
                 // Searches the song
-                let video = await Util.getFirstSearch(songName, ytsr);
+                let video = await Util.getFirstSearch(songName, ytsr, options);
                 // Joins the voice channel
                 let connection = await voiceChannel.join();
                 // Creates a new guild with data
@@ -146,7 +161,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Pauses the dispatcher
             queue.dispatcher.pause();
             queue.playing = false;
@@ -164,7 +179,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Pauses the dispatcher
             queue.dispatcher.resume();
             queue.playing = true;
@@ -182,7 +197,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Stops the dispatcher
             queue.stopped = true;
             queue.songs = [];
@@ -202,7 +217,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Updates volume
             queue.dispatcher.setVolumeLogarithmic(percent / 200);
             // Resolves guild queue
@@ -232,7 +247,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             if (typeof songName !== 'string') return reject(customErrors['SongTypeInvalid']);
             try {
                 // Searches the song
@@ -265,7 +280,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Updates queue
             queue.songs = songs;
             // Resolves the queue
@@ -282,7 +297,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Clears queue
             let currentlyPlaying = queue.songs.shift();
             queue.songs = [ currentlyPlaying ];
@@ -300,7 +315,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             let currentSong = queue.songs[0];
             // Ends the dispatcher
             queue.dispatcher.end();
@@ -319,7 +334,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             let currentSong = queue.songs[0];
             // Resolves the current song
             resolve(currentSong);
@@ -336,7 +351,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Enable/Disable repeat mode
             queue.repeatMode = enabled;
             // Resolve
@@ -353,7 +368,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Shuffle the queue (except the first song)
             let currentSong = queue.songs.shift();
             queue.songs = queue.songs.sort(() => Math.random() - 0.5);
@@ -373,7 +388,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject(customErrors['QueueIsNull']);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
             // Remove the song from the queue
             let songFound = null;
             if(typeof song === "number"){

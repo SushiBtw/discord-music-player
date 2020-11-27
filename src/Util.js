@@ -23,9 +23,10 @@ class Util {
      * Gets the first youtube results for your search.
      * @param {string} search The name of the video or the video URL.
      * @param {ytsr} ytsr ytsr.
+     * @param {object} options Options.
      * @returns {Promise<Video>}
      */
-    static getFirstSearch(search, ytsr) {
+    static getFirstSearch(search, ytsr, options = {}) {
         return new Promise(async (resolve, reject) => {
 
             let isVideoLink = VideoRegex.test(search);
@@ -52,19 +53,47 @@ class Util {
                 });
 
             } else {
-                // v6.0.0 Custom Filters - ToDo
+                var filters;
 
-                const filters = await ytsr.getFilters(search);
-                const filterVideo = filters.get('Type').find(o => o.name === 'Video');
+                // Default Options - Type: Video
+                let filtersType = await ytsr.getFilters(search);
+                filters = filtersType.get('Type').find(o => o.name === 'Video');
 
-                const options = {
-                    limit: 1,
-                    nextpageRef: filterVideo.ref,
+                // Custom Options - Upload date: null
+                if (options.uploadDate) {
+                    let filtersUploadDate = await ytsr.getFilters(filters.ref);
+                    filters = filtersUploadDate.get('Upload date').find(o => o.name.toLowerCase().includes(options.uploadDate)) || filters;
                 }
 
-                ytsr(filterVideo.query, options).then(searchResults => {
-                    if (!searchResults.items || !searchResults.items[0]) return reject('SearchIsNull');
-                    resolve(searchResults.items[0]);
+                // Custom Options - Duration: null
+                if (options.duration) {
+                    let filtersDuration = await ytsr.getFilters(filters.ref);
+                    filters = filtersDuration.get('Duration').find(o => o.name.toLowerCase().startsWith(options.duration)) || filters;
+                }
+
+                // Custom Options - Sort by: relevance
+                if (options.sortBy && !options.sortBy.toLowerCase().includes('relevance')) {
+                    let filtersSortBy = await ytsr.getFilters(filters.ref);
+                    filters = filtersSortBy.get('Sort by').find(o => o.name.toLowerCase().includes(options.sortBy)) || filters;
+                }
+
+                const searchOptions = {
+                    limit: 2,
+                    nextpageRef: filters.ref,
+                }
+
+                ytsr(filters.query, searchOptions).then(searchResults => {
+
+                    let items = searchResults.items;
+
+                    if (!items || !items[0]) return reject('SearchIsNull');
+
+                    if (items[0].type != 'Video')
+                        items.shift();
+
+                    if (!items || !items[0]) return reject('SearchIsNull');
+
+                    resolve(items[0]);
                 }).catch((error) => {
                     return reject('SearchIsNull');
                 });

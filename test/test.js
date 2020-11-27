@@ -1,6 +1,12 @@
 let testStrings = [
-    'https://www.youtube.com/watch?v=iP6XpLQM2Cs&ab_channel=keshaVEVO',
-]
+    'Waiting For Love',
+];
+
+const testSearchOptions = {
+    uploadDate: null,
+    duration: 'short',
+    sortBy: 'DontSoryByDueMisstypedError',
+}
 
 const Discord = require("discord.js");
 const client = new Discord.Client();
@@ -14,7 +20,7 @@ for (const str in testStrings) {
 
     console.log(`Running Song: ${testStrings[str]}`);
 
-    Util.getFirstSearch(testStrings[str], ytsr).then(result => {
+    Util.getFirstSearch(testStrings[str], ytsr, testSearchOptions).then(result => {
         console.log(`Found Song: ${result.title}`);
         process.exit(0);
     });
