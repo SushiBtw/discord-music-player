@@ -59,7 +59,7 @@ class Util {
         return new Promise(async (resolve, reject) => {
 
             options = { ...defaultSearchOptions, ...options};
-            options = pick(options, defaultSearchOptions.keys());
+            options = pick(options, Object.keys(defaultSearchOptions))
 
             let isVideoLink = VideoRegex.test(search);
 

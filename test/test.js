@@ -11,9 +11,11 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 
 const Util = require('../src/Util');
-const { Player } = require('../index');
+const { Player, version } = require('../index');
 let player = new Player(client);
 const ytsr = require('../src/node-ytsr-wip/main');
+
+console.log(version);
 
 for (const str in testStrings) {
 
