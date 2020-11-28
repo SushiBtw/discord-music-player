@@ -208,7 +208,7 @@ class Player {
      * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    addToQueue(guildID, songName, options = {}, requestedBy) {
+    async addToQueue(guildID, songName, options = {}, requestedBy) {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
