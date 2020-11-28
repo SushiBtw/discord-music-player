@@ -110,6 +110,7 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 - **[pause(GuildID)](#pause)** - Pause the current playing Song.
 - **[resume(GuildID)](#resume)** - Resume the Song that was paused.
 - **[stop(GuildID)](#stop)** - Stop playing the Music and clear the Server Queue.
+- **[shuffle(GuildID)](#shuffle)** - Shuffle the Server Queue.
 - **[setRepeatMode(GuildID, boolean)](#repeat)** - Repeat the current Song indefinitely (if set to ``true``) *[true/false]*.
 ### Other Methods
 - **[setVolume(GuildID, Volume)](#setvolume)** - Set Music Volume.
@@ -367,6 +368,26 @@ client.on('message', (message) => {
     if(command === 'stop'){
         client.player.stop(message.guild.id);
         message.channel.send('Music stopped, the Queue was cleared!');
+    }
+});
+```
+
+### Shuffle
+Shuffle the Server Queue.
+
+**Usage:**
+```js
+client.player.shuffle(GuildID);
+```
+**Example**:
+```js
+client.on('message', (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'shuffle'){
+        client.player.shuffle(message.guild.id);
+        message.channel.send('Server Queue was shuffled.');
     }
 });
 ```

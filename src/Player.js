@@ -320,25 +320,6 @@ class Player {
     }
 
     /**
-     * Shuffles the guild queue.
-     * @param {string} guildID 
-     * @returns {Promise<Void>}
-     */
-    shuffle(guildID){
-        return new Promise(async(resolve, reject) => {
-            // Gets guild queue
-            let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
-            // Shuffle the queue (except the first song)
-            let currentSong = queue.songs.shift();
-            queue.songs = queue.songs.sort(() => Math.random() - 0.5);
-            queue.songs.unshift(currentSong);
-            // Resolve
-            resolve();
-        });
-    }
-
-    /**
      * Removes a song from the queue
      * @param {string} guildID 
      * @param {number|Song} song The index of the song to remove or the song to remove object.
@@ -364,6 +345,25 @@ class Player {
             }
             // Resolve
             resolve(songFound);
+        });
+    }
+
+    /**
+     * Shuffles the guild queue.
+     * @param {string} guildID 
+     * @returns {Promise<Void>}
+     */
+    shuffle(guildID) {
+        return new Promise(async (resolve, reject) => {
+            // Gets guild queue
+            let queue = this.queues.find((g) => g.guildID === guildID);
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
+            // Shuffle the queue (except the first song)
+            let currentSong = queue.songs.shift();
+            queue.songs = queue.songs.sort(() => Math.random() - 0.5);
+            queue.songs.unshift(currentSong);
+            // Resolve
+            resolve();
         });
     }
 
