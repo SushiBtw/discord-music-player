@@ -6,36 +6,7 @@ if(version.split('.')[0] !== '12') throw new Error("Only the master branch of di
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Song = require('./Song');
-
-
-/**
- * Specific errors.
- *
- * @property {string} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
- * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
- * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
- */
-const customErrors = {
-    'SearchIsNull': 'No Song was found with that query.',
-    'VoiceChannelTypeInvalid': 'Voice Channel must be a type of VoiceChannel.',
-    'SongTypeInvalid': 'Song must be a type of String.',
-    'QueueIsNull': 'The Guild Queue is NULL.',
-    'OptionsTypeInvalid': 'The Search Options must be a type of Object.'
-}
-
-/**
- * Default search options
- * 
- * @property {string} uploadDate Upload date [Options: 'hour', 'today', 'week', 'month', 'year'] | Default: none
- * @property {string} duration Duration [Options: 'short', 'long'] | Default: none
- * @property {string} sortBy Sort by [Options: 'relevance', 'date', 'view count', 'rating'] | Default: relevance
- */
-const defaultSearchOptions = {
-    uploadDate: null,
-    duration: null,
-    sortBy: 'relevance',
-}
-
+const MusicPlayerError = require('./MusicPlayerError');
 
 /**
  * Player options.
@@ -118,38 +89,32 @@ class Player {
      * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    play(voiceChannel, songName, options = {}, requestedBy) {
+    async play(voiceChannel, songName, options = {}, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
-        return new Promise(async (resolve, reject) => {
-            if (!voiceChannel || typeof voiceChannel !== 'object') return reject({ error: { type: 'VoiceChannelTypeInvalid', message: customErrors['VoiceChannelTypeInvalid'] }, song: null });
-            if (typeof songName !== 'string') return reject({ error: { type: 'SongTypeInvalid', message: customErrors['SongTypeInvalid'] }, song: null });
-            if (typeof options != 'object') return reject({ error: { type: 'OptionsTypeInvalid', message: customErrors['OptionsTypeInvalid'] }, song: null });
-            try {
-                // Searches the song
-                let video = await Util.getVideoBySearch(songName, ytsr, options);
-                // Joins the voice channel
-                let connection = await voiceChannel.join();
-                // Creates a new guild with data
-                let queue = new Queue(voiceChannel.guild.id);
-                queue.connection = connection;
-                let song = new Song(video, queue, requestedBy);
-                queue.songs.push(song);
-                // Add the queue to the list
-                this.queues.push(queue);
-                // Plays the song
-                this._playSong(queue.guildID, true);
 
-                return resolve({ error: null, song: song });
-            }
-            catch (err) {
-                return resolve({
-                    error: {
-                        type: 'SearchIsNull',
-                        message: customErrors['SearchIsNull']
-                    }, song: null
-                });
-            }
-        });
+        if (!voiceChannel || typeof voiceChannel !== 'object') throw new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
+        if (typeof songName !== 'string') throw new MusicPlayerError('SongTypeInvalid', 'song');
+        if (typeof options != 'object') throw new MusicPlayerError('OptionsTypeInvalid', 'song');
+        try {
+            // Searches the song
+            let video = await Util.getVideoBySearch(songName, ytsr, options);
+            // Joins the voice channel
+            let connection = await voiceChannel.join();
+            // Creates a new guild with data
+            let queue = new Queue(voiceChannel.guild.id);
+            queue.connection = connection;
+            let song = new Song(video, queue, requestedBy);
+            queue.songs.push(song);
+            // Add the queue to the list
+            this.queues.push(queue);
+            // Plays the song
+            this._playSong(queue.guildID, true);
+
+            return { error: null, song: song };
+        }
+        catch (err) {
+            return new MusicPlayerError('SearchIsNull', 'song');
+        }
     }
 
     /**
@@ -161,7 +126,7 @@ class Player {
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
+            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] } });
             // Pauses the dispatcher
             queue.dispatcher.pause();
             queue.playing = false;
@@ -243,32 +208,26 @@ class Player {
      * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    addToQueue(guildID, songName, options = {}, requestedBy){
-        return new Promise(async(resolve, reject) => {
-            // Gets guild queue
-            let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
-            if (typeof songName !== 'string') return reject({ error: { type: 'SongTypeInvalid', message: customErrors['SongTypeInvalid'] }, song: null });
-            if (typeof options != 'object') return reject({ error: { type: 'OptionsTypeInvalid', message: customErrors['OptionsTypeInvalid'] }, song: null });
-            try {
-                // Searches the song
-                let video = await Util.getVideoBySearch(songName, ytsr, options);
-                // Define the song
-                let song = new Song(video, queue, requestedBy);
-                // Updates queue
-                queue.songs.push(song);
-                // Resolves the song
-                return resolve({ error: null, song: song });
-            }
-            catch (err) {
-                return resolve({
-                    error: {
-                        type: 'SearchIsNull',
-                        message: customErrors['SearchIsNull']
-                    }, song: null
-                });
-            };
-        });
+    addToQueue(guildID, songName, options = {}, requestedBy) {
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
+
+        if (typeof songName !== 'string') throw new MusicPlayerError('SongTypeInvalid', 'song');
+        if (typeof options != 'object') throw new MusicPlayerError('OptionsTypeInvalid', 'song');
+        try {
+            // Searches the song
+            let video = await Util.getVideoBySearch(songName, ytsr, options);
+            // Define the song
+            let song = new Song(video, queue, requestedBy);
+            // Updates queue
+            queue.songs.push(song);
+            // Resolves the song
+            return resolve({ error: null, song: song });
+        }
+        catch (err) {
+            return new MusicPlayerError('SearchIsNull', 'song');
+        };
     }
 
     /**

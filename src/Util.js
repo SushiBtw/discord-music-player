@@ -28,6 +28,19 @@ const pick = (obj, keys) =>
         }, {})
 
 /**
+ * Default search options
+ * 
+ * @property {string} uploadDate Upload date [Options: 'hour', 'today', 'week', 'month', 'year'] | Default: none
+ * @property {string} duration Duration [Options: 'short', 'long'] | Default: none
+ * @property {string} sortBy Sort by [Options: 'relevance', 'date', 'view count', 'rating'] | Default: relevance
+ */
+const defaultSearchOptions = {
+    uploadDate: null,
+    duration: null,
+    sortBy: 'relevance',
+}
+
+/**
  * Utilities.
  * @ignore
  */
@@ -45,8 +58,8 @@ class Util {
     static getVideoBySearch(search, ytsr, options = {}) {
         return new Promise(async (resolve, reject) => {
 
-            options = { ...{ uploadDate: null, duration: null, sortBy: 'relevance' }, ...options};
-            options = pick(options, ['uploadDate', 'duration', 'sortBy']);
+            options = { ...defaultSearchOptions, ...options};
+            options = pick(options, defaultSearchOptions.keys());
 
             let isVideoLink = VideoRegex.test(search);
 

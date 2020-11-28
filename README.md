@@ -1,66 +1,96 @@
+﻿
 # Discord Music Player
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-# **5.0.6 Update:**
-- Fixed Unknown Package error
-- Fixed ``SyntaxError: Unexpected end of JSON input`` error,
-- Other minor fixes.
-
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
-## Installation
+## **DMP v6.0.0 Update:**
+- [x]   **YouTube Link Support** - [Read More](#),
+- [x] **YouTube Filters** - [Read More](#),
+- [ ]  **Shuffle Method** - [Not Ready](#),
+- [ ] **Progress Bar** - [Not Ready](#),
+- [ ] **Code Quality Fixes** - **Not Ready**,
+- [ ] **Code Size Reduction** - **Not Ready**.
 
+## Page Sections
+- **[Installation](#installation)**
+- **[Getting Started](#getting-started)**
+- **[Installation](#installation)**
+- **[Installation](#installation)**
+- **[Installation](#installation)**
+
+## Installation
+*Node.js 12.0.0 or newer is required to run this module.*
 ```sh
 npm install --save discord-music-player
 ```
-
 Install **opusscript** or **@discordjs/opus**:
 *If something goes wrong use ``*@discordjs/opus``.*
 ```sh
 npm install --save opusscript
 ```
+**Install [FFMPEG](https://www.ffmpeg.org/download.html)!**
 
-Install [FFMPEG](https://www.ffmpeg.org/download.html) and you're done!
-
-## Player
-
+## Getting Started
+**The code bellow, will show you how to use DMP in your code.**
+*Please define your **Player** after the **client/bot** definition.*
 ```js
-const Discord = require("discord.js"),
-const client = new Discord.Client(),
+const Discord = require("discord.js");
+const client = new Discord.Client();
 const settings = {
-    prefix: "!",
-    token: "Client_Token"
+    prefix: '!',
+    token: 'YourBotTokenHere'
 };
 
 const { Player } = require("discord-music-player");
-const player = new Player(client);
-// To easily access the player
+const player = new Player(client, {
+	leaveOnEmpty: false, // This options are optional.
+});
+// You can define the Player as *client.player* to easly access it.
 client.player = player;
 
 client.on("ready", () => {
-    console.log("I'm ready to play!");
+    console.log("I am ready to Play with DMP 🎶");
 });
 
 client.login(settings.token);
 ```
-
-You can pass a second parameter when instantiating the class Player: the **options** object:  
-**options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.  
-**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.  
-**options.leaveOnEmpty**: whether the bot should leave the voice channel if there is no more member in it.
-
-### Features Overview
-
-You need to **init the guild queue using the play() function**, then you are able to manage the queue using the following functions:
+### Player Options
+*You can pass a second parameter when instantiating the class Player, the **options** object:*
+**options.leaveOnEnd: [true/false]** If set to **true**, the bot will leave the channel, when the queue would be empty.
+**options.leaveOnStop [true/false]**: If set to **true**, the bot will leave the Voice Channel when the `stop()` function is used.
+**options.leaveOnEmpty [true/false]**: If set to **true**, bot will automatically leave the Voice Channel when is empty.
 
 ```js
+new Player(client, {
+	leaveOnEnd: false,
+	leaveOnEmpty: false,
+	leaveOnEmpty: true,
+});
+```
+
+## Functions
+
+You need to **init the guild queue using the play() function**, then you are able to manage the queue using the listed functions.
+***VoiceChannel** object can be obtained from the Message object - ``message.member.voice.channel``.*
+***GuildID** object can be obtained from the Message object - ``message.guild.id``.*
+***SongName** is a Search String or a YouTube Video URL.*
+***Options (optional)** object can have the following options:*
+```json
+{
+	uploadDate: 'hour/today/week/month/year', // Default - none
+	duration: 'short/long', // Default - none
+	sortBy: 'relevance/date/view count/rating' // Default - 'relevance'
+}
+```
+
 // Play a song in the voice channel and init the guild queue
-client.player.play(voiceChannel, songName);
+client.player.play(VoiceChannel, songName, Options);
 
 // Add a song to the queue
-client.player.addToQueue(guildID, songName);
+client.player.addToQueue(guildID, SongName);
 // Clear the queue
 client.player.clearQueue(guildID);
 // Get the queue
@@ -88,7 +118,7 @@ client.player.nowPlaying(guildID);
 client.player.setRepeatMode(guildID, true);
 // Current song will no longer be repeated indefinitely
 client.player.setRepeatMode(guildID, false);
-```
+
 
 ### Event messages
 
