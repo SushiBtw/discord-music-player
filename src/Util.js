@@ -1,6 +1,9 @@
+const scrapeYT = require('scrape-yt');
+
+//RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-const scrapeYT = require('scrape-yt');
+
 /**
  * Get ID from YouTube link.
  * @param {string} url
@@ -10,6 +13,19 @@ function youtube_parser(url) {
     var match = url.match(VideoRegexID);
     return (match && match[7].length == 11) ? match[7] : false;
 }
+
+/**
+ * A pure function to pick specific keys from object, similar to https://lodash.com/docs/4.17.4#pick
+ * @param {Object}obj: The object to pick the specified keys from
+ * @param {Array}keys: A list of all keys to pick from obj
+ */
+const pick = (obj, keys) =>
+    Object.keys(obj)
+        .filter(i => keys.includes(i))
+        .reduce((acc, key) => {
+            acc[key] = obj[key];
+            return acc;
+        }, {})
 
 /**
  * Utilities.
@@ -26,8 +42,11 @@ class Util {
      * @param {object} options Options.
      * @returns {Promise<Video>}
      */
-    static getFirstSearch(search, ytsr, options = {}) {
+    static getVideoBySearch(search, ytsr, options = {}) {
         return new Promise(async (resolve, reject) => {
+
+            options = { ...{ uploadDate: null, duration: null, sortBy: 'relevance' }, ...options};
+            options = pick(options, ['uploadDate', 'duration', 'sortBy']);
 
             let isVideoLink = VideoRegex.test(search);
 

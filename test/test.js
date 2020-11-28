@@ -1,9 +1,8 @@
 let testStrings = [
-    'Waiting For Love',
+    'This is the life',
 ];
 
 const testSearchOptions = {
-    uploadDate: null,
     duration: 'short',
     sortBy: 'DontSoryByDueMisstypedError',
 }
@@ -20,8 +19,11 @@ for (const str in testStrings) {
 
     console.log(`Running Song: ${testStrings[str]}`);
 
-    Util.getFirstSearch(testStrings[str], ytsr, testSearchOptions).then(result => {
-        console.log(`Found Song: ${result.title}`);
+    Util.getVideoBySearch(testStrings[str], ytsr, testSearchOptions).then(result => {
+        console.log(`Found Song: ${result.title} | ${result.link}`);
+        process.exit(0);
+    }).catch(err => {
+        console.error(err);
         process.exit(0);
     });
 

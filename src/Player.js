@@ -126,7 +126,7 @@ class Player {
             if (typeof options != 'object') return reject({ error: { type: 'OptionsTypeInvalid', message: customErrors['OptionsTypeInvalid'] }, song: null });
             try {
                 // Searches the song
-                let video = await Util.getFirstSearch(songName, ytsr, options);
+                let video = await Util.getVideoBySearch(songName, ytsr, options);
                 // Joins the voice channel
                 let connection = await voiceChannel.join();
                 // Creates a new guild with data
@@ -243,15 +243,16 @@ class Player {
      * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Song>}
      */
-    addToQueue(guildID, songName, requestedBy){
+    addToQueue(guildID, songName, options = {}, requestedBy){
         return new Promise(async(resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
             if (!queue) return reject({ error: { type: 'QueueIsNull', message: customErrors['QueueIsNull'] }, song: null });
-            if (typeof songName !== 'string') return reject(customErrors['SongTypeInvalid']);
+            if (typeof songName !== 'string') return reject({ error: { type: 'SongTypeInvalid', message: customErrors['SongTypeInvalid'] }, song: null });
+            if (typeof options != 'object') return reject({ error: { type: 'OptionsTypeInvalid', message: customErrors['OptionsTypeInvalid'] }, song: null });
             try {
                 // Searches the song
-                let video = await Util.getFirstSearch(songName, ytsr);
+                let video = await Util.getVideoBySearch(songName, ytsr, options);
                 // Define the song
                 let song = new Song(video, queue, requestedBy);
                 // Updates queue
