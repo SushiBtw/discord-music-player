@@ -17,9 +17,12 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 # Page Sections
 - **[Installation](#installation)**
 - **[Getting Started](#getting-started)**
-- **[Installation](#installation)**
-- **[Installation](#installation)**
-- **[Installation](#installation)**
+- **[Documentation](#documentation)**
+- **[Methods](#methods)**
+- **[Events](#events)**
+- **[Examples](#examples)**
+- **[Info Messages](#info-messages)**
+- **[Handle Errors](#handle-errors)**
 
 # Installation
 *Node.js 12.0.0 or newer is required to run this module.*
@@ -65,11 +68,14 @@ client.login(settings.token);
 
 **options.leaveOnEmpty [true/false]**: If set to **true**, bot will automatically leave the Voice Channel when is empty.
 
+**options.quality ['high'/'low']**: Music quality (Default: 'high')
+
 ```js
 new Player(client, {
 	leaveOnEnd: false,
 	leaveOnEmpty: false,
 	leaveOnEmpty: true,
+    quality: 'high'
 });
 ```
 
@@ -97,23 +103,23 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 
 ## Methods:
 ### Play Methods
-- **[play(VoiceChannel, SongName, Options)](#play)** - Play a Song and init the Server Queue.
-- **[addToQueue(GuildID, SongName, Options)](#add-to-queue)** - Add a Song to the Server Queue.
+- **[play(VoiceChannel, SongName, Options)](#play)** - Play a Song and init the Server Queue. | Returning: Song
+- **[addToQueue(GuildID, SongName, Options)](#add-to-queue)** - Add a Song to the Server Queue. | Returning: Song
 ### Queue Methods
-- **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild.
-- **[nowPlaying(GuildID)](#now-playing)** - Get the currenly playing Song in the Server Queue.
-- **[clearQueue(GuildID)](#clearqueue)** - Clear the Server Queue.
-- **[getQueue(GuildID)](#getqueue)** - Get the Server Queue.
+- **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild. | Returning: Boolean
+- **[nowPlaying(GuildID)](#now-playing)** - Get the currenly playing Song in the Server Queue. | Returning: Song
+- **[clearQueue(GuildID)](#clearqueue)** - Clear the Server Queue (without the Plaing song). | Returning: Queue
+- **[getQueue(GuildID)](#getqueue)** - Get the Server Queue. | Returning: Queue
 ### Song Methods
-- **[skip(GuildID)](#skip)** - Skip the current Song.
-- **[remove(GuildID, SongID)](#remove)** - Remove a Song from the Queue.
-- **[pause(GuildID)](#pause)** - Pause the current playing Song.
-- **[resume(GuildID)](#resume)** - Resume the Song that was paused.
-- **[stop(GuildID)](#stop)** - Stop playing the Music and clear the Server Queue.
-- **[shuffle(GuildID)](#shuffle)** - Shuffle the Server Queue.
-- **[setRepeatMode(GuildID, boolean)](#repeat)** - Repeat the current Song indefinitely (if set to ``true``) *[true/false]*.
+- **[skip(GuildID)](#skip)** - Skip the current Song. | Returning: Song
+- **[remove(GuildID, SongID)](#remove)** - Remove a Song from the Queue. | Returning: Song
+- **[pause(GuildID)](#pause)** - Pause the current playing Song. | Returning: Song
+- **[resume(GuildID)](#resume)** - Resume the Song that was paused. | Returning: Song
+- **[stop(GuildID)](#stop)** - Stop playing the Music and clear the Server Queue. | Returning: Void
+- **[shuffle(GuildID)](#shuffle)** - Shuffle the Server Queue. | Returning: Queue
+- **[setRepeatMode(GuildID, boolean)](#repeat)** - Repeat the current Song indefinitely (if set to ``true``) *[true/false]*. | Returning: Void
 ### Other Methods
-- **[setVolume(GuildID, Volume)](#setvolume)** - Set Music Volume.
+- **[setVolume(GuildID, Volume)](#setvolume)** - Set Music Volume. | Returning: Void
 
 
 ## Events

@@ -16,8 +16,8 @@ function youtube_parser(url) {
 
 /**
  * A pure function to pick specific keys from object.
- * @param {Object}obj: The object to pick the specified keys from
- * @param {Array}keys: A list of all keys to pick from obj
+ * @param {Object} obj: The object to pick the specified keys from
+ * @param {Array} keys: A list of all keys to pick from obj
  */
 const pick = (obj, keys) =>
     Object.keys(obj)

@@ -6,7 +6,8 @@ const customErrors = {
     'VoiceChannelTypeInvalid': 'Voice Channel must be a type of VoiceChannel.',
     'SongTypeInvalid': 'Song must be a type of String.',
     'QueueIsNull': 'The Guild Queue is NULL.',
-    'OptionsTypeInvalid': 'The Search Options must be a type of Object.'
+    'OptionsTypeInvalid': 'The Search Options must be a type of Object.',
+    'NotANumber': 'The provided argument is not a Number.'
 }
 
 /**
@@ -21,7 +22,10 @@ class MusicPlayerError {
         /**
          * Error type.
          * @type {string}
-         */
+        */
+
+        this.error = {};
+
         this.error.type = error;
 
         /**
@@ -30,9 +34,9 @@ class MusicPlayerError {
          */
         this.error.message = customErrors[error];
 
-        if (this.nullObject)
+        if (nullObject)
             this[nullObject] = null;
     }
 }
 
-module.export = MusicPlayerError;
+module.exports = MusicPlayerError;
