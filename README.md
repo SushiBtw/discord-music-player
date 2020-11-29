@@ -7,12 +7,12 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
 ## **DMP v6.0.0 Update:**
-- [x] **YouTube Link Support** - [Read More](#),
-- [x] **YouTube Filters** - [Read More](#),
-- [ ] **Shuffle Method** - [Not Ready](#),
-- [ ] **Progress Bar** - [Not Ready](#),
-- [ ] **Code Quality Fixes** - **Not Ready**,
-- [ ] **Code Size Reduction** - **Not Ready**.
+- [x] **YouTube Link Support** - [Read More](#documentation),
+- [x] **YouTube Filters** - [Read More](#documentation),
+- [x] **Shuffle Method** - [Read More](#shuffle),
+- [x] **Progress Bar** - [Read More](#create-progress-bar),
+- [x] **Code Quality Fixes**,
+- [x] **Code Size Reduction**.
 
 # Page Sections
 - **[Installation](#installation)**
@@ -75,7 +75,7 @@ new Player(client, {
 	leaveOnEnd: false,
 	leaveOnEmpty: false,
 	leaveOnEmpty: true,
-    quality: 'high'
+    quality: 'high',
 });
 ```
 
@@ -120,6 +120,7 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 - **[setRepeatMode(GuildID, boolean)](#repeat)** - Repeat the current Song indefinitely (if set to ``true``) *[true/false]*. | Returning: Void
 ### Other Methods
 - **[setVolume(GuildID, Volume)](#setvolume)** - Set Music Volume. | Returning: Void
+- **[createProgressBar(GuildID, BarSize, ArrowIcon, LoadedIcon)](#create-progress-bar)** - Create a progress bar per current playing song. | Returning: String
 
 
 ## Events
@@ -446,6 +447,28 @@ client.on('message', (message) => {
     if(command === 'setvolume'){
         client.player.setVolume(message.guild.id, parseInt(args[0]));
         message.channel.send(`Volume set to ${args[0]} !`);
+    }
+});
+```
+
+### Create Progress Bar
+Create a progress bar per current playing song.
+
+**Usage:**
+```js
+createProgressBar(GuildID, BarSize, ArrowIcon, LoadedIcon);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'progress'){
+        let progressBar = createProgressBar(message.guild.id, 20);
+
+        message.channel.send(progressBar);
+        // Example: [==>                  ][00:25/04:07]
     }
 });
 ```

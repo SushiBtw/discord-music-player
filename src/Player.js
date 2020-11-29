@@ -280,14 +280,13 @@ class Player {
      * @returns {Song}
      */
     nowPlaying(guildID) {
-            // Gets guild queue
-            let queue = this.queues.find((g) => g.guildID === guildID);
-            if (!queue) return new MusicPlayerError('QueueIsNull');
-            let currentSong = queue.songs[0];
-            // Resolves the current song
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let currentSong = queue.songs[0];
+        // Resolves the current song
 
-        console.log(currentSong);
-            return currentSong;
+        return currentSong;
     }
 
     /**
