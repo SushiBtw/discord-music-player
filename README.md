@@ -1,415 +1,414 @@
+﻿
 # Discord Music Player
 
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
-# **5.0.6 Update:**
-- Fixed Unknown Package error
-- Fixed ``SyntaxError: Unexpected end of JSON input`` error,
-- Other minor fixes.
-
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
-## Installation
+## **DMP v6.0.0 Update:**
+- [x] **YouTube Link Support** - [Read More](#documentation),
+- [x] **YouTube Filters** - [Read More](#documentation),
+- [x] **Shuffle Method** - [Read More](#shuffle),
+- [x] **Progress Bar** - [Read More](#create-progress-bar),
+- [x] **Code Quality Fixes**,
+- [x] **Code Size Reduction**.
 
+# Page Sections
+- **[Installation](#installation)**
+- **[Getting Started](#getting-started)**
+- **[Documentation](#documentation)**
+- **[Methods](#methods)**
+- **[Events](#events)**
+- **[Examples](#examples)**
+- **[Info Messages](#info-messages)**
+- **[Handle Errors](#handle-errors)**
+
+# Installation
+*Node.js 12.0.0 or newer is required to run this module.*
 ```sh
 npm install --save discord-music-player
 ```
-
 Install **opusscript** or **@discordjs/opus**:
 *If something goes wrong use ``*@discordjs/opus``.*
 ```sh
 npm install --save opusscript
 ```
+**Install [FFMPEG](https://www.ffmpeg.org/download.html)!**
 
-Install [FFMPEG](https://www.ffmpeg.org/download.html) and you're done!
-
-## Player
-
+# Getting Started
+**The code bellow, will show you how to use DMP in your code.**
+*Please define your **Player** after the **client/bot** definition.*
 ```js
-const Discord = require("discord.js"),
-client = new Discord.Client(),
-settings = {
-    prefix: "!",
-    token: "Client_Token"
+const Discord = require("discord.js");
+const client = new Discord.Client();
+const settings = {
+    prefix: '!',
+    token: 'YourBotTokenHere'
 };
 
 const { Player } = require("discord-music-player");
-const player = new Player(client);
-// To easily access the player
+const player = new Player(client, {
+	leaveOnEmpty: false, // This options are optional.
+});
+// You can define the Player as *client.player* to easly access it.
 client.player = player;
 
 client.on("ready", () => {
-    console.log("I'm ready to play!");
+    console.log("I am ready to Play with DMP 🎶");
 });
 
 client.login(settings.token);
 ```
+### Player Options
+*You can pass a second parameter when instantiating the class Player, the **options** object:*
+**options.leaveOnEnd: [true/false]** If set to **true**, the bot will leave the channel, when the queue would be empty.
 
-You can pass a second parameter when instantiating the class Player: the **options** object:  
-**options.leaveOnEnd**: whether the bot should leave the voice channel when there is no more song in the queue.  
-**options.leaveOnStop**: whether the bot should leave the voice channel when the `stop()` function is used.  
-**options.leaveOnEmpty**: whether the bot should leave the voice channel if there is no more member in it.
+**options.leaveOnStop [true/false]**: If set to **true**, the bot will leave the Voice Channel when the `stop()` function is used.
 
-### Features Overview
+**options.leaveOnEmpty [true/false]**: If set to **true**, bot will automatically leave the Voice Channel when is empty.
 
-You need to **init the guild queue using the play() function**, then you are able to manage the queue using the following functions:
+**options.quality ['high'/'low']**: Music quality (Default: 'high')
 
 ```js
-// Play a song in the voice channel and init the guild queue
-client.player.play(voiceChannel, songName);
-
-// Add a song to the queue
-client.player.addToQueue(guildID, songName);
-// Clear the queue
-client.player.clearQueue(guildID);
-// Get the queue
-client.player.getQueue(guildID);
-// Skip the current song
-client.player.skip(guildID);
-// Remove a song from the queue using the index number
-client.player.remove(guildID, song);
-
-
-// Pause
-client.player.pause(guildID);
-// Resume
-client.player.resume(guildID);
-// Stop
-client.player.stop(guildID);
-
-// Check if music is playing in a guild
-client.player.isPlaying(guildID);
-// Get the currently playing song
-client.player.nowPlaying(guildID);
-
-
-// Current song will be repeated indefinitely
-client.player.setRepeatMode(guildID, true);
-// Current song will no longer be repeated indefinitely
-client.player.setRepeatMode(guildID, false);
+new Player(client, {
+	leaveOnEnd: false,
+	leaveOnEmpty: false,
+	leaveOnEmpty: true,
+    quality: 'high',
+});
 ```
 
-### Event messages
+# Documentation
 
+To create a **Guild Queue**, use the **play()** command, then you are able to manage the queue using the listed functions.
+***VoiceChannel** object can be obtained from the Message object - ``message.member.voice.channel``.*
+
+***GuildID** object can be obtained from the Message object - ``message.guild.id``.*
+
+***SongName** is a Search String or a YouTube Video URL.*
+
+***RequestedBy** is a String, that can be obtained from the Message object - ``message.author.tag``.*
+
+***SongID** is a Intiger (starting from 0) of the Song in Queue [use i.e. ``parseInt(args[0])`` per Int].*
+
+***Options (optional)** object can have the following options:*
+```js
+{
+	uploadDate: 'hour/today/week/month/year', // Default - none
+	duration: 'short/long', // Default - none
+	sortBy: 'relevance/date/view count/rating' // Default - 'relevance'
+}
+```
+
+## Methods:
+### Play Methods
+- **[play(VoiceChannel, SongName, Options)](#play)** - Play a Song and init the Server Queue. | Returning: Song
+- **[addToQueue(GuildID, SongName, Options)](#add-to-queue)** - Add a Song to the Server Queue. | Returning: Song
+### Queue Methods
+- **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild. | Returning: Boolean
+- **[nowPlaying(GuildID)](#now-playing)** - Get the currenly playing Song in the Server Queue. | Returning: Song
+- **[clearQueue(GuildID)](#clearqueue)** - Clear the Server Queue (without the Plaing song). | Returning: Queue
+- **[getQueue(GuildID)](#getqueue)** - Get the Server Queue. | Returning: Queue
+### Song Methods
+- **[skip(GuildID)](#skip)** - Skip the current Song. | Returning: Song
+- **[remove(GuildID, SongID)](#remove)** - Remove a Song from the Queue. | Returning: Song
+- **[pause(GuildID)](#pause)** - Pause the current playing Song. | Returning: Song
+- **[resume(GuildID)](#resume)** - Resume the Song that was paused. | Returning: Song
+- **[stop(GuildID)](#stop)** - Stop playing the Music and clear the Server Queue. | Returning: Void
+- **[shuffle(GuildID)](#shuffle)** - Shuffle the Server Queue. | Returning: Queue
+- **[setRepeatMode(GuildID, boolean)](#repeat)** - Repeat the current Song indefinitely (if set to ``true``) *[true/false]*. | Returning: Void
+### Other Methods
+- **[setVolume(GuildID, Volume)](#setvolume)** - Set Music Volume. | Returning: Void
+- **[createProgressBar(GuildID, BarSize, ArrowIcon, LoadedIcon)](#create-progress-bar)** - Create a progress bar per current playing song. | Returning: String
+
+
+## Events
+*Listen to Events after the Play command (initialization) - more info can be found in the **[Info Messages](#)** section.*
+
+- **getQueue(guildID).on('end')** - Called when the Queue is empty.
+- **getQueue(guildID).on('songChanged')** - Called when the Song is changed.
+- **getQueue(guildID).on('channelEmpty')** - Called when the Voice Channel is empty.
 ```js
 client.player.getQueue(guildID)
 .on('end', () => {
-    message.channel.send('There is no more music in the queue!');
+    message.channel.send('The queue is empty, there is nothing to play!');
 })
 .on('songChanged', (oldSong, newSong) => {
-    message.channel.send(`Now playing ${newSong.name}...`);
+    message.channel.send(`Ended playing ${oldSong.name}! Now playing ${newSong.name}!`);
 })
 .on('channelEmpty', () => {
-    message.channel.send('Stop playing, there is no more member in the voice channel...');
+    message.channel.send('Everyone left the Voice Channel.');
 });
 ```
+
 
 ## Examples
 
 ### Play
-
-To play a song, use the `client.player.play()` function.  
+Play a Song and init the Server Queue.
 
 **Usage:**
-
 ```js
-client.player.play(voiceChannel, songName, requestedBy);
+client.player.play(VoiceChannel, SongName, RequestedBy);
 ```
-
 **Example**:
-
 ```js
 client.on('message', async (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    // !play Despacito
-    // will play "Despacito" in the member voice channel
+    // !play This is the Life
+    // will play "This is the Life" in the Voice Channel
 
     if(command === 'play'){
-        let song = await client.player.play(message.member.voice.channel, args[0], message.member.user.tag);
+        let song = await client.player.play(message.member.voice.channel, args[0], {
+	        duration: 'long' // This is optional
+        });
         song = song.song;
-        message.channel.send(`Currently playing ${song.name}! - Requested by ${song.requestedBy}`);
+        message.channel.send(`Started playing ${song.name}.`);
     }
-
-```
-
-### Pause
-
-To pause the current song, use the `client.player.pause()` function.  
-
-**Usage:**
-
-```js
-client.player.pause(guildID);
-```
-
-**Example**:
-
-```js
-client.on('message', async (message) => {
-
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if(command === 'pause'){
-        let song = await client.player.pause(message.guild.id);
-        message.channel.send(`${song.name} paused!`);
-    }
-
 });
 ```
 
-### Resume
-
-To resume the current song, use the `client.player.resume()` function.  
-
-**Usage:**
-
-```js
-client.player.resume(guildID);
-```
-
-**Example**:
-
-```js
-client.on('message', async (message) => {
-
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if(command === 'resume'){
-        let song = await client.player.resume(message.guild.id);
-        message.channel.send(`${song.name} resumed!`);
-    }
-
-});
-```
-
-### Stop
-
-To stop the music, use the `client.player.stop()` function.  
+### Add To Queue
+**This part is per isPlaying (``client.player.isPlaying(GuildID)``) too.**
+Add a Song to the Server Queue if queue already exists.
 
 **Usage:**
-
 ```js
-client.player.stop(guildID);
+client.player.isPlaying(GuildID);
+client.player.addToQueue(GuildID, SongName);
 ```
-
-**Example**:
-
-```js
-client.on('message', (message) => {
-
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if(command === 'stop'){
-        client.player.stop(message.guild.id);
-        message.channel.send('Music stopped!');
-    }
-
-});
-```
-
-### SetVolume
-
-To update the volume, use the `client.player.setVolume()` function.  
-
-**Usage:**
-
-```js
-client.player.setVolume(guildID, percent);
-```
-
-**Example**:
-
-```js
-client.on('message', (message) => {
-
-    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if(command === 'setvolume'){
-        client.player.setVolume(message.guild.id, parseInt(args[0]));
-        message.channel.send(`Volume set to ${args[0]} !`);
-    }
-
-});
-```
-
-### AddToQueue
-
-To add a song to the queue, use the `client.player.addToQueue()` function.
-
-**Usage:**
-
-```js
-client.player.addToQueue(guildID, songName);
-```
-
 **Example:**
-
-In this example, you will see how to add a song to the queue if one is already playing.
-
+*If there is a already playing song, add a new one to the queue.*
 ```js
 client.on('message', async (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     if(command === 'play'){
-        let isPlaing = client.player.isPlaying(message.guild.id);
+        let isPlaying = client.player.isPlaying(message.guild.id);
         // If there's already a song playing
-        if(isPlaing){
+        if(isPlaying){
             // Add the song to the queue
             let song = await client.player.addToQueue(message.guild.id, args[0]);
             song = song.song;
-            message.channel.send(`${song.name} added to queue!`);
+            message.channel.send(`Song ${song.name} was added to the queue!`);
         } else {
             // Else, play the song
             let song = await client.player.play(message.member.voice.channel, args[0]);
             song = song.song;
-            message.channel.send(`Currently playing ${song.name}!`);
+            message.channel.send(`Started playing ${song.name}!`);
         }
     }
+});
+```
 
+### Now Playing
+Get the currently playing Song in the Server Queue.
+
+**Usage:**
+```js
+client.player.nowPlaying(GuildID);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+    if(command === 'song'){
+        let song = await client.player.nowPlaying(message.guild.id);
+        message.channel.send(`Current song: ${song.name}`);
+    }
 });
 ```
 
 ### ClearQueue
-
-To clear the queue, use the `client.player.clearQueue()` function.
+Clear the Server Queue.
 
 **Usage:**
-
 ```js
-client.player.clearQueue(guildID);
+client.player.clearQueue(GuildID);
 ```
-
 **Example:**
-
 ```js
 client.on('message', (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if(command === 'clear-queue'){
+    if(command === 'clearqueue'){
         client.player.clearQueue(message.guild.id);
-        message.channel.send('Queue cleared!');
+        message.channel.send('Queue was cleared!');
     }
-
 });
 ```
 
 ### GetQueue
-
-To get the server queue, use the `client.player.getQueue()` function.
+Get the Server Queue.
 
 **Usage:**
-
 ```js
-client.player.getQueue(guildID);
+client.player.getQueue(GuildID);
 ```
-
 **Example:**
-
 ```js
 client.on('message', (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     if(command === 'queue'){
         let queue = await client.player.getQueue(message.guild.id);
-        message.channel.send('Server queue:\n'+(queue.songs.map((song, i) => {
-            return `${i === 0 ? 'Current' : `#${i+1}`} - ${song.name} | ${song.author}`
+        message.channel.send('Queue:\n'+(queue.songs.map((song, i) => {
+            return `${i === 0 ? 'Now Playing' : `#${i+1}`} - ${song.name} | ${song.author}`
         }).join('\n')));
     }
-
     /**
      * Output:
      *
-     * Server queue:
-     * Current - Despacito | Luis Fonsi
-     * #2 - Memories | Maroon 5
+     * Queue:
+     * Now Playing - Despacito | Luis Fonsi
+     * #2 - Timber | Pitbull
      * #3 - Dance Monkey | Tones And I
-     * #4 - Circles | Post Malone
      */
-
 });
 ```
 
 ### Skip
-
-To skip the current song, use the `client.player.skip()` function.  
+Skip the current Song.
 
 **Usage:**
-
 ```js
-client.player.skip(guildID);
+client.player.skip(GuildID);
 ```
-
 **Example**:
-
 ```js
 client.on('message', async (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     if(command === 'skip'){
         let song = await client.player.skip(message.guild.id);
-        message.channel.send(`${song.name} skipped!`);
+        message.channel.send(`${song.name} was skipped!`);
     }
-
 });
 ```
 
-### Now Playing
-
-To get the currently playing song, use the `client.player.nowPlaying()` function.  
+### Remove
+Remove a Song from the Queue.
 
 **Usage:**
 
 ```js
-client.player.nowPlaying(guildID);
+client.player.remove(GuildID, Song);
 ```
-
-**Example**:
-
+**Example:**
 ```js
 client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+    
+    // !remove 2
+    
+    if(command === 'remove'){
+	    let SongID = parseInt(args[0])-1; // The index is starting from 0, so we subtract 1.
+        // Removes a song from the queue
+        client.player.remove(message.guild.id, SongID).then(() => {
+            message.channel.send(`Removed song ${args[0]} from the Queue!`);
+        });
+    }
+});
+```
 
+### Pause
+Pause the current playing Song.
+**Usage:**
+```js
+client.player.pause(GuildID);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if(command === 'now-playing'){
-        let song = await client.player.nowPlaying(message.guild.id);
-        message.channel.send(`Currently playing ${song.name}...`);
+    if(command === 'pause'){
+        let song = await client.player.pause(message.guild.id);
+        message.channel.send(`${song.name} was paused!`);
     }
+});
+```
 
+### Resume
+Resume the Song that was paused.
+
+**Usage:**
+```js
+client.player.resume(GuildID);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'resume'){
+        let song = await client.player.resume(message.guild.id);
+        message.channel.send(`${song.name} was resumed!`);
+    }
+});
+```
+
+### Stop
+Stop playing the Music and clear the Server Queue.
+
+**Usage:**
+```js
+client.player.stop(GuildID);
+```
+**Example**:
+```js
+client.on('message', (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'stop'){
+        client.player.stop(message.guild.id);
+        message.channel.send('Music stopped, the Queue was cleared!');
+    }
+});
+```
+
+### Shuffle
+Shuffle the Server Queue.
+
+**Usage:**
+```js
+client.player.shuffle(GuildID);
+```
+**Example**:
+```js
+client.on('message', (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'shuffle'){
+        client.player.shuffle(message.guild.id);
+        message.channel.send('Server Queue was shuffled.');
+    }
 });
 ```
 
 ### Repeat
-
-To repeat the current song, use the `client.player.setRepeatMode()` function.  
+Repeat the current Song indefinitely (if set to ``true``) *[true/false]*.
 
 **Usage:**
-
 ```js
-client.player.setRepeatMode(guildID, boolean);
+client.player.setRepeatMode(GuildID, boolean);
 ```
-
 **Example**:
-
 ```js
 client.on('message', async (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
@@ -428,52 +427,69 @@ client.on('message', async (message) => {
         let song = await client.player.nowPlaying(message.guild.id);
         message.channel.send(`${song.name}  will no longer be repeated indefinitely!`);
     }
-
 });
 ```
 
-### Remove
-
-To remove a song from the queue, use the `client.player.remove()` function.
+### SetVolume
+Set Music Volume.
 
 **Usage:**
-
 ```js
-client.player.remove(guildID, song);
+client.player.setVolume(GuildID, Volume);
 ```
-
-**Example:**
-
+**Example**:
+*Volume should be a % (from 0 to 200).*
 ```js
-client.on('message', async (message) => {
-
+client.on('message', (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if(command === 'remove'){
-        // Removes a song from the queue
-        client.player.remove(message.guild.id, args[0]).then(() => {
-            message.channel.send('Removed song!');
-        });
+    if(command === 'setvolume'){
+        client.player.setVolume(message.guild.id, parseInt(args[0]));
+        message.channel.send(`Volume set to ${args[0]} !`);
+    }
+});
+```
+
+### Create Progress Bar
+Create a progress bar per current playing song.
+
+**Usage:**
+```js
+createProgressBar(GuildID, BarSize, ArrowIcon, LoadedIcon);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'progress'){
+        let progressBar = client.player.createProgressBar(message.guild.id, 20);
+
+        message.channel.send(progressBar);
+        // Example: [==>                  ][00:25/04:07]
     }
 });
 ```
 
 ## Info Messages
 
-You can send a message when the queue ends or when the song changes:
-
+**You can use Info Messages to send a information, when a event if performed.**
 ```js
 client.on('message', (message) => {
-
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     if(command === 'play'){
         let song = await client.player.play(message.member.voice.channel, args[0]);
+        
+        // Send a message, when Queue would be empty.
         song.queue.on('end', () => {
             message.channel.send('The queue is empty, please add new songs!');
         });
+        
+        // Send a message, when a Song would change.
         song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
             if(repeatMode){
                 message.channel.send(`Playing ${newSong} again...`);
@@ -482,19 +498,17 @@ client.on('message', (message) => {
             }
         });
     }
-
+});
 ```
 
-## Handle errors
-
-##### Catching errors while using ``play`` and ``addToQueue``:
+## Handle Errors
+**Catching errors while using ``play`` and ``addToQueue``:**
 ```js
-    play(message.member.voice.channel, args[0]).then(async body => {
+    play(message.member.voice.channel, args[0]).then(async song => {
             // If Song won't be found - *body.error* will be NOT null and *body.song* null.
             // You should catch the error using .catch() method or use:
-            if(!body.error) throw(error);
-            let song = body.song;
-        
+            if(!song.error) throw(error);
+            let song = song.song;
         }).catch(err => {
             // Catch and Debug it, whatever you need.
             console.log(err);
@@ -502,69 +516,37 @@ client.on('message', (message) => {
             * Will Debug:
             * {
             *   error: {
-            *      type: 'YouTube_Not_Found',
+            *      type: 'SearchIsNull',
             *      message: 'No Song was found with that query.'
             *   }
             *   song: null
             * }
             */
         });
-        
-    play(message.member.voice.channel, args[0]).then(async body => {
-            // If your API Key will be rate-limited - *body.error* will be NOT null and *body.song* null.
-            // You should catch the error using .catch() method or use:
-            if(!body.error) throw(error);
-            let song = body.song;
-        
-        }).catch(err => {
-            // Catch and Debug it, whatever you need.
-            console.log(err);
-            /**
-            * Will Debug:
-            * {
-            *   error: {
-            *      type: 'YouTube_API_Error',
-            *      message: 'Your API Key has been rate-limited.\nRead more: ' +
-            *          'https://developers.google.com/youtube/v3/getting-started#quota.'
-            *   },
-            *   song: null
-            * }
-            */
-        });
 ```
 
-There are 2 main errors that you can handle like this:
-
+### Example:
 ```js
-client.on('message', (message) => {
+client.on('message', async (message) => {
 
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    // Error 1:
     // Song not found
     if(command === 'play'){
-        client.player.play(message.member.voice.channel, args[0]).then(async body => {
-            if(body.error) throw(body.error);
+        client.player.play(message.member.voice.channel, args[0]).then(async song => {
+            if(song.error) throw(song.error);
         
         }).catch(err => {
             // Catch and Debug it, whatever you need.
             console.log(err);
         });
     }
-
-    // Error 2:
-    // Not playing
-    if(command === 'queue'){
-        // Define if Music is playing:
-        let playing = client.player.isPlaying(message.guild.id);
-        // Now look into it, if music is not playing, Stop:
-        if(!playing) return message.channel.send(':x: No songs currently playing!');
-        // you are sure it works:
-        client.player.getQueue(message.guild.id);
-    }
-
 });
 ```
 
-### **Used to power [SsumBOT Discord Bot](https://ssumbot.xyz/) - one of the best Discord Bots**
+## Contribution and Info
+**This module is used in the following Bots:**
+- **[SsumBOT (500 guilds)](https://ssumbot.xyz/)** made by **[Me](https://github.com/SushiBtw)**.
+
+*Contribute with the module on [the GitHub module page](https://github.com/SushiBtw/discord-music-player/).*
