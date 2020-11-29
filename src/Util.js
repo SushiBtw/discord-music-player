@@ -58,7 +58,7 @@ class Util {
     static getVideoBySearch(search, ytsr, options = {}) {
         return new Promise(async (resolve, reject) => {
 
-            options = { ...defaultSearchOptions, ...options};
+            options = { ...defaultSearchOptions, ...options };
             options = pick(options, Object.keys(defaultSearchOptions))
 
             let isVideoLink = VideoRegex.test(search);
@@ -133,6 +133,64 @@ class Util {
             }
         });
     }
+
+    /**
+     * Convers Milisecords to Time (HH:MM:SS)
+     * @param {String} ms Miliseconds
+     * @returns {String}
+     */
+    static MilisecondsToTime(ms) {
+        let seconds = ms / 1000;
+        let hours = parseInt(seconds / 3600);
+        seconds = seconds % 3600;
+        let minutes = parseInt(seconds / 60);
+        seconds = Math.ceil(seconds % 60);
+
+        seconds = (`0${seconds}`).slice(-2);
+        minutes = (`0${minutes}`).slice(-2);
+        hours = (`0${hours}`).slice(-2);
+
+        return `${hours == 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
+    }
+
+    /**
+     * Convers Time (HH:MM:SS) to Miliseconds
+     * @param {String} time Time
+     * @returns {String}
+     */
+    static TimeToMiliseconds(time) {
+        let items = time.split(':'),
+            s = 0, m = 1;
+
+        while (items.length > 0) {
+            s += m * parseInt(items.pop(), 10);
+            m *= 60;
+        }
+
+        return s * 1000;
+    }
+
+    /**
+     * Create a text progress bar
+     * @param {Number} value - The value to fill the bar
+     * @param {Number} maxValue - The max value of the bar
+     * @param {Number} size - The bar size (in letters)
+     * @param {String} loadedIcon - Loaded Icon
+     * @param {String} arrowIcon - Arrow Icon
+     * @return {String} - Music Bar
+     */
+    static buildBar(value, maxValue, size, loadedIcon, arrowIcon) {
+        const percentage = value / maxValue;
+        const progress = Math.round((size * percentage));
+        const emptyProgress = size - progress;
+
+        const progressText = loadedIcon.repeat(progress) + arrowIcon;
+        const emptyProgressText = ' '.repeat(emptyProgress);
+
+        return `[${progressText}${emptyProgressText}][${this.MilisecondsToTime(value)}/${this.MilisecondsToTime(maxValue)}]`;
+    };
+
+
 };
 
 module.exports = Util;

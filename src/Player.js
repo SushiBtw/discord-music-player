@@ -24,58 +24,6 @@ const PlayerOptions = {
     quality: 'high'
 };
 
-function MStoTime(ms) {
-    // 1- Convert to seconds:
-    var seconds = ms / 1000;
-    // 2- Extract hours:
-    var hours = parseInt(seconds / 3600);
-    seconds = seconds % 3600;
-    // 3- Extract minutes:
-    var minutes = parseInt(seconds / 60);
-    
-    seconds = seconds % 60;
-
-    seconds = Math.ceil(seconds);
-    seconds = ('0' + seconds).slice(-2);
-    hours = ('0' + hours).slice(-2);
-    minutes = ('0' + minutes).slice(-2);
-
-    return (hours == 0 ? '' : (hours + ":")) + minutes + ":" + seconds;
-}
-
-/**
- * Create a text progress bar
- * @param {Number} value - The value to fill the bar
- * @param {Number} maxValue - The max value of the bar
- * @param {Number} size - The bar size (in letters)
- * @return {String} - The bar
- */
-function progressBar(value, maxValue, size) {
-    const percentage = value / maxValue;
-    const progress = Math.round((size * percentage));
-    const emptyProgress = size - progress;
-
-    const progressText = '▬'.repeat(progress) + '🔘';
-    const emptyProgressText = '▭'.repeat(emptyProgress);
-    const percentageText = Math.round(percentage * 100) + '%';
-
-    const bar = '[' + progressText + emptyProgressText + ']' + `[${MStoTime(value)}/${MStoTime(maxValue)}]`;
-    return bar;
-};
-
-function timeToMS(str) {
-    var p = str.split(':'),
-        s = 0, m = 1;
-
-    while (p.length > 0) {
-        s += m * parseInt(p.pop(), 10);
-        m *= 60;
-    }
-
-    return s * 1000;
-}
-
-
 class Player {
 
     /**
@@ -332,14 +280,14 @@ class Player {
      * @returns {Song}
      */
     nowPlaying(guildID) {
-        return new Promise(async (resolve, reject) => {
             // Gets guild queue
             let queue = this.queues.find((g) => g.guildID === guildID);
             if (!queue) return new MusicPlayerError('QueueIsNull');
             let currentSong = queue.songs[0];
             // Resolves the current song
+
+        console.log(currentSong);
             return currentSong;
-        });
     }
 
     /**
@@ -397,11 +345,23 @@ class Player {
         return queue.songs;
     }
 
-    createProgressBar(guildID) {
+
+    /**
+    * Creates a progress bar per current playing song.
+    * @param {String} guildID Guild ID
+    * @param {String} barSize Bar Size
+    * @param {String} arrowIcon Arrow Icon
+    * @param {String} loadedIcon Loaded Icon
+    * @returns {String}
+    */
+    createProgressBar(guildID, barSize = 20, arrowIcon = '>', loadedIcon = '=') {
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
-        return progressBar(queue.dispatcher.streamTime, timeToMS(queue.songs[0].duration), 15);
+        let timePassed = queue.dispatcher.streamTime;
+        let timeEnd = Util.TimeToMiliseconds(queue.songs[0].duration);
+
+        return `${Util.buildBar(timePassed, timeEnd, barSize, loadedIcon, arrowIcon)}`;
     }
 
     /**
