@@ -71,6 +71,9 @@ class Util {
 
                 let video = await scrapeYT.getVideo(VideoID);
 
+                if (Object.keys(video).length === 0)
+                    console.warn('[DMP] YouTube returned a empty object, you are probably rate-limited (please wait some time) - The Author and Title are Unknown.');
+
                 // Callback on invalid duration
                 if (typeof video.duration != 'number') {
                     video.duration = parseInt(video.duration) || 0;
@@ -82,11 +85,11 @@ class Util {
                 duration = duration.replace(/^0(?:0:0?)?/, '');
 
                 return resolve({
-                    title: video.title,
+                    title: video.title || 'Unknown',
                     duration,
-                    author: video.channel.name,
+                    author: video.channel.name || 'Unknown',
                     link: search,
-                    thumbnail: video.channel.thumbnail
+                    thumbnail: video.channel.thumbnail || 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png'
                 });
 
             } else {
