@@ -1,10 +1,11 @@
 let testStrings = [
-    'This is the life',
+    'this is the life',
 ];
 
 const testSearchOptions = {
+    uploadDate: null,
     duration: 'short',
-    sortBy: 'DontSoryByDueMisstypedError',
+    sortBy: 'relevance',
 }
 
 const Discord = require("discord.js");

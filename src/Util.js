@@ -69,7 +69,12 @@ class Util {
                 let VideoID = youtube_parser(search);
                 if (!VideoID) return reject('SearchIsNull');
 
-                const video = await scrapeYT.getVideo(VideoID);
+                let video = await scrapeYT.getVideo(VideoID);
+
+                // Callback on invalid duration
+                if (typeof video.duration != 'number') {
+                    video.duration = parseInt(video.duration) || 0;
+                }
 
                 var date = new Date(null);
                 date.setSeconds(video.duration);
@@ -89,23 +94,35 @@ class Util {
 
                 // Default Options - Type: Video
                 let filtersType = await ytsr.getFilters(search);
+
+                await Promise.all(filtersType);
+
                 filters = filtersType.get('Type').find(o => o.name === 'Video');
 
                 // Custom Options - Upload date: null
-                if (options.uploadDate) {
+                if (options.uploadDate != null) {
                     let filtersUploadDate = await ytsr.getFilters(filters.ref);
+
+                    await Promise.all(filtersUploadDate);
+
                     filters = filtersUploadDate.get('Upload date').find(o => o.name.toLowerCase().includes(options.uploadDate)) || filters;
                 }
 
                 // Custom Options - Duration: null
-                if (options.duration) {
+                if (options.duration != null) {
                     let filtersDuration = await ytsr.getFilters(filters.ref);
+
+                    await Promise.all(filtersDuration);
+
                     filters = filtersDuration.get('Duration').find(o => o.name.toLowerCase().startsWith(options.duration)) || filters;
                 }
 
                 // Custom Options - Sort by: relevance
-                if (options.sortBy && !options.sortBy.toLowerCase().includes('relevance')) {
+                if (options.sortBy != null && !options.sortBy.toLowerCase().includes('relevance')) {
                     let filtersSortBy = await ytsr.getFilters(filters.ref);
+
+                    await Promise.all(filtersSortBy);
+
                     filters = filtersSortBy.get('Sort by').find(o => o.name.toLowerCase().includes(options.sortBy)) || filters;
                 }
 
@@ -120,7 +137,7 @@ class Util {
 
                     if (!items || !items[0]) return reject('SearchIsNull');
 
-                    if (items[0].type != 'Video')
+                    if (items[0].type.toLowerCase() != 'video')
                         items.shift();
 
                     if (!items || !items[0]) return reject('SearchIsNull');

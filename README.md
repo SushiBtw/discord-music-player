@@ -73,7 +73,7 @@ client.login(settings.token);
 ```js
 new Player(client, {
 	leaveOnEnd: false,
-	leaveOnEmpty: false,
+	leaveOnStop: false,
 	leaveOnEmpty: true,
     quality: 'high',
 });
@@ -103,8 +103,8 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 
 ## Methods:
 ### Play Methods
-- **[play(VoiceChannel, SongName, Options)](#play)** - Play a Song and init the Server Queue. | Returning: Song
-- **[addToQueue(GuildID, SongName, Options)](#add-to-queue)** - Add a Song to the Server Queue. | Returning: Song
+- **[play(VoiceChannel, SongName, Options, RequestedBy)](#play)** - Play a Song and init the Server Queue. | Returning: Song
+- **[addToQueue(GuildID, SongName, Options, RequestedBy)](#add-to-queue)** - Add a Song to the Server Queue. | Returning: Song
 ### Queue Methods
 - **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild. | Returning: Boolean
 - **[nowPlaying(GuildID)](#now-playing)** - Get the currenly playing Song in the Server Queue. | Returning: Song
@@ -150,7 +150,7 @@ Play a Song and init the Server Queue.
 
 **Usage:**
 ```js
-client.player.play(VoiceChannel, SongName, RequestedBy);
+client.player.play(VoiceChannel, SongName, Options, RequestedBy);
 ```
 **Example**:
 ```js
@@ -178,7 +178,7 @@ Add a Song to the Server Queue if queue already exists.
 **Usage:**
 ```js
 client.player.isPlaying(GuildID);
-client.player.addToQueue(GuildID, SongName);
+client.player.addToQueue(GuildID, SongName, Options, RequestedBy);
 ```
 **Example:**
 *If there is a already playing song, add a new one to the queue.*
