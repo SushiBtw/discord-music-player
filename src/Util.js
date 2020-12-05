@@ -87,7 +87,7 @@ class Util {
                 return resolve({
                     title: video.title || 'Unknown',
                     duration,
-                    author: video.channel.name || 'Unknown',
+                    author: video.channel ? video.channel.name || 'Unknown' : 'Unknown',
                     link: search,
                     thumbnail: video.channel.thumbnail || 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png'
                 });
