@@ -84,12 +84,14 @@ class Util {
                 var duration = date.toISOString().substr(11, 8);
                 duration = duration.replace(/^0(?:0:0?)?/, '');
 
+                let defaultThumbnail = 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png';
+
                 return resolve({
                     title: video.title || 'Unknown',
                     duration,
                     author: video.channel ? video.channel.name || 'Unknown' : 'Unknown',
                     link: search,
-                    thumbnail: video.channel.thumbnail || 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png'
+                    thumbnail: video.channel ? video.channel.thumbnail || defaultThumbnail : defaultThumbnail
                 });
 
             } else {
