@@ -375,12 +375,12 @@ class Player {
         // If there isn't any music in the queue
         if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode) {
             // Leaves the voice channel
-            if (this.options.leaveOnEnd && !queue.stopped) queue.connection.channel.leave();
+            if (this.options.leaveOnEnd && !queue.stopped) setTimeout(() => {queue.connection.channel.leave()}, queue.timeoutOnExit)
             // Remoces the guild from the guilds list
             this.queues = this.queues.filter((g) => g.guildID !== guildID);
             // Emits stop event
             if (queue.stopped) {
-                if (this.options.leaveOnStop) queue.connection.channel.leave();
+                if (this.options.leaveOnStop) if (this.options.leaveOnEnd && !queue.stopped) setTimeout(() => {queue.connection.channel.leave()}, queue.timeoutOnExit)
                 return queue.emit('stop');
             }
             // Emits end event 
