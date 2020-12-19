@@ -403,14 +403,16 @@ class Player {
                     queue.connection.channel.leave();
                     return queue.emit('end');
                 }, this.options.timeout);
-                return;
             }
+            return;
         }
         // Emit songChanged event
         if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode);
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song
+
+        console.log(song);
 
         let Quality = this.options.quality;
         Quality = Quality.toLowerCase() == 'low' ? 'lowestaudio' : 'highestaudio';
