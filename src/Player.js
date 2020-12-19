@@ -35,6 +35,9 @@ class Player {
     constructor(client, options = {}) {
         if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
         if (typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
+
+        if (options.timeout && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
+
         /**
          * Your Discord Client instance.
          * @type {Client}
@@ -67,6 +70,9 @@ class Player {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
                 // Start timeout
+
+                console.log(this.options.timeout);
+
                 setTimeout(() => {
                     // If the channel is not empty
                     if (queue.connection.channel.members.size > 1) return;
@@ -76,7 +82,7 @@ class Player {
                     this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
                     // Emit end event
                     queue.emit('channelEmpty');
-                }, queue.timeout);
+                }, this.options.timeout);
             }
         });
     }
@@ -398,7 +404,7 @@ class Player {
 
                     queue.connection.channel.leave();
                     return queue.emit('end');
-                }, queue.timeout);
+                }, this.options.timeout);
                 return;
             }
         }

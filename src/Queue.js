@@ -57,12 +57,6 @@ class Queue extends EventEmitter {
          */
         this.repeatMode = false;
 
-        /**
-         * Timeout on voice channel leave.
-         * @type {Number}
-        */
-        this.timeout = 0;
-
     }
 
 };
@@ -85,8 +79,5 @@ class Queue extends EventEmitter {
  * @param {Song} newSong The new song (currently playing)
  * @param {Boolean} skipped Whether the change is due to the skip() function
  */
-
- if(isNaN(this.timeoutOnExit)) throw new SyntaxError('Provided timeoutOnExit in options is not valid number.')
- if(!isFinite(this.timeoutOnExit)) throw new SyntaxError('timeoutOnExit must be finite number.')
 
 module.exports = Queue;
