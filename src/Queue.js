@@ -59,9 +59,9 @@ class Queue extends EventEmitter {
 
         /**
          * Timeout on voice channel leave.
-         * @type {Int}
+         * @type {Number}
         */
-       this.timeoutOnExit = 60000
+        this.timeout = 0;
 
     }
 
@@ -71,6 +71,7 @@ class Queue extends EventEmitter {
  * Emitted when the queue is empty.
  * @event Queue#end
  */
+
 
 /**
  * Emitted when the voice channel is empty.

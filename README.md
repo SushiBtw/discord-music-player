@@ -68,7 +68,7 @@ client.login(settings.token);
 
 **options.leaveOnEmpty [true/false]**: If set to **true**, bot will automatically leave the Voice Channel when is empty.
 
-**options.timeoutOnExit [number]**: Sets timeout for leaving Voice Channel.
+**options.timeout [number]**: If set to **miliseconds**, bot will leave onEnd & onEmpty after that amount of time.
 
 **options.quality ['high'/'low']**: Music quality (Default: 'high')
 
@@ -77,7 +77,7 @@ new Player(client, {
 	leaveOnEnd: false,
 	leaveOnStop: false,
 	leaveOnEmpty: true,
-    timeoutOnExit: 60000,
+    timeout: 0,
     quality: 'high',
 });
 ```

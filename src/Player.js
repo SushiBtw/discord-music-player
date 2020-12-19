@@ -15,12 +15,14 @@ const MusicPlayerError = require('./MusicPlayerError');
  * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
  * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
  * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
+ * @property {Milliseconds} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
  * @property {string} quality Music quality ['high'/'low'] | Default: high
  */
 const PlayerOptions = {
     leaveOnEnd: true,
     leaveOnStop: true,
     leaveOnEmpty: true,
+    timeout: 0,
     quality: 'high'
 };
 
@@ -64,12 +66,17 @@ class Player {
             if (queue) {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
-                // Disconnect from the voice channel
-                queue.connection.channel.leave();
-                // Delete the queue
-                this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
-                // Emit end event
-                queue.emit('channelEmpty');
+                // Start timeout
+                setTimeout(() => {
+                    // If the channel is not empty
+                    if (queue.connection.channel.members.size > 1) return;
+                    // Disconnect from the voice channel
+                    queue.connection.channel.leave();
+                    // Delete the queue
+                    this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
+                    // Emit end event
+                    queue.emit('channelEmpty');
+                }, queue.timeout);
             }
         });
     }
@@ -374,17 +381,26 @@ class Player {
         let queue = this.queues.find((g) => g.guildID === guildID);
         // If there isn't any music in the queue
         if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode) {
-            // Leaves the voice channel
-            if (this.options.leaveOnEnd && !queue.stopped) setTimeout(() => {queue.connection.channel.leave()}, queue.timeoutOnExit)
-            // Remoces the guild from the guilds list
-            this.queues = this.queues.filter((g) => g.guildID !== guildID);
             // Emits stop event
             if (queue.stopped) {
-                if (this.options.leaveOnStop) if (this.options.leaveOnEnd && !queue.stopped) setTimeout(() => {queue.connection.channel.leave()}, queue.timeoutOnExit)
+                // Remoces the guild from the guilds list
+                this.queues = this.queues.filter((g) => g.guildID !== guildID);
+
+                if (this.options.leaveOnStop)
+                    queue.connection.channel.leave();
                 return queue.emit('stop');
             }
-            // Emits end event 
-            return queue.emit('end');
+            // Emits end event
+            if (this.options.leaveOnEnd) {
+                setTimeout(() => {
+                    // Remoces the guild from the guilds list
+                    this.queues = this.queues.filter((g) => g.guildID !== guildID);
+
+                    queue.connection.channel.leave();
+                    return queue.emit('end');
+                }, queue.timeout);
+                return;
+            }
         }
         // Emit songChanged event
         if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode);
