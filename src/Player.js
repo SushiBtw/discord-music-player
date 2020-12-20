@@ -358,7 +358,7 @@ class Player {
     /**
      * Enable or disable the repeat mode
      * @param {string} guildID
-     * @param {Boolean} enabled Whether the repeat mode should be enabled
+     * @param {boolean} enabled Whether the repeat mode should be enabled
      * @returns {Void}
      */
     setRepeatMode(guildID, enabled) {
@@ -369,6 +369,21 @@ class Player {
         queue.repeatMode = enabled;
         // Resolve
         return;
+    }
+
+    /**
+     * Toggle the repeat mode
+     * @param {string} guildID
+     * @returns {boolean} Returns the current set state
+     */
+    toggleLoop(guildID) {
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull');
+        // Enable/Disable repeat mode
+        queue.repeatMode = !queue.repeatMode;
+        // Resolve
+        return queue.repeatMode;
     }
 
     /**
