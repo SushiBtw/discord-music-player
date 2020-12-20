@@ -1,8 +1,11 @@
 const scrapeYT = require('scrape-yt');
+let defaultThumbnail = 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png';
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#\&\?]*).*/;
+let PlaylistRegexID = /[&?]list=([^&]+)/;
 
 /**
  * Get ID from YouTube link.
@@ -12,6 +15,16 @@ let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?
 function youtube_parser(url) {
     var match = url.match(VideoRegexID);
     return (match && match[7].length == 11) ? match[7] : false;
+}
+
+/**
+ * Get ID from Playlist link.
+ * @param {string} url
+ * @returns {string}
+ */
+function playlist_parser(url) {
+    var match = url.match(PlaylistRegexID);
+    return (match && match[1].length == 34) ? match[1] : false;
 }
 
 /**
@@ -79,12 +92,10 @@ class Util {
                     video.duration = parseInt(video.duration) || 0;
                 }
 
-                var date = new Date(null);
+                let date = new Date(null);
                 date.setSeconds(video.duration);
-                var duration = date.toISOString().substr(11, 8);
+                let duration = date.toISOString().substr(11, 8);
                 duration = duration.replace(/^0(?:0:0?)?/, '');
-
-                let defaultThumbnail = 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png';
 
                 return resolve({
                     title: video.title || 'Unknown',
@@ -155,6 +166,58 @@ class Util {
             }
         });
     }
+
+    /**
+     * Gets the videos from playlist.
+     * @param {string} search Playlist URL.
+     * @param {ytsr} ytsr ytsr.
+     * @param {number} max Options.
+     * @returns {Promise<Video>}
+     */
+    static getVideoFromPlaylist(search, ytsr, max) {
+        return new Promise(async (resolve, reject) => {
+
+            let isPlaylistLink = PlaylistRegex.test(search);
+            if (!isPlaylistLink) return reject('InvalidPlaylist');
+
+            let PlaylistID = playlist_parser(search);
+            if (!PlaylistID) return reject('InvalidPlaylist');
+
+            let playlist = await scrapeYT.getPlaylist(PlaylistID);
+            if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
+
+            Promise.all(playlist.videos = playlist.videos.map(video => {
+
+                // Callback on invalid duration
+                if (typeof video.duration != 'number') {
+                    video.duration = parseInt(video.duration) || 0;
+                }
+                let date = new Date(null);
+                date.setSeconds(video.duration);
+                let duration = date.toISOString().substr(11, 8);
+                duration = duration.replace(/^0(?:0:0?)?/, '');
+
+                return {
+                    title: video.title || 'Unknown',
+                    duration,
+                    author: video.channel ? video.channel.name || 'Unknown' : 'Unknown',
+                    link: `https://www.youtube.com/watch?v=${video.id}`,
+                    thumbnail: video.thumbnail || defaultThumbnail
+                }
+            }));
+
+            resolve({
+                link: search,
+                videoCount: playlist.videoCount,
+                title: playlist.title || 'Unknown',
+                channel: playlist.channel.name || 'Unknown',
+                videos: playlist.videos
+            });
+        });
+    }
+
+
+
 
     /**
      * Convers Milisecords to Time (HH:MM:SS)

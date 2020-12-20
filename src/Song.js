@@ -21,7 +21,7 @@ class Song {
          * Author channel of the song.
          * @type {string}
          */
-        this.author = video.author;
+        this.author = video.author.name || video.author;
         /**
          * Youtube video URL.
          * @type {string}

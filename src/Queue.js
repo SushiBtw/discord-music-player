@@ -56,6 +56,7 @@ class Queue extends EventEmitter {
          * @type {Boolean}
          */
         this.repeatMode = false;
+
     }
 
 };
@@ -64,6 +65,7 @@ class Queue extends EventEmitter {
  * Emitted when the queue is empty.
  * @event Queue#end
  */
+
 
 /**
  * Emitted when the voice channel is empty.

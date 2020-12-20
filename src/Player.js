@@ -3,6 +3,7 @@ const mergeOptions = require('merge-options');
 const ytsr = require('./node-ytsr-wip/main');
 const { VoiceChannel, version } = require("discord.js");
 if (version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
+if (process.version.split('.')[0].substring(1) < 14) throw new Error("Discord.js requires NodeJS version >= 14.0.0, for Music Handlers now. Please update your Node at https://nodejs.org/en/.");
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Song = require('./Song');
@@ -15,12 +16,14 @@ const MusicPlayerError = require('./MusicPlayerError');
  * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
  * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
  * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
+ * @property {Milliseconds} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
  * @property {string} quality Music quality ['high'/'low'] | Default: high
  */
 const PlayerOptions = {
     leaveOnEnd: true,
     leaveOnStop: true,
     leaveOnEmpty: true,
+    timeout: 0,
     quality: 'high'
 };
 
@@ -33,6 +36,8 @@ class Player {
     constructor(client, options = {}) {
         if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
         if (typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
+        if (options.timeout && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
+
         /**
          * Your Discord Client instance.
          * @type {Client}
@@ -64,12 +69,18 @@ class Player {
             if (queue) {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
-                // Disconnect from the voice channel
-                queue.connection.channel.leave();
-                // Delete the queue
-                this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
-                // Emit end event
-                queue.emit('channelEmpty');
+                // Start timeout
+
+                setTimeout(() => {
+                    // If the channel is not empty
+                    if (queue.connection.channel.members.size > 1) return;
+                    // Disconnect from the voice channel
+                    queue.connection.channel.leave();
+                    // Delete the queue
+                    this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
+                    // Emit end event
+                    queue.emit('channelEmpty');
+                }, this.options.timeout);
             }
         });
     }
@@ -85,7 +96,7 @@ class Player {
 
     /**
      * Plays a song in a voice channel.
-     * @param {voiceChannel} voiceChannel The voice channel in which the song will be played.
+     * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
      * @param {string} songName The name of the song to play.
      * @param {object} options Search options.
      * @param {User} requestedBy The user who requested the song.
@@ -93,13 +104,13 @@ class Player {
      */
     async play(voiceChannel, songName, options = {}, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
-
-        if (!voiceChannel || typeof voiceChannel !== 'object') return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
-        if (typeof songName !== 'string') return new MusicPlayerError('SongTypeInvalid', 'song');
-        if (typeof options != 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
+        if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
+        if (typeof songName !== 'string' || songName.length == 0) return new MusicPlayerError('SongTypeInvalid', 'song');
+        if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
         try {
             // Searches the song
             let video = await Util.getVideoBySearch(songName, ytsr, options);
+
             // Joins the voice channel
             let connection = await voiceChannel.join();
             // Creates a new guild with data
@@ -118,6 +129,62 @@ class Player {
             return new MusicPlayerError('SearchIsNull', 'song');
         }
     }
+
+
+    /**
+     * Plays or adds the Playlist songs to the queue.
+     * @param {string} guildID
+     * @param {string} playlistLink The name of the song to play.
+     * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
+     * @param {number} maxSongs Max songs to add to the queue.
+     * @returns {Promise<Playlist>}
+     */
+    async playlist(guildID, playlistLink, voiceChannel, maxSongs) {
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
+        if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song');
+
+        try {
+            // Searches the playlist
+            let playlist = await Util.getVideoFromPlaylist(playlistLink, ytsr, maxSongs);
+            let connection = queue?.connection ?? null;
+            let isFirstPlay = queue ? true : false;
+            let playlistSongs = [];
+
+            if (!queue) {
+                // Joins the voice channel if needed
+                connection = await voiceChannel.join();
+                // Creates a new guild with data if needed
+                queue = new Queue(voiceChannel.guild.id);
+                queue.connection = connection;
+            }
+            // Add all songs to the GuildQueue
+            Promise.all(playlist.videos.map(video => {
+                let song = new Song(video, queue);
+                playlistSongs.push(song);
+                queue.songs.push(song);
+            }));
+            // Add the queue to the list
+            this.queues.push(queue);
+            // Plays the song
+
+            if (!isFirstPlay)
+                this._playSong(queue.guildID, !isFirstPlay);
+
+            return {
+                error: null, song: isFirstPlay ? null : queue.songs[0], playlist: {
+                    link: playlist.link,
+                    playlistSongs,
+                    videoCount: playlist.videoCount,
+                    channel: playlist.channel
+                }
+            };
+        }
+        catch (err) {
+            return new MusicPlayerError('InvalidPlaylist', 'song');
+        }
+    }
+
 
     /**
      * Pauses the current song.
@@ -206,9 +273,8 @@ class Player {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
-
-        if (typeof songName !== 'string') throw new MusicPlayerError('SongTypeInvalid', 'song');
-        if (typeof options != 'object') throw new MusicPlayerError('OptionsTypeInvalid', 'song');
+        if (typeof songName !== 'string' || songName.length == 0) return new MusicPlayerError('SongTypeInvalid', 'song');
+        if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
         try {
             // Searches the song
             let video = await Util.getVideoBySearch(songName, ytsr, options);
@@ -292,7 +358,7 @@ class Player {
     /**
      * Enable or disable the repeat mode
      * @param {string} guildID
-     * @param {Boolean} enabled Whether the repeat mode should be enabled
+     * @param {boolean} enabled Whether the repeat mode should be enabled
      * @returns {Void}
      */
     setRepeatMode(guildID, enabled) {
@@ -303,6 +369,21 @@ class Player {
         queue.repeatMode = enabled;
         // Resolve
         return;
+    }
+
+    /**
+     * Toggle the repeat mode
+     * @param {string} guildID
+     * @returns {boolean} Returns the current set state
+     */
+    toggleLoop(guildID) {
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull');
+        // Enable/Disable repeat mode
+        queue.repeatMode = !queue.repeatMode;
+        // Resolve
+        return queue.repeatMode;
     }
 
     /**
@@ -374,24 +455,38 @@ class Player {
         let queue = this.queues.find((g) => g.guildID === guildID);
         // If there isn't any music in the queue
         if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode) {
-            // Leaves the voice channel
-            if (this.options.leaveOnEnd && !queue.stopped) queue.connection.channel.leave();
-            // Remoces the guild from the guilds list
-            this.queues = this.queues.filter((g) => g.guildID !== guildID);
             // Emits stop event
             if (queue.stopped) {
-                if (this.options.leaveOnStop) queue.connection.channel.leave();
+                // Remoces the guild from the guilds list
+                this.queues = this.queues.filter((g) => g.guildID !== guildID);
+
+                if (this.options.leaveOnStop)
+                    queue.connection.channel.leave();
+                // Emits the stop event
                 return queue.emit('stop');
             }
-            // Emits end event 
-            return queue.emit('end');
+            // Emits end event
+            if (this.options.leaveOnEnd) {
+                // Emits the end event
+                queue.emit('end');
+                // Remoces the guild from the guilds list
+                this.queues = this.queues.filter((g) => g.guildID !== guildID);
+                // Timeout
+                let connectionChannel = queue.connection.channel;
+                setTimeout(() => {
+                    queue = this.queues.find((g) => g.guildID === guildID);
+                    if (!queue || queue.songs.length < 1) {
+                        return connectionChannel.leave();
+                    }
+                }, this.options.timeout);
+                return;
+            }
         }
         // Emit songChanged event
         if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode);
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song
-
         let Quality = this.options.quality;
         Quality = Quality.toLowerCase() == 'low' ? 'lowestaudio' : 'highestaudio';
 
