@@ -127,7 +127,7 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 
 
 ## Events
-*Listen to Events after the Play command (initialization) - more info can be found in the **[Info Messages](#)** section.*
+*Listen to Events after the Play command (initialization) - more info can be found in the **[Info Messages](#info-messages)** section.*
 
 - **getQueue(guildID).on('end')** - Called when the Queue is empty.
 - **getQueue(guildID).on('songChanged')** - Called when the Song is changed.
@@ -495,9 +495,9 @@ client.on('message', (message) => {
         // Send a message, when a Song would change.
         song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
             if(repeatMode){
-                message.channel.send(`Playing ${newSong} again...`);
+                message.channel.send(`Playing ${newSong.name} again...`);
             } else {
-                message.channel.send(`Now playing ${newSong}...`);
+                message.channel.send(`Now playing ${newSong.name}...`);
             }
         });
     }
@@ -521,7 +521,7 @@ client.on('message', (message) => {
             *   error: {
             *      type: 'SearchIsNull',
             *      message: 'No Song was found with that query.'
-            *   }
+            *   },
             *   song: null
             * }
             */

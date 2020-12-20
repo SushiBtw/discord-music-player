@@ -96,7 +96,7 @@ class Player {
 
     /**
      * Plays a song in a voice channel.
-     * @param {voiceChannel} voiceChannel The voice channel in which the song will be played.
+     * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
      * @param {string} songName The name of the song to play.
      * @param {object} options Search options.
      * @param {User} requestedBy The user who requested the song.
@@ -104,13 +104,13 @@ class Player {
      */
     async play(voiceChannel, songName, options = {}, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
-
-        if (!voiceChannel || typeof voiceChannel !== 'object') return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
-        if (typeof songName !== 'string') return new MusicPlayerError('SongTypeInvalid', 'song');
-        if (typeof options != 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
+        if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
+        if (typeof songName !== 'string' || songName.length == 0) return new MusicPlayerError('SongTypeInvalid', 'song');
+        if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
         try {
             // Searches the song
             let video = await Util.getVideoBySearch(songName, ytsr, options);
+
             // Joins the voice channel
             let connection = await voiceChannel.join();
             // Creates a new guild with data
@@ -217,9 +217,8 @@ class Player {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
-
-        if (typeof songName !== 'string') throw new MusicPlayerError('SongTypeInvalid', 'song');
-        if (typeof options != 'object') throw new MusicPlayerError('OptionsTypeInvalid', 'song');
+        if (typeof songName !== 'string' || songName.length == 0) return new MusicPlayerError('SongTypeInvalid', 'song');
+        if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
         try {
             // Searches the song
             let video = await Util.getVideoBySearch(songName, ytsr, options);
@@ -392,28 +391,31 @@ class Player {
 
                 if (this.options.leaveOnStop)
                     queue.connection.channel.leave();
+                // Emits the stop event
                 return queue.emit('stop');
             }
             // Emits end event
             if (this.options.leaveOnEnd) {
+                // Emits the end event
+                queue.emit('end');
+                // Remoces the guild from the guilds list
+                this.queues = this.queues.filter((g) => g.guildID !== guildID);
+                // Timeout
+                let connectionChannel = queue.connection.channel;
                 setTimeout(() => {
-                    // Remoces the guild from the guilds list
-                    this.queues = this.queues.filter((g) => g.guildID !== guildID);
-
-                    queue.connection.channel.leave();
-                    return queue.emit('end');
+                    queue = this.queues.find((g) => g.guildID === guildID);
+                    if (!queue || queue.songs.length < 1) {
+                        return connectionChannel.leave();
+                    }
                 }, this.options.timeout);
+                return;
             }
-            return;
         }
         // Emit songChanged event
         if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode);
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song
-
-        console.log(song);
-
         let Quality = this.options.quality;
         Quality = Quality.toLowerCase() == 'low' ? 'lowestaudio' : 'highestaudio';
 
