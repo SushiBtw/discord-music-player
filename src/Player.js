@@ -130,6 +130,62 @@ class Player {
         }
     }
 
+
+    /**
+     * Plays or adds the Playlist songs to the queue.
+     * @param {string} guildID
+     * @param {string} playlistLink The name of the song to play.
+     * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
+     * @param {number} maxSongs Max songs to add to the queue.
+     * @returns {Promise<Playlist>}
+     */
+    async playlist(guildID, playlistLink, voiceChannel, maxSongs) {
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
+        if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song');
+
+        try {
+            // Searches the playlist
+            let playlist = await Util.getVideoFromPlaylist(playlistLink, ytsr, maxSongs);
+            let connection = queue?.connection ?? null;
+            let isFirstPlay = queue ? true : false;
+            let playlistSongs = [];
+
+            if (!queue) {
+                // Joins the voice channel if needed
+                connection = await voiceChannel.join();
+                // Creates a new guild with data if needed
+                queue = new Queue(voiceChannel.guild.id);
+                queue.connection = connection;
+            }
+            // Add all songs to the GuildQueue
+            Promise.all(playlist.videos.map(video => {
+                let song = new Song(video, queue);
+                playlistSongs.push(song);
+                queue.songs.push(song);
+            }));
+            // Add the queue to the list
+            this.queues.push(queue);
+            // Plays the song
+
+            if (!isFirstPlay)
+                this._playSong(queue.guildID, !isFirstPlay);
+
+            return {
+                error: null, song: isFirstPlay ? null : queue.songs[0], playlist: {
+                    link: playlist.link,
+                    playlistSongs,
+                    videoCount: playlist.videoCount,
+                    channel: playlist.channel
+                }
+            };
+        }
+        catch (err) {
+            return new MusicPlayerError('InvalidPlaylist', 'song');
+        }
+    }
+
+
     /**
      * Pauses the current song.
      * @param {string} guildID
