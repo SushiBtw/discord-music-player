@@ -7,7 +7,8 @@ const customErrors = {
     'SongTypeInvalid': 'Song must be a type of String.',
     'QueueIsNull': 'The Guild Queue is NULL.',
     'OptionsTypeInvalid': 'The Search Options must be a type of Object.',
-    'NotANumber': 'The provided argument is not a Number.'
+    'NotANumber': 'The provided argument is not a Number.',
+    'InvalidPlaylist': 'No Playlist was found with that link.'
 }
 
 /**
