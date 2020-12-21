@@ -8,7 +8,9 @@ const customErrors = {
     'QueueIsNull': 'The Guild Queue is NULL.',
     'OptionsTypeInvalid': 'The Search Options must be a type of Object.',
     'NotANumber': 'The provided argument is not a Number.',
-    'InvalidPlaylist': 'No Playlist was found with that link.'
+    'InvalidPlaylist': 'No Playlist was found with that link.',
+    'MaxSongsTypeInvalid': 'The provided argument (MaxSongsTypeInvalid) is not a Number.',
+    'PlaylistTypeInvalid': 'The provided argument (PlaylistURL) was not a String.'
 }
 
 /**

@@ -186,7 +186,9 @@ class Util {
             let playlist = await scrapeYT.getPlaylist(PlaylistID);
             if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
-            Promise.all(playlist.videos = playlist.videos.map(video => {
+            Promise.all(playlist.videos = playlist.videos.map((video, index) => {
+
+                if (index >= max) return null;
 
                 // Callback on invalid duration
                 if (typeof video.duration != 'number') {
@@ -205,6 +207,8 @@ class Util {
                     thumbnail: video.thumbnail || defaultThumbnail
                 }
             }));
+
+            playlist.videos = playlist.videos.filter(function (obj) { return obj });
 
             resolve({
                 link: search,

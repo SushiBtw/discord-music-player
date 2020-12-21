@@ -143,6 +143,7 @@ class Player {
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
         if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song');
+        if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song');
 
         try {
             // Searches the playlist
@@ -181,6 +182,7 @@ class Player {
             };
         }
         catch (err) {
+            console.log(err);
             return new MusicPlayerError('InvalidPlaylist', 'song');
         }
     }
