@@ -182,7 +182,6 @@ class Player {
             };
         }
         catch (err) {
-            console.log(err);
             return new MusicPlayerError('InvalidPlaylist', 'song');
         }
     }
