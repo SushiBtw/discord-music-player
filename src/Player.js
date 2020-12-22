@@ -1,7 +1,7 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
-const { VoiceChannel, version } = require("discord.js");
+const { VoiceChannel, version, User } = require("discord.js");
 if (version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
 const Util = require('./Util');
@@ -136,9 +136,10 @@ class Player {
      * @param {string} playlistLink The name of the song to play.
      * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
      * @param {number} maxSongs Max songs to add to the queue.
+     * @param {User} requestedBy The user who requested the song.
      * @returns {Promise<Playlist>}
      */
-    async playlist(guildID, playlistLink, voiceChannel, maxSongs) {
+    async playlist(guildID, playlistLink, voiceChannel, maxSongs, requestedBy) {
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song', 'playlist');
         if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song', 'playlist');
@@ -160,7 +161,7 @@ class Player {
             }
             // Add all songs to the GuildQueue
             Promise.all(playlist.videos.map(video => {
-                let song = new Song(video, queue);
+                let song = new Song(video, queue, requestedBy);
                 playlistSongs.push(song);
                 queue.songs.push(song);
             }));
