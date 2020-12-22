@@ -101,7 +101,7 @@ class Util {
                     title: video.title || 'Unknown',
                     duration,
                     author: video.channel ? video.channel.name || 'Unknown' : 'Unknown',
-                    url: search,
+                    link: search,
                     thumbnail: video.channel ? video.channel.thumbnail || defaultThumbnail : defaultThumbnail
                 });
 
