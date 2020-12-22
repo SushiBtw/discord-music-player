@@ -21,7 +21,7 @@ class MusicPlayerError {
      * @param {string} error Error.
      * @param {object} nullObject Object.
      */
-    constructor(error, nullObject) {
+    constructor(error, nullObject, playlistNull) {
         /**
          * Error type.
          * @type {string}
@@ -39,6 +39,8 @@ class MusicPlayerError {
 
         if (nullObject)
             this[nullObject] = null;
+        if (playlistNull)
+            this[playlistNull] = null;
     }
 }
 

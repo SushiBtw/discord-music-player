@@ -1,6 +1,6 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
-const ytsr = require('./node-ytsr-wip/main');
+const ytsr = require('ytsr');
 const { VoiceChannel, version } = require("discord.js");
 if (version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 if (process.version.split('.')[0].substring(1) < 14) throw new Error("Discord.js requires NodeJS version >= 14.0.0, for Music Handlers now. Please update your Node at https://nodejs.org/en/.");
@@ -141,9 +141,9 @@ class Player {
      */
     async playlist(guildID, playlistLink, voiceChannel, maxSongs) {
         let queue = this.queues.find((g) => g.guildID === guildID);
-        if (!queue) if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
-        if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song');
-        if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song');
+        if (!queue) if (voiceChannel?.type !== 'voice' ?? true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song', 'playlist');
+        if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song', 'playlist');
+        if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song', 'playlist');
 
         try {
             // Searches the playlist
@@ -182,7 +182,7 @@ class Player {
             };
         }
         catch (err) {
-            return new MusicPlayerError('InvalidPlaylist', 'song');
+            return new MusicPlayerError('InvalidPlaylist', 'song', 'playlist');
         }
     }
 
