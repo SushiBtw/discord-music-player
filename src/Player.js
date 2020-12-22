@@ -439,7 +439,7 @@ class Player {
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
         let timePassed = queue.dispatcher.streamTime;
-        let timeEnd = Util.TimeToMiliseconds(queue.songs[0].duration);
+        let timeEnd = Util.TimeToMilliseconds(queue.songs[0].duration);
 
         return `${Util.buildBar(timePassed, timeEnd, barSize, loadedIcon, arrowIcon)}`;
     }

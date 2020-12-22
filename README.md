@@ -18,6 +18,7 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 - **[Getting Started](#getting-started)**
 - **[Documentation](#documentation)**
 - **[Methods](#methods)**
+- **[Utils](#utils)**
 - **[Events](#events)**
 - **[Examples](#examples)**
 - **[Info Messages](#info-messages)**
@@ -126,6 +127,21 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 - **[setVolume(GuildID, Volume)](#setvolume)** - Set Music Volume. | Returning: Void
 - **[createProgressBar(GuildID, BarSize, ArrowIcon, LoadedIcon)](#create-progress-bar)** - Create a progress bar per current playing song. | Returning: String
 
+
+## Utils
+*Use the Utils to convert the Time (Hh:Mm:Ss) to Milliseconds or vice versa.*
+
+- **MillisecondsToTime(Milliseconds)** - Convert Milliseconds to YouTube Time (Hh:Mm:Ss)
+- **TimeToMilliseconds(Time)** - Convert YouTube Time (Hh:Mm:Ss) to Milliseconds
+```js
+const { Player, Utils } = require('discord-music-player');
+
+// Convert YouTube Time (Hh:Mm:Ss) to Milliseconds
+let MS = Utils.TimeToMilliseconds('33:22'); // Return: 2002000
+
+Convert Milliseconds to YouTube Time (Hh:Mm:Ss)
+let TIME = Utils.MillisecondsToTime('2002000'); // Return: 33:22
+```
 
 ## Events
 *Listen to Events after the Play command (initialization) - more info can be found in the **[Info Messages](#info-messages)** section.*

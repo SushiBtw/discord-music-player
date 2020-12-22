@@ -229,15 +229,12 @@ class Util {
         });
     }
 
-
-
-
     /**
-     * Convers Milisecords to Time (HH:MM:SS)
+     * Convers Milliseconds to Time (HH:MM:SS)
      * @param {String} ms Miliseconds
      * @returns {String}
      */
-    static MilisecondsToTime(ms) {
+    static MillisecondsToTime(ms) {
         let seconds = ms / 1000;
         let hours = parseInt(seconds / 3600);
         seconds = seconds % 3600;
@@ -252,11 +249,11 @@ class Util {
     }
 
     /**
-     * Convers Time (HH:MM:SS) to Miliseconds
+     * Convers Time (HH:MM:SS) to Milliseconds
      * @param {String} time Time
      * @returns {String}
      */
-    static TimeToMiliseconds(time) {
+    static TimeToMilliseconds(time) {
         let items = time.split(':'),
             s = 0, m = 1;
 
@@ -285,7 +282,7 @@ class Util {
         const progressText = loadedIcon.repeat(progress) + arrowIcon;
         const emptyProgressText = ' '.repeat(emptyProgress);
 
-        return `[${progressText}${emptyProgressText}][${this.MilisecondsToTime(value)}/${this.MilisecondsToTime(maxValue)}]`;
+        return `[${progressText}${emptyProgressText}][${this.MillisecondsToTime(value)}/${this.MillisecondsToTime(maxValue)}]`;
     };
 
 
