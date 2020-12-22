@@ -139,7 +139,7 @@ const { Player, Utils } = require('discord-music-player');
 // Convert YouTube Time (Hh:Mm:Ss) to Milliseconds
 let MS = Utils.TimeToMilliseconds('33:22'); // Return: 2002000
 
-Convert Milliseconds to YouTube Time (Hh:Mm:Ss)
+// Convert Milliseconds to YouTube Time (Hh:Mm:Ss)
 let TIME = Utils.MillisecondsToTime('2002000'); // Return: 33:22
 ```
 
