@@ -14,7 +14,7 @@ const client = new Discord.Client();
 const Util = require('../src/Util');
 const { Player, version } = require('../index');
 let player = new Player(client);
-const ytsr = require('../src/node-ytsr-wip/main');
+const ytsr = require('ytsr');
 
 console.log(version);
 

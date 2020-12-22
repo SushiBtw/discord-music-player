@@ -8,7 +8,9 @@ const customErrors = {
     'QueueIsNull': 'The Guild Queue is NULL.',
     'OptionsTypeInvalid': 'The Search Options must be a type of Object.',
     'NotANumber': 'The provided argument is not a Number.',
-    'InvalidPlaylist': 'No Playlist was found with that link.'
+    'InvalidPlaylist': 'No Playlist was found with that link.',
+    'MaxSongsTypeInvalid': 'The provided argument (MaxSongsTypeInvalid) is not a Number.',
+    'PlaylistTypeInvalid': 'The provided argument (PlaylistURL) was not a String.'
 }
 
 /**
@@ -19,7 +21,7 @@ class MusicPlayerError {
      * @param {string} error Error.
      * @param {object} nullObject Object.
      */
-    constructor(error, nullObject) {
+    constructor(error, nullObject, playlistNull) {
         /**
          * Error type.
          * @type {string}
@@ -37,6 +39,8 @@ class MusicPlayerError {
 
         if (nullObject)
             this[nullObject] = null;
+        if (playlistNull)
+            this[playlistNull] = null;
     }
 }
 

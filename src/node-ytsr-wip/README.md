@@ -1,1 +1,0 @@
-## This is a local-node package performed by *TimeForANinja* - https://github.com/TimeForANinja/node-ytsr/tree/wip-api-adjustments

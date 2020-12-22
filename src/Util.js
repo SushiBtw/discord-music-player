@@ -113,41 +113,44 @@ class Util {
 
                 await Promise.all(filtersType);
 
-                filters = filtersType.get('Type').find(o => o.name === 'Video');
+                filters = filtersType.get('Type').get('Video');
 
                 // Custom Options - Upload date: null
                 if (options.uploadDate != null) {
-                    let filtersUploadDate = await ytsr.getFilters(filters.ref);
+                    let filtersUploadDate = await ytsr.getFilters(filters.url);
 
                     await Promise.all(filtersUploadDate);
 
-                    filters = filtersUploadDate.get('Upload date').find(o => o.name.toLowerCase().includes(options.uploadDate)) || filters;
+                    filters = Array.from(filtersUploadDate.get('Upload date'), ([name, value]) => ({ name, url: value.url }))
+                        .find(o => o.name.toLowerCase().includes(options.uploadDate)) || filters;
                 }
 
                 // Custom Options - Duration: null
                 if (options.duration != null) {
-                    let filtersDuration = await ytsr.getFilters(filters.ref);
+                    let filtersDuration = await ytsr.getFilters(filters.url);
 
                     await Promise.all(filtersDuration);
 
-                    filters = filtersDuration.get('Duration').find(o => o.name.toLowerCase().startsWith(options.duration)) || filters;
+                    filters = Array.from(filtersDuration.get('Duration'), ([name, value]) => ({ name, url: value.url }))
+                        .find(o => o.name.toLowerCase().startsWith(options.duration)) || filters;
                 }
 
                 // Custom Options - Sort by: relevance
                 if (options.sortBy != null && !options.sortBy.toLowerCase().includes('relevance')) {
-                    let filtersSortBy = await ytsr.getFilters(filters.ref);
+                    let filtersSortBy = await ytsr.getFilters(filters.url);
 
                     await Promise.all(filtersSortBy);
 
-                    filters = filtersSortBy.get('Sort by').find(o => o.name.toLowerCase().includes(options.sortBy)) || filters;
+                    filters = Array.from(filtersSortBy.get('Sort by'), ([name, value]) => ({ name, url: value.url }))
+                        .find(o => o.name.toLowerCase().includes(options.sortBy)) || filters;
                 }
 
                 const searchOptions = {
                     limit: 2,
-                    nextpageRef: filters.ref,
+                    nextpageRef: filters.url,
                 }
 
-                ytsr(filters.query, searchOptions).then(searchResults => {
+                ytsr(filters.url, searchOptions).then(searchResults => {
 
                     let items = searchResults.items;
 
@@ -157,6 +160,12 @@ class Util {
                         items.shift();
 
                     if (!items || !items[0]) return reject('SearchIsNull');
+
+                    Promise.all(items = items.map(vid => {
+                        vid.link = vid.url;
+                        vid.thumbnail = vid.bestThumbnail.url || defaultThumbnail;
+                        return vid;
+                    }));
 
                     resolve(items[0]);
                 }).catch((error) => {
@@ -186,7 +195,9 @@ class Util {
             let playlist = await scrapeYT.getPlaylist(PlaylistID);
             if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
-            Promise.all(playlist.videos = playlist.videos.map(video => {
+            Promise.all(playlist.videos = playlist.videos.map((video, index) => {
+
+                if (index >= max) return null;
 
                 // Callback on invalid duration
                 if (typeof video.duration != 'number') {
@@ -206,6 +217,8 @@ class Util {
                 }
             }));
 
+            playlist.videos = playlist.videos.filter(function (obj) { return obj });
+
             resolve({
                 link: search,
                 videoCount: playlist.videoCount,
@@ -216,15 +229,12 @@ class Util {
         });
     }
 
-
-
-
     /**
-     * Convers Milisecords to Time (HH:MM:SS)
+     * Convers Milliseconds to Time (HH:MM:SS)
      * @param {String} ms Miliseconds
      * @returns {String}
      */
-    static MilisecondsToTime(ms) {
+    static MillisecondsToTime(ms) {
         let seconds = ms / 1000;
         let hours = parseInt(seconds / 3600);
         seconds = seconds % 3600;
@@ -239,11 +249,11 @@ class Util {
     }
 
     /**
-     * Convers Time (HH:MM:SS) to Miliseconds
+     * Convers Time (HH:MM:SS) to Milliseconds
      * @param {String} time Time
      * @returns {String}
      */
-    static TimeToMiliseconds(time) {
+    static TimeToMilliseconds(time) {
         let items = time.split(':'),
             s = 0, m = 1;
 
@@ -272,7 +282,7 @@ class Util {
         const progressText = loadedIcon.repeat(progress) + arrowIcon;
         const emptyProgressText = ' '.repeat(emptyProgress);
 
-        return `[${progressText}${emptyProgressText}][${this.MilisecondsToTime(value)}/${this.MilisecondsToTime(maxValue)}]`;
+        return `[${progressText}${emptyProgressText}][${this.MillisecondsToTime(value)}/${this.MillisecondsToTime(maxValue)}]`;
     };
 
 
