@@ -3,7 +3,6 @@ const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
 const { VoiceChannel, version } = require("discord.js");
 if (version.split('.')[0] !== '12') throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
-if (process.version.split('.')[0].substring(1) < 14) throw new Error("Discord.js requires NodeJS version >= 14.0.0, for Music Handlers now. Please update your Node at https://nodejs.org/en/.");
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Song = require('./Song');
