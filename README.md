@@ -108,7 +108,7 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 ### Play Methods
 - **[play(VoiceChannel, SongName, Options, RequestedBy)](#play)** - Play a Song and init the Server Queue. | Returning: Song
 - **[addToQueue(GuildID, SongName, Options, RequestedBy)](#add-to-queue)** - Add a Song to the Server Queue. | Returning: Song
-- **[playlist(GuildID, PlaylistURL, VoiceChannel, MaxSongs)](#playlist)** - Add a Playlist to the Server Queue | Returning: Playlist, Song?
+- **[playlist(GuildID, PlaylistURL, VoiceChannel, MaxSongs, RequestedBy)](#playlist)** - Add a Playlist to the Server Queue | Returning: Playlist, Song?
 ### Queue Methods
 - **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild. | Returning: Boolean
 - **[nowPlaying(GuildID)](#now-playing)** - Get the currenly playing Song in the Server Queue. | Returning: Song
@@ -230,7 +230,7 @@ Add a Playlist to the Server Queue.
 
 **Usage:**
 ```js
-client.player.playlist(GuildID, PlaylistURL, VoiceChannel, MaxSongs);
+client.player.playlist(GuildID, PlaylistURL, VoiceChannel, MaxSong, RequestedBy);
 ```
 **Example:**
 ```js
@@ -240,7 +240,8 @@ client.on('message', async (message) => {
 
     if (command === 'playlist') {
         let isPlaying = client.player.isPlaying(message.guild.id);
-        let playlist = await client.player.playlist(message.guild.id, args.join(' '), message.member.voice.channel);
+        // If MaxSongs is -1, will be infinite.
+        let playlist = await client.player.playlist(message.guild.id, args.join(' '), message.member.voice.channel, 10, message.author.tag);
         
         // Determine the Song (only if the music was not playing previously)
         let song = playlist.song;
