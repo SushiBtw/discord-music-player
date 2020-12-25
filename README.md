@@ -49,7 +49,7 @@ const settings = {
 
 const { Player } = require("discord-music-player");
 const player = new Player(client, {
-	leaveOnEmpty: false, // This options are optional.
+    leaveOnEmpty: false, // This options are optional.
 });
 // You can define the Player as *client.player* to easly access it.
 client.player = player;
@@ -74,9 +74,9 @@ client.login(settings.token);
 
 ```js
 new Player(client, {
-	leaveOnEnd: false,
-	leaveOnStop: false,
-	leaveOnEmpty: true,
+    leaveOnEnd: false,
+    leaveOnStop: false,
+    leaveOnEmpty: true,
     timeout: 0,
     quality: 'high',
 });
@@ -98,9 +98,9 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 ***Options (optional)** object can have the following options:*
 ```js
 {
-	uploadDate: 'hour/today/week/month/year', // Default - none
-	duration: 'short/long', // Default - none
-	sortBy: 'relevance/date/view count/rating' // Default - 'relevance'
+    uploadDate: 'hour/today/week/month/year', // Default - none
+    duration: 'short/long', // Default - none
+    sortBy: 'relevance/date/view count/rating' // Default - 'relevance'
 }
 ```
 
@@ -183,7 +183,7 @@ client.on('message', async (message) => {
 
     if(command === 'play'){
         let song = await client.player.play(message.member.voice.channel, args.join(' '), {
-	        duration: 'long' // This is optional
+            duration: 'long' // This is optional
         });
         song = song.song;
         message.channel.send(`Started playing ${song.name}.`);
@@ -381,7 +381,7 @@ client.on('message', async (message) => {
     // !remove 2
     
     if(command === 'remove'){
-	    let SongID = parseInt(args[0])-1; // The index is starting from 0, so we subtract 1.
+        let SongID = parseInt(args[0])-1; // The index is starting from 0, so we subtract 1.
         // Removes a song from the queue
         client.player.remove(message.guild.id, SongID).then(() => {
             message.channel.send(`Removed song ${args[0]} from the Queue!`);
