@@ -643,5 +643,6 @@ client.on('message', async (message) => {
 ## Contribution and Info
 **This module is used in the following Bots:**
 - **[SsumBOT (500 guilds)](https://ssumbot.xyz/)** made by **[Me](https://github.com/SushiBtw)**.
+- **[SpeckyBot (100 guilds)](https://github.com/SpeckyYT/SpeckyBot/)** made by **[SpeckyYT](https://github.com/SpeckyYT)**.
 
 *Contribute with the module on [the GitHub module page](https://github.com/SushiBtw/discord-music-player/).*
