@@ -49,7 +49,7 @@ const settings = {
 
 const { Player } = require("discord-music-player");
 const player = new Player(client, {
-	leaveOnEmpty: false, // This options are optional.
+    leaveOnEmpty: false, // This options are optional.
 });
 // You can define the Player as *client.player* to easly access it.
 client.player = player;
@@ -74,9 +74,9 @@ client.login(settings.token);
 
 ```js
 new Player(client, {
-	leaveOnEnd: false,
-	leaveOnStop: false,
-	leaveOnEmpty: true,
+    leaveOnEnd: false,
+    leaveOnStop: false,
+    leaveOnEmpty: true,
     timeout: 0,
     quality: 'high',
 });
@@ -98,9 +98,9 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 ***Options (optional)** object can have the following options:*
 ```js
 {
-	uploadDate: 'hour/today/week/month/year', // Default - none
-	duration: 'short/long', // Default - none
-	sortBy: 'relevance/date/view count/rating' // Default - 'relevance'
+    uploadDate: 'hour/today/week/month/year', // Default - none
+    duration: 'short/long', // Default - none
+    sortBy: 'relevance/date/view count/rating' // Default - 'relevance'
 }
 ```
 
@@ -183,7 +183,7 @@ client.on('message', async (message) => {
 
     if(command === 'play'){
         let song = await client.player.play(message.member.voice.channel, args.join(' '), {
-	        duration: 'long' // This is optional
+            duration: 'long' // This is optional
         });
         song = song.song;
         message.channel.send(`Started playing ${song.name}.`);
@@ -242,15 +242,15 @@ client.on('message', async (message) => {
         let isPlaying = client.player.isPlaying(message.guild.id);
         // If MaxSongs is -1, will be infinite.
         let playlist = await client.player.playlist(message.guild.id, args.join(' '), message.member.voice.channel, 10, message.author.tag);
-        
+
         // Determine the Song (only if the music was not playing previously)
         let song = playlist.song;
         // Get the Playlist
         playlist = playlist.playlist;
-        
+
         // Send information about adding the Playlist to the Queue
         message.channel.send(`Added a Playlist to the queue with **${playlist.videoCount} songs**, that was **made by ${playlist.channel}**.`)
-        
+
         // If there was no songs previously playing, send a message about playing one.
         if (!isPlaying) {
 
@@ -377,11 +377,11 @@ client.player.remove(GuildID, Song);
 client.on('message', async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    
+
     // !remove 2
-    
+
     if(command === 'remove'){
-	    let SongID = parseInt(args[0])-1; // The index is starting from 0, so we subtract 1.
+        let SongID = parseInt(args[0])-1; // The index is starting from 0, so we subtract 1.
         // Removes a song from the queue
         client.player.remove(message.guild.id, SongID).then(() => {
             message.channel.send(`Removed song ${args[0]} from the Queue!`);
@@ -515,7 +515,7 @@ client.on('message', async (message) => {
 
     if (command === 'toggle') {
         let toggle = client.player.toggleLoop(message.guild.id);
-        
+
         // Send a message with the toggle information
         if (toggle)
             message.channel.send('I will now repeat the current playing song.');
@@ -578,12 +578,12 @@ client.on('message', (message) => {
 
     if(command === 'play'){
         let song = await client.player.play(message.member.voice.channel, args.join(''));
-        
+
         // Send a message, when Queue would be empty.
         song.queue.on('end', () => {
             message.channel.send('The queue is empty, please add new songs!');
         });
-        
+
         // Send a message, when a Song would change.
         song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
             if(repeatMode){
@@ -631,7 +631,7 @@ client.on('message', async (message) => {
     if(command === 'play'){
         client.player.play(message.member.voice.channel, args.join(' ')).then(async song => {
             if(song.error) throw(song.error);
-        
+
         }).catch(err => {
             // Catch and Debug it, whatever you need.
             console.log(err);
@@ -643,5 +643,6 @@ client.on('message', async (message) => {
 ## Contribution and Info
 **This module is used in the following Bots:**
 - **[SsumBOT (500 guilds)](https://ssumbot.xyz/)** made by **[Me](https://github.com/SushiBtw)**.
+- **[SpeckyBot (100 guilds)](https://github.com/SpeckyYT/SpeckyBot/)** made by **[SpeckyYT](https://github.com/SpeckyYT)**.
 
 *Contribute with the module on [the GitHub module page](https://github.com/SushiBtw/discord-music-player/).*
