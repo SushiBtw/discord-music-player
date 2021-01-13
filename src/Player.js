@@ -212,7 +212,9 @@ class Player {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
-        // Pauses the dispatcher
+        // Resumes the dispatcher
+        queue.dispatcher.resume();
+        queue.dispatcher.pause();
         queue.dispatcher.resume();
         queue.playing = true;
         // Resolves the guild queue
