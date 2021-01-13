@@ -103,7 +103,7 @@ class Player {
      */
     async play(voiceChannel, songName, options = {}, requestedBy) {
         this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
-        if (voiceChannel.type ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
+        if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
         if (typeof songName !== 'string' || songName.length == 0) return new MusicPlayerError('SongTypeInvalid', 'song');
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
         try {
@@ -141,7 +141,7 @@ class Player {
      */
     async playlist(guildID, playlistLink, voiceChannel, maxSongs, requestedBy) {
         let queue = this.queues.find((g) => g.guildID === guildID);
-        if (!queue) if (voiceChannel.type ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song', 'playlist');
+        if (!queue) if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song', 'playlist');
         if (typeof playlistLink !== 'string' || playlistLink.length == 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song', 'playlist');
         if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song', 'playlist');
 
