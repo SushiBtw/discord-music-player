@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "6.3.6",
+  "version": "6.3.7",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
   "scripts": {
@@ -37,6 +37,6 @@
   },
   "devDependencies": {
     "discord.js": "discordjs/discord.js",
-    "jsdoc": "^3.6.3",
+    "jsdoc": "^3.6.3"
   }
 }
