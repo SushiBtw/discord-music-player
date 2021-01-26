@@ -6,7 +6,7 @@
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
-## **DMP v6.3.0 Update:**
+## **DMP v6.4.0 Update:**
 - [x] **Fix YouTube issues with Vevo Music**,
 - [x] **Add ``playlist`` method** - [Read More](#playlist),
 - [x] **Add ``toggleLoop(GuildID)`` method** - [Read More](#toggle-loop),
