@@ -14,7 +14,7 @@ let PlaylistRegexID = /[&?]list=([^&]+)/;
  */
 function youtube_parser(url) {
     var match = url.match(VideoRegexID);
-    return (match && match[7].length == 11) ? match[7] : false;
+    return (match && match[7].length === 11) ? match[7] : false;
 }
 
 /**
@@ -24,7 +24,7 @@ function youtube_parser(url) {
  */
 function playlist_parser(url) {
     var match = url.match(PlaylistRegexID);
-    return (match && match[1].length == 34) ? match[1] : false;
+    return (match && match[1].length === 34) ? match[1] : false;
 }
 
 /**
@@ -88,7 +88,7 @@ class Util {
                     console.warn('[DMP] YouTube returned a empty object, you are probably rate-limited (please wait some time) - The Author and Title are Unknown.');
 
                 // Callback on invalid duration
-                if (typeof video.duration != 'number') {
+                if (typeof video.duration !== 'number') {
                     video.duration = parseInt(video.duration) || 0;
                 }
 
@@ -106,7 +106,7 @@ class Util {
                 });
 
             } else {
-                var filters;
+                let filters;
 
                 // Default Options - Type: Video
                 let filtersType = await ytsr.getFilters(search);
@@ -195,9 +195,9 @@ class Util {
             let playlist = await scrapeYT.getPlaylist(PlaylistID);
             if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
-            Promise.all(playlist.videos = playlist.videos.map((video, index) => {
+            await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
 
-                if (index >= max) return null;
+                if (max !== -1 && index >= max) return null;
 
                 // Callback on invalid duration
                 if (typeof video.duration != 'number') {
@@ -245,13 +245,13 @@ class Util {
         minutes = (`0${minutes}`).slice(-2);
         hours = (`0${hours}`).slice(-2);
 
-        return `${hours == 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
+        return `${hours === 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
     }
 
     /**
      * Convers Time (HH:MM:SS) to Milliseconds
      * @param {String} time Time
-     * @returns {String}
+     * @returns {number}
      */
     static TimeToMilliseconds(time) {
         let items = time.split(':'),
