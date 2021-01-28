@@ -5,6 +5,7 @@ class Song {
     /**
      * @param {Video} video The Youtube video
      * @param {Queue} queue The queue in which the song is
+     * @param {String} requestedBy The request user
      */
     constructor(video, queue, requestedBy) {
         /**
@@ -14,19 +15,19 @@ class Song {
         this.name = video.title;
         /**
          * Song duration.
-         * @type {Number}
+         * @type {String}
          */
         this.duration = video.duration;
         /**
          * Author channel of the song.
          * @type {string}
          */
-        this.author = video.author.name || video.author;
+        this.author = video.channel.name;
         /**
          * Youtube video URL.
          * @type {string}
          */
-        this.url = video.link;
+        this.url = video.url;
         /**
          * Youtube video thumbnail.
          * @type {string}
@@ -43,6 +44,6 @@ class Song {
          */
         this.requestedBy = requestedBy;
     }
-};
+}
 
 module.exports = Song;

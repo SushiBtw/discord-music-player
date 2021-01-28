@@ -59,25 +59,6 @@ class Queue extends EventEmitter {
 
     }
 
-};
-
-/**
- * Emitted when the queue is empty.
- * @event Queue#end
- */
-
-
-/**
- * Emitted when the voice channel is empty.
- * @event Queue#channelEmpty
- */
-
-/**
- * Emitted when the song changes.
- * @event Queue#songChanged
- * @param {Song} oldSong The old song (playing before)
- * @param {Song} newSong The new song (currently playing)
- * @param {Boolean} skipped Whether the change is due to the skip() function
- */
+}
 
 module.exports = Queue;
