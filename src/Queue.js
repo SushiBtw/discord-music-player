@@ -7,9 +7,10 @@ class Queue extends EventEmitter {
 
     /**
      * Represents a guild queue.
-     * @param {string} guildID 
+     * @param {string} guildID
+     * @param {Object} options
      */
-    constructor(guildID){
+    constructor(guildID, options = {}){
         super();
         /**
          * The guild ID.
@@ -45,7 +46,7 @@ class Queue extends EventEmitter {
          * The stream volume.
          * @type {Number}
          */
-        this.volume = 100;
+        this.volume = options.volume || 100;
         /**
          * Whether the stream is currently playing.
          * @type {Boolean}

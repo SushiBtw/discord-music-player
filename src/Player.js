@@ -17,6 +17,7 @@ const MusicPlayerError = require('./MusicPlayerError');
  * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
  * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
  * @property {Number} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
+ * @property {Number} volume The default playing volume of the player. | Default: 100
  * @property {String} quality Music quality ['high'/'low'] | Default: high
  */
 const PlayerOptions = {
@@ -24,6 +25,7 @@ const PlayerOptions = {
     leaveOnStop: true,
     leaveOnEmpty: true,
     timeout: 0,
+    volume: 100,
     quality: 'high'
 };
 
@@ -35,8 +37,9 @@ class Player {
      */
     constructor(client, options = {}) {
         if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
-        if (typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
-        if (options.timeout && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
+        if (!options || typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
+        if (typeof options.timeout != 'undefined' && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
+        if (typeof options.volume != 'undefined' && (isNaN(options.volume) || !isFinite(options.volume))) throw new TypeError('[VolumeInvalidType] Volume should be a Number presenting a value in percentual.');
 
         /**
          * Your Discord Client instance.
@@ -109,7 +112,7 @@ class Player {
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
         try {
             // Creates a new guild with data
-            let queue = new Queue(voiceChannel.guild.id);
+            let queue = new Queue(voiceChannel.guild.id, this.options);
             // Searches the song
             let song = await Util.getVideoBySearch(songName, options, queue, requestedBy);
             // Joins the voice channel
@@ -178,7 +181,7 @@ class Player {
                 // Joins the voice channel if needed
                 connection = await voiceChannel.join();
                 // Creates a new guild with data if needed
-                queue = new Queue(voiceChannel.guild.id);
+                queue = new Queue(voiceChannel.guild.id, this.options);
                 queue.connection = connection;
             }
             // Searches the playlist
