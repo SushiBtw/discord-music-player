@@ -7,7 +7,8 @@ class Queue extends EventEmitter {
 
     /**
      * Represents a guild queue.
-     * @param {string} guildID 
+     * @param {string} guildID
+     * @param {Object} options
      */
     constructor(guildID, options = {}){
         super();
