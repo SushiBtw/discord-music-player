@@ -208,6 +208,7 @@ class Util {
             }));
             playlist.videos = playlist.videos.filter(function (obj) { return obj });
             playlist.url = search;
+            playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
             resolve(new Playlist(playlist, queue, requestedBy));
         });
