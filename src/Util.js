@@ -64,7 +64,7 @@ class Util {
     /**
      * Gets the first youtube results for your search.
      * @param {string} search The name of the video or the video URL.
-     * @param {ytsr} ytsr ytsr.
+     * @param {((query: string, options?: ytsr.Options) => Promise<ytsr.Result>) | ytsr} ytsr ytsr.
      * @param {object} options Options.
      * @returns {Promise<Video>}
      */

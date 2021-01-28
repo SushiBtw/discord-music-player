@@ -1,10 +1,10 @@
 {
   "name": "discord-music-player",
-  "version": "6.3.7",
+  "version": "6.4.0",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
   "scripts": {
-    "test": "node test/test.js",
+    "test": "jest test/test.js",
     "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose"
   },
   "keywords": [
@@ -37,6 +37,8 @@
   },
   "devDependencies": {
     "discord.js": "discordjs/discord.js",
-    "jsdoc": "^3.6.3"
+    "jsdoc": "^3.6.3",
+    "assert-diff": "^3.0.2",
+    "jest": "^26.6.3"
   }
 }
