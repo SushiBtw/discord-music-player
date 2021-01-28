@@ -10,7 +10,7 @@ class Song {
     constructor(video, queue, requestedBy) {
         /**
          * Song name.
-         * @type {string}
+         * @type {String}
          */
         this.name = video.title;
         /**
@@ -20,17 +20,17 @@ class Song {
         this.duration = video.duration;
         /**
          * Author channel of the song.
-         * @type {string}
+         * @type {String}
          */
         this.author = video.channel.name;
         /**
          * Youtube video URL.
-         * @type {string}
+         * @type {String}
          */
         this.url = video.url;
         /**
          * Youtube video thumbnail.
-         * @type {string}
+         * @type {String}
          */
         this.thumbnail = video.thumbnail;
         /**
@@ -40,7 +40,7 @@ class Song {
         this.queue = queue;
         /**
          * The user who requested that song.
-         * @type {User}
+         * @type {String}
          */
         this.requestedBy = requestedBy;
     }

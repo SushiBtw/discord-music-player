@@ -1,7 +1,9 @@
 {
-  "title": "Amy Macdonald - This Is The Life (Official Video)",
-  "duration": "3:16",
   "author": "Amy Macdonald",
-  "link": "https://www.youtube.com/watch?v=iRYvuS9OxdA",
-  "thumbnail": "https://yt3.ggpht.com/ytc/AAUvwnjUGrHx7bR86J3bXJBgXxoodnHWEYdeml8-_Q8x0g=s176-c-k-c0xffffffff-no-nd-rj-mo"
+  "duration": "3:16",
+  "name": "Amy Macdonald - This Is The Life (Official Video)",
+  "queue": null,
+  "requestedBy": null,
+  "thumbnail": "https://i.ytimg.com/vi/iRYvuS9OxdA/maxresdefault.jpg",
+  "url": "https://www.youtube.com/watch?v=iRYvuS9OxdA"
 }
