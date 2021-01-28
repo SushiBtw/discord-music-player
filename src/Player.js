@@ -37,9 +37,9 @@ class Player {
      */
     constructor(client, options = {}) {
         if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
-        if (typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
-        if (options.timeout && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
-        if (typeof options.timeout != 'undefined' && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[VolumeInvalidType] Volume should be a Number presenting a value in percentual.');
+        if (!options || typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
+        if (typeof options.timeout != 'undefined' && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
+        if (typeof options.volume != 'undefined' && (isNaN(options.volume) || !isFinite(options.volume))) throw new TypeError('[VolumeInvalidType] Volume should be a Number presenting a value in percentual.');
 
         /**
          * Your Discord Client instance.
