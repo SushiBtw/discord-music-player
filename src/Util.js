@@ -82,7 +82,7 @@ class Util {
      * @param {String} requestedBy User that requested the song.
      * @returns {Promise<Song>}
      */
-    static getVideoBySearch(search, options = {}, queue, requestedBy= undefined) {
+    static getVideoBySearch(search, options = {}, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
             options = { ...defaultSearchOptions, ...options };
@@ -186,7 +186,7 @@ class Util {
      * @param {String} requestedBy User that requested the song.
      * @returns {Promise<Playlist>}
      */
-    static getVideoFromPlaylist(search, max, queue, requestedBy= undefined) {
+    static getVideoFromPlaylist(search, max, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
             let isPlaylistLink = PlaylistRegex.test(search);
@@ -209,7 +209,7 @@ class Util {
             playlist.videos = playlist.videos.filter(function (obj) { return obj });
             playlist.url = search;
 
-            new Playlist(playlist, queue, requestedBy)
+            resolve(new Playlist(playlist, queue, requestedBy));
         });
     }
 
