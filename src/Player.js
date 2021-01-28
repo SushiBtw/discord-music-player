@@ -175,7 +175,7 @@ class Player {
         if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song', 'playlist');
 
         try {
-            let connection = queue.connection;
+            let connection = queue ? queue.connection : null
             let isFirstPlay = !!queue;
             if (!queue) {
                 // Joins the voice channel if needed

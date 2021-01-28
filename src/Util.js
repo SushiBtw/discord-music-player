@@ -162,7 +162,7 @@ class Util {
                             title: vid.title,
                             duration: vid.duration,
                             channel: {
-                                name: vid.channel.name,
+                                name: vid.author.name,
                             },
                             url: vid.url,
                             thumbnail: vid.bestThumbnail.url,
