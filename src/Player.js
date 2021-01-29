@@ -65,10 +65,10 @@ class Player {
         // Listener to check if the channel is empty
         client.on('voiceStateUpdate', (oldState, newState) => {
             if (!this.options.leaveOnEmpty) return;
-            // If the member leaves a voice channel
-            if (!oldState.channelID || newState.channelID) return;
+            // If message leaves the current voice channel
+            if (oldState.channelID === newState.channelID) return;
             // Search for a queue for this channel
-            let queue = this.queues.find((g) => g.connection.channel.id === oldState.channelID);
+            let queue = this.queues.find((g) => g.guildID === oldState.guild.id);
             if (queue) {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
