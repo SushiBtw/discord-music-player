@@ -376,6 +376,7 @@ class Player {
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatQueue = enabled;
+        if(queue.repeatQueue === true) queue.repeatMode = false;
     }
 
     /**
@@ -389,6 +390,7 @@ class Player {
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatMode = enabled;
+        if(queue.repeatMode === true) queue.repeatQueue = false;
     }
 
 
@@ -403,6 +405,7 @@ class Player {
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatMode = !queue.repeatMode;
+        if(queue.repeatMode === true) queue.repeatQueue = false;
         // Resolve
         return queue.repeatMode;
     }
@@ -418,6 +421,7 @@ class Player {
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatQueue = !queue.repeatQueue;
+        if(queue.repeatQueue === true) queue.repeatMode = false;
         // Resolve
         return queue.repeatQueue;
     }

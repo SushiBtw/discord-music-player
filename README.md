@@ -166,7 +166,7 @@ client.player.getQueue(guildID)
 .on('end', () => {
     message.channel.send('The queue is empty, there is nothing to play!');
 })
-.on('songChanged', (oldSong, newSong) => {
+.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
     message.channel.send(`Ended playing ${oldSong.name}! Now playing ${newSong.name}!`);
 })
 .on('channelEmpty', () => {
@@ -276,9 +276,11 @@ client.on('message', async (message) => {
             });
 
             // Send a message, when a Song would change.
-            song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
+            song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
                 if (repeatMode) {
                     message.channel.send(`Playing ${newSong.name} again...`);
+                } else if(repeatQueue) {
+                    message.channel.send(`Playing **${newSong.name}...**\nAdded **${oldSong.name}** to the end of the queue (repeatQueue).`);
                 } else {
                     message.channel.send(`Now playing ${newSong.name}...`);
                 }
@@ -672,9 +674,11 @@ client.on('message', (message) => {
         });
 
         // Send a message, when a Song would change.
-        song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
-            if(repeatMode){
+        song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
+            if (repeatMode) {
                 message.channel.send(`Playing ${newSong.name} again...`);
+            } else if(repeatQueue) {
+                message.channel.send(`Playing **${newSong.name}...**\nAdded **${oldSong.name}** to the end of the queue (repeatQueue).`);
             } else {
                 message.channel.send(`Now playing ${newSong.name}...`);
             }
