@@ -4,6 +4,7 @@
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
+**We support YouTube Videos, Playlist's, Spotify Songs and even more!**
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
 ### *We support NodeJS 12-15.*

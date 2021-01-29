@@ -1,0 +1,13 @@
+test
+coverage
+.travis.yml
+.jenkins.yml
+.codeclimate.yml
+.jscsrc
+.jshintrc
+.eslintrc*
+.idea
+.editorconfig
+out
+.vs
+.jsdoc.json
