@@ -126,7 +126,7 @@ class Player {
             return { error: null, song: song };
         }
         catch (err) {
-            return new MusicPlayerError('SearchIsNull', 'song');
+            return new MusicPlayerError(err === 'InvalidSpotify' ? err : 'SearchIsNull', 'song');
         }
     }
 
@@ -154,7 +154,7 @@ class Player {
             return { error: null, song: song };
         }
         catch (err) {
-            return new MusicPlayerError('SearchIsNull', 'song');
+            return new MusicPlayerError(err === 'InvalidSpotify' ? err : 'SearchIsNull', 'song');
         }
     }
 

@@ -2,13 +2,14 @@ const scrapeYT = require('scrape-yt');
 const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
-let defaultThumbnail = 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png';
+const { getPreview } = require("spotify-url-info");
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#\&\?]*).*/;
 let PlaylistRegexID = /[&?]list=([^&]+)/;
+let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
 /**
  * Get ID from YouTube link.
@@ -87,6 +88,12 @@ class Util {
 
             options = { ...defaultSearchOptions, ...options };
             options = pick(options, Object.keys(defaultSearchOptions))
+
+            if(SpotifyRegex.test(search)) {
+                search = await this.songFromSpotify(search).catch(err => {
+                    return reject(err);
+                });
+            }
 
             let isVideoLink = VideoRegex.test(search);
 
@@ -211,6 +218,23 @@ class Util {
             playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
             resolve(new Playlist(playlist, queue, requestedBy));
+        });
+    }
+
+    /**
+     * Converts a spotify track URL to a string containing the artist and song name.
+     * @param {String} query The spotify song URL.
+     * @returns {Promise<String>} The artist and song name (e.g. "Rick Astley - Never Gonna Give You Up")
+     */
+    static songFromSpotify(query) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let SpotifyResult = await getPreview(query);
+                resolve(`${SpotifyResult['artist']} - ${SpotifyResult['title']}`);
+            }
+            catch(err) {
+                reject('InvalidSpotify');
+            }
         });
     }
 
