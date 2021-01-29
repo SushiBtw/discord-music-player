@@ -68,7 +68,7 @@ class Player {
             // If message leaves the current voice channel
             if (oldState.channelID === newState.channelID) return;
             // Search for a queue for this channel
-            let queue = this.queues.find((g) => g.guildID === oldState.guild.id);
+            let queue = this.getQueue(oldState.guild.id);
             if (queue) {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
@@ -141,7 +141,7 @@ class Player {
      */
     async addToQueue(guildID, songName, options = {}, requestedBy) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
         if (typeof songName !== 'string' || songName.length === 0) return new MusicPlayerError('SongTypeInvalid', 'song');
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
@@ -167,7 +167,7 @@ class Player {
      */
     async seek(guildID, seek) {
         if(isNaN(seek)) return new MusicPlayerError('NotANumber', 'song');
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
 
         queue.songs[0].seekTime = seek;
@@ -187,7 +187,7 @@ class Player {
      * @returns {Promise<{song: (null|Song), playlist: Playlist} || MusicPlayerError>}
      */
     async playlist(guildID, playlistLink, voiceChannel, maxSongs, requestedBy) {
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song', 'playlist');
         if (typeof playlistLink !== 'string' || playlistLink.length === 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song', 'playlist');
         if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song', 'playlist');
@@ -232,7 +232,7 @@ class Player {
      */
     pause(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Pauses the dispatcher
         queue.dispatcher.pause();
@@ -248,7 +248,7 @@ class Player {
      */
     resume(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Resumes the dispatcher
         queue.dispatcher.resume();
@@ -266,7 +266,7 @@ class Player {
      */
     stop(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Stops the dispatcher
         queue.stopped = true;
@@ -283,7 +283,7 @@ class Player {
      */
     setVolume(guildID, percent) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
         // Updates volume
@@ -310,7 +310,7 @@ class Player {
      */
     setQueue(guildID, songs) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Updates queue
         queue.songs = songs;
@@ -325,7 +325,7 @@ class Player {
      */
     clearQueue(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Clears queue
         let currentlyPlaying = queue.songs.shift();
@@ -341,7 +341,7 @@ class Player {
      */
     skip(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         let currentSong = queue.songs[0];
         // Ends the dispatcher
@@ -358,7 +358,7 @@ class Player {
      */
     nowPlaying(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Resolves the current song
 
@@ -372,7 +372,7 @@ class Player {
      */
     setQueueRepeatMode(guildID, enabled) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatQueue = enabled;
@@ -386,7 +386,7 @@ class Player {
      */
     setRepeatMode(guildID, enabled) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatMode = enabled;
@@ -401,7 +401,7 @@ class Player {
      */
     toggleLoop(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatMode = !queue.repeatMode;
@@ -417,7 +417,7 @@ class Player {
      */
     toggleQueueLoop(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatQueue = !queue.repeatQueue;
@@ -435,7 +435,7 @@ class Player {
      */
     remove(guildID, song) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Remove the song from the queue
         let songFound = null;
@@ -456,7 +456,7 @@ class Player {
      */
     shuffle(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
         let currentSong = queue.songs.shift();
@@ -476,7 +476,7 @@ class Player {
     * @returns {String}
     */
     createProgressBar(guildID, barSize = 20, arrowIcon = '>', loadedIcon = '=') {
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
         let timePassed = queue.dispatcher.streamTime + queue.songs[0].seekTime;
@@ -494,7 +494,7 @@ class Player {
      */
     async _playSong(guildID, firstPlay, seek= null) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.getQueue(guildID);
         // If there isn't any music in the queue
         if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode && !queue.repeatQueue) {
             // Emits stop event
@@ -516,7 +516,7 @@ class Player {
                 // Timeout
                 let connectionChannel = queue.connection.channel;
                 setTimeout(() => {
-                    queue = this.queues.find((g) => g.guildID === guildID);
+                    queue = this.getQueue(guildID);
                     if (!queue || queue.songs.length < 1) {
                         return connectionChannel.leave();
                     }
