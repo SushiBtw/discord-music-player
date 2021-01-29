@@ -440,7 +440,7 @@ class Player {
             if (songFound) {
                 queue.songs = queue.songs.filter((s) => s !== songFound);
             }
-        } return new MusicPlayerError('NotANumber');
+        } else return new MusicPlayerError('NotANumber');
         // Resolve
         return songFound;
     }
@@ -534,17 +534,27 @@ class Player {
         let Quality = this.options.quality;
         Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
-        let dispatcher = queue.connection.play(ytdl(song.url, { filter: 'audioonly', quality: Quality, highWaterMark: 1 << 25 }), {
-            seek: seek / 1000 || 0,
+        const stream = ytdl(song.url, {
+            filter: 'audioonly',
+            quality: Quality,
+            dlChunkSize: 0,
+            highWaterMark: 1 << 25,
         });
-        queue.dispatcher = dispatcher;
-        // Set volume
-        dispatcher.setVolumeLogarithmic(queue.volume / 200);
-        // When the song ends
-        dispatcher.on('finish', () => {
-            // Play the next song
-            return this._playSong(guildID, false);
-        });
+
+        setTimeout(() => {
+            if(queue.dispatcher) queue.dispatcher.destroy();
+            let dispatcher = queue.connection.play(stream, {
+                seek: seek / 1000 || 0,
+            });
+            queue.dispatcher = dispatcher;
+            // Set volume
+            dispatcher.setVolumeLogarithmic(queue.volume / 200);
+            // When the song ends
+            dispatcher.on('finish', () => {
+                // Play the next song
+                return this._playSong(guildID, false);
+            });
+        }, 1000)
     }
 
 };
