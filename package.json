@@ -15,7 +15,8 @@
     "discord",
     "volume",
     "queue",
-    "youtube"
+    "youtube",
+    "spotify"
   ],
   "repository": {
     "type": "git",
