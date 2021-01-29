@@ -321,7 +321,7 @@ class Player {
     /**
      * Clears the guild queue, but not the current song.
      * @param {string} guildID
-     * @returns {Queue}
+     * @returns {Queue || MusicPlayerError}
      */
     clearQueue(guildID) {
         // Gets guild queue
@@ -331,13 +331,13 @@ class Player {
         let currentlyPlaying = queue.songs.shift();
         queue.songs = [currentlyPlaying];
         // Resolves guild queue
-        return queue.songs;
+        return queue;
     }
 
     /**
      * Skips a song.
      * @param {string} guildID
-     * @returns {Song}
+     * @returns {Song || MusicPlayerError}
      */
     skip(guildID) {
         // Gets guild queue
@@ -354,23 +354,34 @@ class Player {
     /**
      * Gets the currently playing song.
      * @param {string} guildID
-     * @returns {Song}
+     * @returns {Song || MusicPlayerError}
      */
     nowPlaying(guildID) {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
-        let currentSong = queue.songs[0];
         // Resolves the current song
 
-        return currentSong;
+        return queue.songs[0];
     }
 
     /**
      * Enable or disable the repeat mode
      * @param {string} guildID
      * @param {boolean} enabled Whether the repeat mode should be enabled
-     * @returns {Void}
+     */
+    setQueueRepeatMode(guildID, enabled) {
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull');
+        // Enable/Disable repeat mode
+        queue.repeatQueue = enabled;
+    }
+
+    /**
+     * Enable or disable the Queue repeat loop
+     * @param {string} guildID
+     * @param {boolean} enabled Whether the repeat mode should be enabled
      */
     setRepeatMode(guildID, enabled) {
         // Gets guild queue
@@ -378,14 +389,13 @@ class Player {
         if (!queue) return new MusicPlayerError('QueueIsNull');
         // Enable/Disable repeat mode
         queue.repeatMode = enabled;
-        // Resolve
-        return;
     }
+
 
     /**
      * Toggle the repeat mode
      * @param {string} guildID
-     * @returns {boolean} Returns the current set state
+     * @returns {boolean || MusicPlayerError} Returns the current set state
      */
     toggleLoop(guildID) {
         // Gets guild queue
@@ -396,6 +406,22 @@ class Player {
         // Resolve
         return queue.repeatMode;
     }
+
+    /**
+     * Toggle the Queue repeat mode
+     * @param {string} guildID
+     * @returns {boolean || MusicPlayerError} Returns the current set state
+     */
+    toggleQueueLoop(guildID) {
+        // Gets guild queue
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull');
+        // Enable/Disable repeat mode
+        queue.repeatQueue = !queue.repeatQueue;
+        // Resolve
+        return queue.repeatQueue;
+    }
+
 
     /**
      * Removes a song from the queue
@@ -422,7 +448,7 @@ class Player {
     /**
      * Shuffles the guild queue.
      * @param {string} guildID 
-     * @returns {Songs}
+     * @returns {Song[]}
      */
     shuffle(guildID) {
         // Gets guild queue
@@ -466,7 +492,7 @@ class Player {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         // If there isn't any music in the queue
-        if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode) {
+        if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode && !queue.repeatQueue) {
             // Emits stop event
             if (queue.stopped) {
                 // Remoces the guild from the guilds list
@@ -494,8 +520,14 @@ class Player {
                 return;
             }
         }
+        // Add to the end if repeatQueue is enabled
+        if(queue.repeatQueue && !seek) {
+            if(queue.repeatMode) console.warn('[DMP] The song was not added at the end of the queue (repeatQueue was enabled) due repeatMode was enabled too.\n'
+            + 'Please do not use repeatMode and repeatQueue together');
+            else queue.songs.push(queue.songs[0]);
+        }
         // Emit songChanged event
-        if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode);
+        if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode, queue.repeatQueue);
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song

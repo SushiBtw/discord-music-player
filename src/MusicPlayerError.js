@@ -22,7 +22,7 @@ class MusicPlayerError {
      * @param {?Object} nullObject Object.
      * @param {?Object} playlistNull Object.
      */
-    constructor(error, nullObject, playlistNull) {
+    constructor(error, nullObject= null, playlistNull= null) {
         /**
          * Error type.
          * @type {string}
