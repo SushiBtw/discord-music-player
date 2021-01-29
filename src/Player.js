@@ -160,6 +160,30 @@ class Player {
 
 
     /**
+     * Seeks the current playing song.
+     * @param {String} guildID Guild ID.
+     * @param {Number} seek Seek (in milliseconds) time.
+     * @returns {Promise<{Song} || MusicPlayerError>}
+     */
+    async seek(guildID, seek) {
+        let queue = this.queues.find((g) => g.guildID === guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
+
+        try {
+            //queue.songs.unshift(queue.songs[0]);
+
+            await this._playSong(guildID, true, seek);
+            return { error: null, song: queue.songs[0] };
+        }
+        catch (err) {
+            console.log(err);
+            return new MusicPlayerError('SearchIsNull', 'song');
+        }
+    }
+
+
+
+    /**
      * Plays or adds the Playlist songs to the queue.
      * @param {String} guildID
      * @param {String} playlistLink The name of the song to play.
@@ -443,8 +467,9 @@ class Player {
      * @ignore
      * @param {string} guildID
      * @param {Boolean} firstPlay Whether the function was called from the play() one
+     * @param {Number || null} seek Seek the song.
      */
-    async _playSong(guildID, firstPlay) {
+    async _playSong(guildID, firstPlay, seek= null) {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         // If there isn't any music in the queue
@@ -482,9 +507,11 @@ class Player {
         let song = queue.songs[0];
         // Download the song
         let Quality = this.options.quality;
-        Quality = Quality.toLowerCase() == 'low' ? 'lowestaudio' : 'highestaudio';
+        Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
-        let dispatcher = queue.connection.play(ytdl(song.url, { filter: 'audioonly', quality: Quality, highWaterMark: 1 << 25 }));
+        let dispatcher = queue.connection.play(ytdl(song.url, { filter: 'audioonly', quality: Quality, highWaterMark: 1 << 25 }), {
+            seek: seek || 0
+        });
         queue.dispatcher = dispatcher;
         // Set volume
         dispatcher.setVolumeLogarithmic(queue.volume / 200);

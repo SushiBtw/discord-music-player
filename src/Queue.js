@@ -57,6 +57,11 @@ class Queue extends EventEmitter {
          * @type {Boolean}
          */
         this.repeatMode = false;
+        /**
+         * Whether the full queue repeat mode is enabled.
+         * @type {Boolean}
+         */
+        this.repeatQueue = false;
 
     }
 
