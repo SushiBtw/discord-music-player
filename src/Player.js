@@ -279,17 +279,16 @@ class Player {
     /**
      * Updates the volume.
      * @param {string} guildID 
-     * @param {number} percent 
-     * @returns {Void}
+     * @param {number} percent
      */
     setVolume(guildID, percent) {
         // Gets guild queue
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
+
         // Updates volume
+        queue.volume = percent;
         queue.dispatcher.setVolumeLogarithmic(percent / 200);
-        // Resolves guild queue
-        return;
     }
 
     /**
