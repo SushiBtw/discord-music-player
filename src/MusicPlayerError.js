@@ -18,8 +18,9 @@ const customErrors = {
  */
 class MusicPlayerError {
     /**
-     * @param {string} error Error.
-     * @param {object} nullObject Object.
+     * @param {String} error Error.
+     * @param {?Object} nullObject Object.
+     * @param {?Object} playlistNull Object.
      */
     constructor(error, nullObject, playlistNull) {
         /**

@@ -43,6 +43,11 @@ class Song {
          * @type {String}
          */
         this.requestedBy = requestedBy;
+        /**
+         * The song seek time.
+         * @type {Number}
+         */
+        this.seekTime = 0;
     }
 }
 

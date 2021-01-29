@@ -166,19 +166,13 @@ class Player {
      * @returns {Promise<{Song} || MusicPlayerError>}
      */
     async seek(guildID, seek) {
+        if(isNaN(seek)) return new MusicPlayerError('NotANumber', 'song');
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
 
-        try {
-            //queue.songs.unshift(queue.songs[0]);
-
-            await this._playSong(guildID, true, seek);
-            return { error: null, song: queue.songs[0] };
-        }
-        catch (err) {
-            console.log(err);
-            return new MusicPlayerError('SearchIsNull', 'song');
-        }
+        queue.songs[0].seekTime = seek;
+        await this._playSong(guildID, true, seek);
+        return { error: null, song: queue.songs[0] };
     }
 
 
@@ -456,7 +450,7 @@ class Player {
         let queue = this.queues.find((g) => g.guildID === guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
-        let timePassed = queue.dispatcher.streamTime;
+        let timePassed = queue.dispatcher.streamTime + queue.songs[0].seekTime;
         let timeEnd = Util.TimeToMilliseconds(queue.songs[0].duration);
 
         return `${Util.buildBar(timePassed, timeEnd, barSize, loadedIcon, arrowIcon)}`;
@@ -510,7 +504,7 @@ class Player {
         Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
         let dispatcher = queue.connection.play(ytdl(song.url, { filter: 'audioonly', quality: Quality, highWaterMark: 1 << 25 }), {
-            seek: seek || 0
+            seek: seek / 1000 || 0,
         });
         queue.dispatcher = dispatcher;
         // Set volume
