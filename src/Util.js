@@ -1,30 +1,45 @@
 const scrapeYT = require('scrape-yt');
-let defaultThumbnail = 'https://reactnativecode.com/wp-content/uploads/2018/02/Default_Image_Thumbnail.png';
+const Playlist = require('./Playlist');
+const Song = require('./Song');
+const ytsr = require('ytsr');
+const { getPreview } = require("spotify-url-info");
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#\&\?]*).*/;
 let PlaylistRegexID = /[&?]list=([^&]+)/;
+let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
 /**
  * Get ID from YouTube link.
- * @param {string} url
- * @returns {string}
+ * @param {String} url
+ * @returns {String}
  */
 function youtube_parser(url) {
-    var match = url.match(VideoRegexID);
+    const match = url.match(VideoRegexID);
     return (match && match[7].length === 11) ? match[7] : false;
 }
 
 /**
  * Get ID from Playlist link.
- * @param {string} url
- * @returns {string}
+ * @param {String} url
+ * @returns {String}
  */
 function playlist_parser(url) {
-    var match = url.match(PlaylistRegexID);
+    const match = url.match(PlaylistRegexID);
     return (match && match[1].length === 34) ? match[1] : false;
+}
+/**
+ * Gets Video Duration from Int
+ * @param {String} d
+ * @returns {String}
+ */
+function getVideoDuration(d) {
+    let date = new Date(null);
+    date.setSeconds(parseInt(d));
+    let duration = date.toISOString().substr(11, 8);
+    return duration.replace(/^0(?:0:0?)?/, '');
 }
 
 /**
@@ -42,10 +57,9 @@ const pick = (obj, keys) =>
 
 /**
  * Default search options
- * 
- * @property {string} uploadDate Upload date [Options: 'hour', 'today', 'week', 'month', 'year'] | Default: none
- * @property {string} duration Duration [Options: 'short', 'long'] | Default: none
- * @property {string} sortBy Sort by [Options: 'relevance', 'date', 'view count', 'rating'] | Default: relevance
+ * @property {String} uploadDate Upload date [Options: 'hour', 'today', 'week', 'month', 'year'] | Default: none
+ * @property {String} duration Duration [Options: 'short', 'long'] | Default: none
+ * @property {String} sortBy Sort by [Options: 'relevance', 'date', 'view count', 'rating'] | Default: relevance
  */
 const defaultSearchOptions = {
     uploadDate: null,
@@ -63,16 +77,23 @@ class Util {
 
     /**
      * Gets the first youtube results for your search.
-     * @param {string} search The name of the video or the video URL.
-     * @param {ytsr} ytsr ytsr.
-     * @param {object} options Options.
-     * @returns {Promise<Video>}
+     * @param {String} search The name of the video or the video URL.
+     * @param {Object<defaultSearchOptions>} options Options.
+     * @param {Queue} queue Queue.
+     * @param {String} requestedBy User that requested the song.
+     * @returns {Promise<Song>}
      */
-    static getVideoBySearch(search, ytsr, options = {}) {
+    static getVideoBySearch(search, options = {}, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
             options = { ...defaultSearchOptions, ...options };
             options = pick(options, Object.keys(defaultSearchOptions))
+
+            if(SpotifyRegex.test(search)) {
+                search = await this.songFromSpotify(search).catch(err => {
+                    return reject(err);
+                });
+            }
 
             let isVideoLink = VideoRegex.test(search);
 
@@ -83,28 +104,10 @@ class Util {
                 if (!VideoID) return reject('SearchIsNull');
 
                 let video = await scrapeYT.getVideo(VideoID);
+                video.duration = getVideoDuration(video.duration);
+                video.url = search;
 
-                if (Object.keys(video).length === 0)
-                    console.warn('[DMP] YouTube returned a empty object, you are probably rate-limited (please wait some time) - The Author and Title are Unknown.');
-
-                // Callback on invalid duration
-                if (typeof video.duration !== 'number') {
-                    video.duration = parseInt(video.duration) || 0;
-                }
-
-                let date = new Date(null);
-                date.setSeconds(video.duration);
-                let duration = date.toISOString().substr(11, 8);
-                duration = duration.replace(/^0(?:0:0?)?/, '');
-
-                return resolve({
-                    title: video.title || 'Unknown',
-                    duration,
-                    author: video.channel ? video.channel.name || 'Unknown' : 'Unknown',
-                    link: search,
-                    thumbnail: video.channel ? video.channel.thumbnail || defaultThumbnail : defaultThumbnail
-                });
-
+                return resolve(new Song(video, queue, requestedBy));
             } else {
                 let filters;
 
@@ -146,7 +149,7 @@ class Util {
                 }
 
                 const searchOptions = {
-                    limit: 2,
+                    limit: 2, // Safe 2 search - look down.
                     nextpageRef: filters.url,
                 }
 
@@ -156,18 +159,24 @@ class Util {
 
                     if (!items || !items[0]) return reject('SearchIsNull');
 
-                    if (items[0].type.toLowerCase() != 'video')
+                    if (items[0].type.toLowerCase() !== 'video')
                         items.shift();
 
                     if (!items || !items[0]) return reject('SearchIsNull');
 
                     Promise.all(items = items.map(vid => {
-                        vid.link = vid.url;
-                        vid.thumbnail = vid.bestThumbnail.url || defaultThumbnail;
-                        return vid;
+                        return {
+                            title: vid.title,
+                            duration: vid.duration,
+                            channel: {
+                                name: vid.author.name,
+                            },
+                            url: vid.url,
+                            thumbnail: vid.bestThumbnail.url,
+                        };
                     }));
 
-                    resolve(items[0]);
+                    return resolve(new Song(items[0], queue, requestedBy));
                 }).catch((error) => {
                     return reject('SearchIsNull');
                 });
@@ -179,11 +188,12 @@ class Util {
     /**
      * Gets the videos from playlist.
      * @param {string} search Playlist URL.
-     * @param {ytsr} ytsr ytsr.
-     * @param {number} max Options.
-     * @returns {Promise<Video>}
+     * @param {Number} max Max playlist songs.
+     * @param {Queue} queue Queue.
+     * @param {String} requestedBy User that requested the song.
+     * @returns {Promise<Playlist>}
      */
-    static getVideoFromPlaylist(search, ytsr, max) {
+    static getVideoFromPlaylist(search, max, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
             let isPlaylistLink = PlaylistRegex.test(search);
@@ -198,40 +208,39 @@ class Util {
             await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
 
                 if (max !== -1 && index >= max) return null;
+                video.duration = getVideoDuration(video.duration);
+                video.url = `http://youtube.com/watch?v=${video.id}`;
 
-                // Callback on invalid duration
-                if (typeof video.duration != 'number') {
-                    video.duration = parseInt(video.duration) || 0;
-                }
-                let date = new Date(null);
-                date.setSeconds(video.duration);
-                let duration = date.toISOString().substr(11, 8);
-                duration = duration.replace(/^0(?:0:0?)?/, '');
-
-                return {
-                    title: video.title || 'Unknown',
-                    duration,
-                    author: video.channel ? video.channel.name || 'Unknown' : 'Unknown',
-                    link: `https://www.youtube.com/watch?v=${video.id}`,
-                    thumbnail: video.thumbnail || defaultThumbnail
-                }
+                return new Song(video, queue, requestedBy);
             }));
-
             playlist.videos = playlist.videos.filter(function (obj) { return obj });
+            playlist.url = search;
+            playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
-            resolve({
-                link: search,
-                videoCount: playlist.videoCount,
-                title: playlist.title || 'Unknown',
-                channel: playlist.channel.name || 'Unknown',
-                videos: playlist.videos
-            });
+            resolve(new Playlist(playlist, queue, requestedBy));
         });
     }
 
     /**
-     * Convers Milliseconds to Time (HH:MM:SS)
-     * @param {String} ms Miliseconds
+     * Converts a spotify track URL to a string containing the artist and song name.
+     * @param {String} query The spotify song URL.
+     * @returns {Promise<String>} The artist and song name (e.g. "Rick Astley - Never Gonna Give You Up")
+     */
+    static songFromSpotify(query) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let SpotifyResult = await getPreview(query);
+                resolve(`${SpotifyResult['artist']} - ${SpotifyResult['title']}`);
+            }
+            catch(err) {
+                reject('InvalidSpotify');
+            }
+        });
+    }
+
+    /**
+     * Converts Milliseconds to Time (HH:MM:SS)
+     * @param {String} ms Milliseconds
      * @returns {String}
      */
     static MillisecondsToTime(ms) {
@@ -249,7 +258,7 @@ class Util {
     }
 
     /**
-     * Convers Time (HH:MM:SS) to Milliseconds
+     * Converts Time (HH:MM:SS) to Milliseconds
      * @param {String} time Time
      * @returns {number}
      */

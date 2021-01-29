@@ -7,9 +7,10 @@ class Queue extends EventEmitter {
 
     /**
      * Represents a guild queue.
-     * @param {string} guildID 
+     * @param {string} guildID
+     * @param {Object} options
      */
-    constructor(guildID){
+    constructor(guildID, options = {}){
         super();
         /**
          * The guild ID.
@@ -45,7 +46,7 @@ class Queue extends EventEmitter {
          * The stream volume.
          * @type {Number}
          */
-        this.volume = 100;
+        this.volume = options.volume || 100;
         /**
          * Whether the stream is currently playing.
          * @type {Boolean}
@@ -56,28 +57,14 @@ class Queue extends EventEmitter {
          * @type {Boolean}
          */
         this.repeatMode = false;
+        /**
+         * Whether the full queue repeat mode is enabled.
+         * @type {Boolean}
+         */
+        this.repeatQueue = false;
 
     }
 
-};
-
-/**
- * Emitted when the queue is empty.
- * @event Queue#end
- */
-
-
-/**
- * Emitted when the voice channel is empty.
- * @event Queue#channelEmpty
- */
-
-/**
- * Emitted when the song changes.
- * @event Queue#songChanged
- * @param {Song} oldSong The old song (playing before)
- * @param {Song} newSong The new song (currently playing)
- * @param {Boolean} skipped Whether the change is due to the skip() function
- */
+}
 
 module.exports = Queue;

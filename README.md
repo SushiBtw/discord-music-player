@@ -4,14 +4,19 @@
 **Note**: this module uses recent discordjs features and requires discord.js version 12.
 
 Discord Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands. **Everything** is customizable, and everything is done to simplify your work **without limiting you**!
+**We support YouTube Videos, Playlist's, Spotify Songs and even more!**
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
-## **DMP v6.3.0 Update:**
-- [x] **Fix YouTube issues with Vevo Music**,
-- [x] **Add ``playlist`` method** - [Read More](#playlist),
-- [x] **Add ``toggleLoop(GuildID)`` method** - [Read More](#toggle-loop),
-- [x] **Bump NodeJS version to v14** - [READ MORE](https://github.com/discordjs/discord.js/pull/5067),
-- [x] **Add ``timeout: int`` option [leaves the voice channel after X milliseconds]** - [Read More](#player-options).
+### *We support NodeJS 12-15.*
+
+## **DMP v6.4.0 Update:**
+- **Required NodeJS downgraded to 12,**,
+- **Fixed requestedBy in ``playlist`` method - [Check It Out](#playlist),**
+- **Added ``seek`` method - [Read More](#seek)**,
+- **Fixed issues with VoiceChannel and Private Playlist's - [Read More](https://github.com/SushiBtw/discord-music-player/pull/54)**,
+- **Added ``volume: Int`` to [Player Options](#player-options) and fixed the ``setVolume`` method - [Read More](#setvolume),**
+- **Added ``toggleQueueLoop`` and ``setQueueRepeatMode`` methods - [Read More](#queue-methods),**
+- **Added support for SPOTIFY - [Check It Out](#play).**
 
 # Page Sections
 - **[Installation](#installation)**
@@ -68,7 +73,9 @@ client.login(settings.token);
 
 **options.leaveOnEmpty [true/false]**: If set to **true**, bot will automatically leave the Voice Channel when is empty.
 
-**options.timeout [number]**: If set to **miliseconds**, bot will leave onEnd & onEmpty after that amount of time.
+**options.timeout [number]**: If set to **milliseconds**, bot will leave onEnd & onEmpty after that amount of time.
+
+**options.volume [number]**: Default music volume (percentage - can be >100%).
 
 **options.quality ['high'/'low']**: Music quality (Default: 'high')
 
@@ -78,6 +85,7 @@ new Player(client, {
     leaveOnStop: false,
     leaveOnEmpty: true,
     timeout: 0,
+    volume: 150,
     quality: 'high',
 });
 ```
@@ -93,7 +101,9 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 
 ***RequestedBy** is a String, that can be obtained from the Message object - ``message.author.tag``.*
 
-***SongID** is a Intiger (starting from 0) of the Song in Queue [use i.e. ``parseInt(args[0])`` per Int].*
+***SongID** is a Integer (starting from 0) of the Song in Queue [use i.e. ``parseInt(args[0])`` per Int].*
+
+***Milliseconds** is a Milliseconds (Integer) of time [i.e. 5000 is 5 Seconds].*
 
 ***Options (optional)** object can have the following options:*
 ```js
@@ -111,10 +121,13 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 - **[playlist(GuildID, PlaylistURL, VoiceChannel, MaxSongs, RequestedBy)](#playlist)** - Add a Playlist to the Server Queue | Returning: Playlist, Song?
 ### Queue Methods
 - **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild. | Returning: Boolean
-- **[nowPlaying(GuildID)](#now-playing)** - Get the currenly playing Song in the Server Queue. | Returning: Song
-- **[clearQueue(GuildID)](#clearqueue)** - Clear the Server Queue (without the Plaing song). | Returning: Queue
+- **[nowPlaying(GuildID)](#now-playing)** - Get the currently playing Song in the Server Queue. | Returning: Song
+- **[clearQueue(GuildID)](#clearqueue)** - Clear the Server Queue (without the Playing song). | Returning: Queue
 - **[getQueue(GuildID)](#getqueue)** - Get the Server Queue. | Returning: Queue
+- **[setQueueRepeatMode(GuildID, boolean)](#repeat-queue)** - Repeat the full Queue indefinitely (if set to ``true``) *[true/false]*. | Returning: Void
+- **[toggleQueueLoop(GuildID)](#toggle-queue-loop)** - Toggle to repeat or not the full Queue indefinitely | Returning: Boolean
 ### Song Methods
+- **[seek(guildID, Milliseconds)](#seek)** - Seek to a current moment in a Song. | Returning: Song
 - **[skip(GuildID)](#skip)** - Skip the current Song. | Returning: Song
 - **[remove(GuildID, SongID)](#remove)** - Remove a Song from the Queue. | Returning: Song
 - **[pause(GuildID)](#pause)** - Pause the current playing Song. | Returning: Song
@@ -154,7 +167,7 @@ client.player.getQueue(guildID)
 .on('end', () => {
     message.channel.send('The queue is empty, there is nothing to play!');
 })
-.on('songChanged', (oldSong, newSong) => {
+.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
     message.channel.send(`Ended playing ${oldSong.name}! Now playing ${newSong.name}!`);
 })
 .on('channelEmpty', () => {
@@ -180,6 +193,8 @@ client.on('message', async (message) => {
 
     // !play This is the Life
     // will play "This is the Life" in the Voice Channel
+    // !play https://open.spotify.com/track/5rX6C5QVvvZB7XckETNych?si=WlrC_VZVRlOhuv55V357AQ
+    // will play "All Summer Long" in the Voice Channel
 
     if(command === 'play'){
         let song = await client.player.play(message.member.voice.channel, args.join(' '), {
@@ -262,9 +277,11 @@ client.on('message', async (message) => {
             });
 
             // Send a message, when a Song would change.
-            song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
+            song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
                 if (repeatMode) {
                     message.channel.send(`Playing ${newSong.name} again...`);
+                } else if(repeatQueue) {
+                    message.channel.send(`Playing **${newSong.name}...**\nAdded **${oldSong.name}** to the end of the queue (repeatQueue).`);
                 } else {
                     message.channel.send(`Now playing ${newSong.name}...`);
                 }
@@ -310,6 +327,27 @@ client.on('message', (message) => {
     if(command === 'clearqueue'){
         client.player.clearQueue(message.guild.id);
         message.channel.send('Queue was cleared!');
+    }
+});
+```
+
+### Seek
+Seek to a current moment in a Song.
+
+**Usage:**
+```js
+client.player.seek(GuildID, Milliseconds);
+```
+**Example:**
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'seek'){
+        // If provided 10 seconds, it would send the Milliseconds stamp (10 * 1000)
+        let song = await client.player.seek(message.guild.id, parseInt(message.args[0] * 1000));
+        message.channel.send(`Seeked to ${message.args[0]} second of ${song.song.name}.`);
     }
 });
 ```
@@ -525,6 +563,58 @@ client.on('message', async (message) => {
 });
 ```
 
+### Repeat Queue
+Repeat the full queue indefinitely (if set to ``true``) *[true/false]*.
+
+**Usage:**
+```js
+client.player.setQueueRepeatMode(GuildID, boolean);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if(command === 'enable-queue-repeat'){
+        // Enable repeat mode
+        client.player.setQueueRepeatMode(message.guild.id, true);
+        message.channel.send(`Full queue will be repeated indefinitely!`);
+    }
+
+    if(command === 'disable-queue-repeat'){
+        // Disable repeat mode
+        client.player.setQueueRepeatMode(message.guild.id, false);
+        message.channel.send(`Full queue will no longer be repeated indefinitely!`);
+    }
+});
+```
+
+### Toggle Queue Loop
+Toggle to repeat or not the full Queue indefinitely.
+
+**Usage:**
+```js
+client.player.toggleQueueLoop(GuildID);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if (command === 'toggle') {
+        let toggle = client.player.toggleQueueLoop(message.guild.id);
+
+        // Send a message with the toggle information
+        if (toggle)
+            message.channel.send('I will now repeat the full queue indefinitely.');
+        else message.channel.send('I will not longer repeat the full queue indefinitely.');
+
+    }
+});
+```
+
 ### SetVolume
 Set Music Volume.
 
@@ -585,9 +675,11 @@ client.on('message', (message) => {
         });
 
         // Send a message, when a Song would change.
-        song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode) => {
-            if(repeatMode){
+        song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
+            if (repeatMode) {
                 message.channel.send(`Playing ${newSong.name} again...`);
+            } else if(repeatQueue) {
+                message.channel.send(`Playing **${newSong.name}...**\nAdded **${oldSong.name}** to the end of the queue (repeatQueue).`);
             } else {
                 message.channel.send(`Now playing ${newSong.name}...`);
             }

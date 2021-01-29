@@ -10,7 +10,8 @@ const customErrors = {
     'NotANumber': 'The provided argument is not a Number.',
     'InvalidPlaylist': 'No Playlist was found with that link.',
     'MaxSongsTypeInvalid': 'The provided argument (MaxSongsTypeInvalid) is not a Number.',
-    'PlaylistTypeInvalid': 'The provided argument (PlaylistURL) was not a String.'
+    'PlaylistTypeInvalid': 'The provided argument (PlaylistURL) was not a String.',
+    'InvalidSpotify': 'No Spotify Song was found with that link.'
 }
 
 /**
@@ -18,10 +19,11 @@ const customErrors = {
  */
 class MusicPlayerError {
     /**
-     * @param {string} error Error.
-     * @param {object} nullObject Object.
+     * @param {String} error Error.
+     * @param {?Object} nullObject Object.
+     * @param {?Object} playlistNull Object.
      */
-    constructor(error, nullObject, playlistNull) {
+    constructor(error, nullObject= null, playlistNull= null) {
         /**
          * Error type.
          * @type {string}
