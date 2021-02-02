@@ -13,6 +13,7 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 - **Required NodeJS downgraded to 12,**,
 - **Fixed requestedBy in ``playlist`` method - [Check It Out](#playlist),**
 - **Added ``seek`` method - [Read More](#seek)**,
+- **Added ``songError`` event, when an error occurs - [Check It Out](#events)**,
 - **Fixed issues with VoiceChannel and Private Playlist's - [Read More](https://github.com/SushiBtw/discord-music-player/pull/54)**,
 - **Added ``volume: Int`` to [Player Options](#player-options) and fixed the ``setVolume`` method - [Read More](#setvolume),**
 - **Added ``toggleQueueLoop`` and ``setQueueRepeatMode`` methods - [Read More](#queue-methods),**
@@ -162,6 +163,7 @@ let TIME = Utils.MillisecondsToTime('2002000'); // Return: 33:22
 - **getQueue(guildID).on('end')** - Called when the Queue is empty.
 - **getQueue(guildID).on('songChanged')** - Called when the Song is changed.
 - **getQueue(guildID).on('channelEmpty')** - Called when the Voice Channel is empty.
+- **getQueue(guildID).on('songError')** - Called when something went wrong with playing a song.
 ```js
 client.player.getQueue(guildID)
 .on('end', () => {
@@ -172,6 +174,10 @@ client.player.getQueue(guildID)
 })
 .on('channelEmpty', () => {
     message.channel.send('Everyone left the Voice Channel.');
+}).on('songError', (errMessage, song) => {
+    if(errMessage === 'VideoUnavailable')
+        message.channel.send(`Could not play **${song.name}** - The song was Unavailable, skipping...`);
+    else message.channel.send(`Could not play ${song.name} - ${errMessage}.`);
 });
 ```
 
@@ -274,10 +280,7 @@ client.on('message', async (message) => {
             // Send a message, when Queue would be empty.
             song.queue.on('end', () => {
                 message.channel.send('The queue is empty, please add new songs!');
-            });
-
-            // Send a message, when a Song would change.
-            song.queue.on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
+            }).on('songChanged', (oldSong, newSong, skipped, repeatMode, repeatQueue) => {
                 if (repeatMode) {
                     message.channel.send(`Playing ${newSong.name} again...`);
                 } else if(repeatQueue) {
@@ -285,6 +288,10 @@ client.on('message', async (message) => {
                 } else {
                     message.channel.send(`Now playing ${newSong.name}...`);
                 }
+            }).on('songError', (errMessage, song) => {
+                if(errMessage === 'VideoUnavailable')
+                    message.channel.send(`Could not play **${song.name}** - The song was Unavailable, skipping...`);
+                else message.channel.send(`Could not play ${song.name} - ${errMessage}.`);
             });
         }
 
@@ -662,7 +669,7 @@ client.on('message', async (message) => {
 
 **You can use Info Messages to send a information, when a event if performed.**
 ```js
-client.on('message', (message) => {
+client.on('message', async message => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
@@ -695,7 +702,7 @@ client.on('message', (message) => {
             // If Song won't be found - *body.error* will be NOT null and *body.song* null.
             // You should catch the error using .catch() method or use:
             if(!song.error) throw(error);
-            let song = song.song;
+            song = song.song;
         }).catch(err => {
             // Catch and Debug it, whatever you need.
             console.log(err);

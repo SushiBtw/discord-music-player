@@ -104,6 +104,7 @@ class Util {
                 if (!VideoID) return reject('SearchIsNull');
 
                 let video = await scrapeYT.getVideo(VideoID);
+
                 video.duration = getVideoDuration(video.duration);
                 video.url = search;
 

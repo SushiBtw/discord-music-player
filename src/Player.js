@@ -543,10 +543,14 @@ class Player {
             quality: Quality,
             dlChunkSize: 0,
             highWaterMark: 1 << 25,
+        }).on('error', err => {
+            queue.emit('songError', (err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message), queue.songs[0]);
+            queue.repeatMode = false;
+            return this._playSong(guildID, false);
         });
 
         setTimeout(() => {
-            if(queue.dispatcher) queue.dispatcher.destroy();
+            if (queue.dispatcher) queue.dispatcher.destroy();
             let dispatcher = queue.connection.play(stream, {
                 seek: seek / 1000 || 0,
             });
@@ -558,7 +562,8 @@ class Player {
                 // Play the next song
                 return this._playSong(guildID, false);
             });
-        }, 1000)
+        }, 1000);
+
     }
 
 };
