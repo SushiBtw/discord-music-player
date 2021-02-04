@@ -292,6 +292,19 @@ class Player {
     }
 
     /**
+     * Gets the volume.
+     * @param {string} guildID 
+     */
+    getVolume(guildID) {
+        // Gets guild queue
+        let queue = this.getQueue(guildID);
+        if (!queue) return new MusicPlayerError('QueueIsNull');
+
+        // Returns volume
+        return queue.volume;
+    }
+
+    /**
      * Gets the guild queue.
      * @param {string} guildID
      * @returns {?Queue}
