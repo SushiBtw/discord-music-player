@@ -106,7 +106,7 @@ class Player {
      * @returns {Promise<{Song} || MusicPlayerError>}
      */
     async play(voiceChannel, songName, options = {}, requestedBy) {
-        this.queues.delete(voiceChannel.id);
+        this.queues.delete(voiceChannel.guild.id);
         if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
         if (typeof songName !== 'string' || songName.length === 0) return new MusicPlayerError('SongTypeInvalid', 'song');
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
