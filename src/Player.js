@@ -48,9 +48,9 @@ class Player {
         this.client = client;
         /**
          * The guilds data.
-         * @type {Queue[]}
+         * @type {Map<string,Queue>}
          */
-        this.queues = [];
+        this.queues = new Map();
         /**
          * Player options.
          * @type {PlayerOptions}
@@ -80,7 +80,7 @@ class Player {
                     // Disconnect from the voice channel
                     queue.connection.channel.leave();
                     // Delete the queue
-                    this.queues = this.queues.filter((g) => g.guildID !== queue.guildID);
+                    this.queues.delete(queue.guildID);
                     // Emit end event
                     queue.emit('channelEmpty');
                 }, this.options.timeout);
@@ -94,7 +94,7 @@ class Player {
      * @returns {Boolean} Whether the guild is currently playing songs
      */
     isPlaying(guildID) {
-        return this.queues.some((g) => g.guildID === guildID);
+        return this.queues.has(guildID);
     }
 
     /**
@@ -106,7 +106,7 @@ class Player {
      * @returns {Promise<{Song} || MusicPlayerError>}
      */
     async play(voiceChannel, songName, options = {}, requestedBy) {
-        this.queues = this.queues.filter((g) => g.guildID !== voiceChannel.id);
+        this.queues.delete(voiceChannel.id);
         if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
         if (typeof songName !== 'string' || songName.length === 0) return new MusicPlayerError('SongTypeInvalid', 'song');
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
@@ -119,7 +119,7 @@ class Player {
             queue.connection = await voiceChannel.join();
             queue.songs.push(song);
             // Add the queue to the list
-            this.queues.push(queue);
+            this.queues.set(voiceChannel.guild.id, queue);
             // Plays the song
             await this._playSong(queue.guildID, true);
 
@@ -207,7 +207,7 @@ class Player {
             // Add all songs to the GuildQueue
             queue.songs = queue.songs.concat(playlist.videos);
             // Updates the queue
-            this.queues.push(queue);
+            this.queues.set(voiceChannel.guild.id, queue);
             // Plays the song
 
             if (!isFirstPlay)
@@ -298,7 +298,7 @@ class Player {
      */
     getQueue(guildID) {
         // Gets guild queue
-        let queue = this.queues.find((g) => g.guildID === guildID);
+        let queue = this.queues.get(guildID);
         return queue;
     }
 
@@ -500,7 +500,7 @@ class Player {
             // Emits stop event
             if (queue.stopped) {
                 // Remoces the guild from the guilds list
-                this.queues = this.queues.filter((g) => g.guildID !== guildID);
+                this.queues.delete(guildID);
 
                 if (this.options.leaveOnStop)
                     queue.connection.channel.leave();
@@ -512,7 +512,7 @@ class Player {
                 // Emits the end event
                 queue.emit('end');
                 // Remoces the guild from the guilds list
-                this.queues = this.queues.filter((g) => g.guildID !== guildID);
+                this.queues.delete(guildID);
                 // Timeout
                 let connectionChannel = queue.connection.channel;
                 setTimeout(() => {
