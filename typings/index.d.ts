@@ -18,7 +18,7 @@ class Player {
     constructor(client: Client, options:PlayerOptions) {}
     client:Client
     options:PlayerOptions
-    queues:Array<Queue>
+    queues:Map<String,Queue>
     ytsr:ytsr
 
     isPlaying(guildID:String):Boolean
