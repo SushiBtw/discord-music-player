@@ -30,6 +30,7 @@ class Player {
     resume(guildID:String):Song
     stop(guildID:String):Song
     setVolume(guildID:String, percent:Number):Song
+    getVolume(guildID:String):Number
     getQueue(guildID:String):Queue
     setQueue(guildID:String, songs:Array<Song>):Queue
     clearQueue(guildID:String):Queue|MusicPlayerError
