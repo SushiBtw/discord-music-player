@@ -297,7 +297,7 @@ class Player {
      */
     getVolume(guildID) {
         // Gets guild queue
-        let queue = this.getQueue(guildID);
+        let queue = this.queues.get(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
 
         // Returns volume
