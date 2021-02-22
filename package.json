@@ -35,7 +35,7 @@
     "miniget": "^4.1.0",
     "scrape-yt": "^1.4.7",
     "spotify-url-info": "^2.2.0",
-    "ytdl-core": "^4.4.5",
+    "ytdl-core": "^4.5.0",
     "ytsr": "^3.2.3"
   },
   "devDependencies": {
