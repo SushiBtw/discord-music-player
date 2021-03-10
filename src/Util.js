@@ -8,7 +8,7 @@ const { getPreview } = require("spotify-url-info");
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#\&\?]*).*/;
+let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/;
 let PlaylistRegexID = /[&?]list=([^&]+)/;
 let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
@@ -178,7 +178,7 @@ class Util {
                     }));
 
                     return resolve(new Song(items[0], queue, requestedBy));
-                }).catch((error) => {
+                }).catch(() => {
                     return reject('SearchIsNull');
                 });
 
@@ -243,21 +243,21 @@ class Util {
 
     /**
      * Converts Milliseconds to Time (HH:MM:SS)
-     * @param {String} ms Milliseconds
+     * @param {Number} ms Milliseconds
      * @returns {String}
      */
     static MillisecondsToTime(ms) {
         let seconds = ms / 1000;
-        let hours = parseInt(seconds / 3600);
+        let hours = seconds / 3600;
         seconds = seconds % 3600;
-        let minutes = parseInt(seconds / 60);
+        let minutes = seconds / 60;
         seconds = Math.ceil(seconds % 60);
 
         seconds = (`0${seconds}`).slice(-2);
         minutes = (`0${minutes}`).slice(-2);
         hours = (`0${hours}`).slice(-2);
 
-        return `${hours === 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
+        return `${parseInt(hours) === 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
     }
 
     /**
@@ -297,7 +297,15 @@ class Util {
         return `[${progressText}${emptyProgressText}][${this.MillisecondsToTime(value)}/${this.MillisecondsToTime(maxValue)}]`;
     };
 
+    /**
+     * @param {Object} options
+     * @returns {Object}
+     */
+    static deserializeOptions(options) {
+        return options;
+    }
 
-};
+
+}
 
 module.exports = Util;

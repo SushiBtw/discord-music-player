@@ -1,12 +1,11 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
-const { VoiceChannel, version, User, Snowflake } = require("discord.js");
+const { VoiceChannel, version } = require("discord.js");
+const Discord = require("discord.js");
 if (Number(version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
 const Util = require('./Util');
-const Song = require('./Song');
-const Playlist = require('./Playlist');
 const MusicPlayerError = require('./MusicPlayerError');
 
 /**
@@ -99,14 +98,24 @@ class Player {
 
     /**
      * Plays a song in a voice channel.
-     * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
+     * @param {Discord.Message} message The voice channel in which the song will be played.
      * @param {String} songName The name of the song to play.
      * @param {Object} options Search options.
      * @param {String} requestedBy The user who requested the song.
      * @returns {Promise<{Song} || MusicPlayerError>}
      */
-    async play(voiceChannel, songName, options = {}, requestedBy) {
-        this.queues.delete(voiceChannel.guild.id);
+    async play(message, songName, options = {}, requestedBy) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
+        // Check for Voice Channel
+        let _voiceChannel = message.member.voice;
+        if(!_voiceChannel instanceof Discord.VoiceState ||
+            !_voiceChannel.channel instanceof Discord.VoiceChannel)
+            throw new MusicPlayerError('VoiceChannelTypeInvalid');
+        // Delete the queue if already exists
+        this.queues.delete(message.guild.id);
+
         if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
         if (typeof songName !== 'string' || songName.length === 0) return new MusicPlayerError('SongTypeInvalid', 'song');
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
@@ -249,7 +258,7 @@ class Player {
     resume(guildID) {
         // Gets guild queue
         let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        if (!queue) throw new MusicPlayerError('QueueIsNull');
         // Resumes the dispatcher
         queue.dispatcher.resume();
         queue.dispatcher.pause();
@@ -262,7 +271,6 @@ class Player {
     /**
      * Stops playing music.
      * @param {string} guildID
-     * @returns {Void}
      */
     stop(guildID) {
         // Gets guild queue
@@ -271,9 +279,9 @@ class Player {
         // Stops the dispatcher
         queue.stopped = true;
         queue.songs = [];
-        queue.dispatcher.end();
-        // Resolves
-        return;
+
+        // Make sure dispatcher exists
+        if(queue.dispatcher) queue.dispatcher.end();
     }
 
     /**
@@ -357,8 +365,8 @@ class Player {
         let queue = this.queues.get(guildID);
         if (!queue) return new MusicPlayerError('QueueIsNull');
         let currentSong = queue.songs[0];
-        // Ends the dispatcher
-        queue.dispatcher.end();
+        // Make sure dispatcher exists
+        if(queue.dispatcher) queue.dispatcher.end();
         queue.skipped = true;
         // Resolves the current song
         return currentSong;
