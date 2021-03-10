@@ -266,15 +266,11 @@ class Util {
      * @returns {number}
      */
     static TimeToMilliseconds(time) {
-        let items = time.split(':'),
-            s = 0, m = 1;
+        const items = time.split(':');
 
-        while (items.length > 0) {
-            s += m * parseInt(items.pop(), 10);
-            m *= 60;
-        }
-
-        return s * 1000;
+        return items.reduceRight((prev,curr,i) => {
+            return parseInt(prev, 10) + parseInt(curr, 10) * 60*(i + 1);
+        }) * 1000;
     }
 
     /**
