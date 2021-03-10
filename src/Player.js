@@ -116,6 +116,7 @@ class Player {
         // Delete the queue if already exists
         this.queues.delete(message.guild.id);
 
+        // Dont even try to run the code, its broken
         if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song');
         if (typeof songName !== 'string' || songName.length === 0) return new MusicPlayerError('SongTypeInvalid', 'song');
         if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
