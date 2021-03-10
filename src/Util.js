@@ -1,4 +1,5 @@
-const scrapeYT = require('scrape-yt');
+const YouTubeClient = require("youtubei");
+const YouTube = new YouTubeClient.Client();
 const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
@@ -32,8 +33,8 @@ function playlist_parser(url) {
 }
 /**
  * Gets Video Duration from Int
- * @param {String} d
- * @returns {String}
+ * @param {String|Number} d
+ * @returns {String|Number}
  */
 function getVideoDuration(d) {
     let date = new Date(null);
@@ -103,10 +104,9 @@ class Util {
                 let VideoID = youtube_parser(search);
                 if (!VideoID) return reject('SearchIsNull');
 
-                let video = await scrapeYT.getVideo(VideoID);
-
-                video.duration = getVideoDuration(video.duration);
-                video.url = search;
+                let video = await YouTube.getVideo(VideoID);
+                video['duration'] = getVideoDuration(video.duration);
+                video['url'] = search;
 
                 return resolve(new Song(video, queue, requestedBy));
             } else {
@@ -203,7 +203,10 @@ class Util {
             let PlaylistID = playlist_parser(search);
             if (!PlaylistID) return reject('InvalidPlaylist');
 
-            let playlist = await scrapeYT.getPlaylist(PlaylistID);
+            /**
+             * @type {YouTubeClient.Playlist}
+             */
+            let playlist = await YouTube.getPlaylist(PlaylistID);
             if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
             await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
@@ -215,7 +218,7 @@ class Util {
                 return new Song(video, queue, requestedBy);
             }));
             playlist.videos = playlist.videos.filter(function (obj) { return obj });
-            playlist.url = search;
+            playlist['url'] = search;
             playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
             resolve(new Playlist(playlist, queue, requestedBy));
