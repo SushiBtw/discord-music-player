@@ -23,6 +23,7 @@ it('Check for Video', async() => {
 it('Check for Playlist', async() => {
     let expectedResult = require('./files/playlist.json');
     let includedResult = await Util.getVideoFromPlaylist(testStrings.playlist, 10, null, null);
+    console.log(includedResult);
 
     ASSERT.deepEqual(expectedResult, includedResult);
 }, 10 * 1000);

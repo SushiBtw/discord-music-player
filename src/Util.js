@@ -210,7 +210,6 @@ class Util {
             if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
             await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
-
                 if (max !== -1 && index >= max) return null;
                 video.duration = getVideoDuration(video.duration);
                 video.url = `http://youtube.com/watch?v=${video.id}`;
