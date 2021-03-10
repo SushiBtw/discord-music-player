@@ -76,6 +76,14 @@ class Util {
 
     constructor() { }
 
+    static PlayOptions =  Object.freeze({
+        search: '',
+        uploadDate: null,
+        duration: null,
+        sortBy: 'relevance',
+        requestedBy: null
+    });
+
     /**
      * Gets the first youtube results for your search.
      * @param {String} search The name of the video or the video URL.
@@ -298,7 +306,13 @@ class Util {
      * @returns {Object}
      */
     static deserializeOptions(options) {
-        return options;
+        let _returnOptions = this.PlayOptions;
+        _returnOptions = {
+            ..._returnOptions,
+            ...options
+        };
+
+        return _returnOptions;
     }
 
 
