@@ -256,34 +256,45 @@ class Player {
 
 
     /**
-     * Pauses the current song.
-     * @param {string} guildID
+     * Pauses the current playing song.
+     * @param {Discord.Message} message The Discord Message object.
      * @returns {Song}
      */
-    pause(guildID) {
+    pause(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
         // Pauses the dispatcher
-        queue.dispatcher.pause();
+        if(queue.dispatcher)
+            queue.dispatcher.pause();
         queue.playing = false;
         // Resolves the guild queue
         return queue.songs[0];
     }
 
     /**
-     * Resumes the current song.
-     * @param {string} guildID
+     * Resumes the current Song.
+     * @param {Discord.Message} message The Discord Message object.
      * @returns {Song}
      */
-    resume(guildID) {
+    resume(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) throw new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
         // Resumes the dispatcher
-        queue.dispatcher.resume();
-        queue.dispatcher.pause();
-        queue.dispatcher.resume();
+        if(queue.dispatcher) {
+            queue.dispatcher.resume();
+            queue.dispatcher.pause();
+            queue.dispatcher.resume();
+        }
         queue.playing = true;
         // Resolves the guild queue
         return queue.songs[0];
@@ -291,43 +302,56 @@ class Player {
 
     /**
      * Stops playing music.
-     * @param {string} guildID
+     * @param {Discord.Message} message The Discord Message object.
      */
-    stop(guildID) {
+    stop(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         // Stops the dispatcher
         queue.stopped = true;
         queue.songs = [];
-
         // Make sure dispatcher exists
         if(queue.dispatcher) queue.dispatcher.end();
     }
 
     /**
      * Updates the volume.
-     * @param {string} guildID 
-     * @param {number} percent
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Number} percentage
      */
-    setVolume(guildID, percent) {
+    setVolume(message, percentage) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
 
         // Updates volume
-        queue.volume = percent;
-        queue.dispatcher.setVolumeLogarithmic(percent / 200);
+        queue.volume = percentage;
+        queue.dispatcher.setVolumeLogarithmic(percentage / 200);
     }
 
     /**
      * Gets the volume.
-     * @param {string} guildID 
+     * @param {Discord.Message} message The Discord Message object.
+     * @returns {Number}
      */
-    getVolume(guildID) {
+    getVolume(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
 
         // Returns volume
         return queue.volume;
@@ -335,13 +359,15 @@ class Player {
 
     /**
      * Gets the guild queue.
-     * @param {string} guildID
+     * @param {Discord.Message} message The Discord Message object.
      * @returns {?Queue}
      */
-    getQueue(guildID) {
-        // Gets guild queue
-        let queue = this.queues.get(guildID);
-        return queue;
+    getQueue(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
+        // Gets & returns guild queue
+        return this.queues.get(message.guild.id);
     }
 
     /**
