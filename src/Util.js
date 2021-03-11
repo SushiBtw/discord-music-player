@@ -69,14 +69,6 @@ const defaultSearchOptions = {
     sortBy: 'relevance',
 }
 
-const PlayOptions =  Object.freeze({
-    search: '',
-    uploadDate: null,
-    duration: null,
-    sortBy: 'relevance',
-    requestedBy: null
-});
-
 /**
  * Utilities.
  * @ignore
@@ -84,6 +76,20 @@ const PlayOptions =  Object.freeze({
 class Util {
 
     constructor() { }
+
+    static PlayOptions = {
+        search: '',
+        uploadDate: null,
+        duration: null,
+        sortBy: 'relevance',
+        requestedBy: null
+    };
+
+    static PlaylistOptions =  {
+        search: '',
+        maxSongs: -1,
+        requestedBy: null,
+    };
 
     /**
      * Gets the first youtube results for your search.
@@ -303,13 +309,23 @@ class Util {
     };
 
     /**
-     * @param {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>} options
-     * @returns {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>}
+     * @param {Partial<Util.PlayOptions>} options
+     * @returns {PlayOptions}
      */
     static deserializeOptions(options) {
         if(typeof options === 'object')
-            return mergeOptions(PlayOptions, options);
-        else return PlayOptions;
+            return mergeOptions(this.PlayOptions, options);
+        else return mergeOptions(this.PlaylistOptions);
+    }
+
+    /**
+     * @param {Partial<Util.PlaylistOptions>} options
+     * @returns {PlaylistOptions}
+     */
+    static deserializeOptionsPlaylist(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlaylistOptions, options);
+        else return mergeOptions(this.PlaylistOptions);
     }
 
 

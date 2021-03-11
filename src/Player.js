@@ -6,6 +6,7 @@ const Discord = require("discord.js");
 if (Number(version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
 const Util = require('./Util');
+const Playlist = require('./Playlist');
 const MusicPlayerError = require('./MusicPlayerError');
 
 /**
@@ -98,8 +99,8 @@ class Player {
 
     /**
      * Plays a song in a voice channel.
-     * @param {Discord.Message} message The voice channel in which the song will be played.
-     * @param {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>} options Search options.
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Util.PlayOptions} options Search options.
      * @returns {Promise<Song>}
      */
     async play(message, options) {
@@ -115,15 +116,15 @@ class Player {
         this.queues.delete(message.guild.id);
         options = Util.deserializeOptions(options);
         // Some last checks
-        if (typeof options.search !== 'string' ||
-            options.search.length === 0)
+        if (typeof options['search'] !== 'string' ||
+            options['search'].length === 0)
             throw new MusicPlayerError('SongTypeInvalid');
 
         try {
             // Creates a new guild with data
             let queue = new Queue(_voiceState.guild.id, this.options);
             // Searches the song
-            let song = await Util.getVideoBySearch(options.search, options, queue, options.requestedBy);
+            let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
             // Joins the voice channel
             queue.connection = await _voiceState.channel.join();
             queue.songs.push(song);
@@ -141,9 +142,9 @@ class Player {
 
 
     /**
-     * Plays a song in a voice channel.
-     * @param {Discord.Message} message The voice channel in which the song will be played.
-     * @param {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>} options Search options.
+     * Adds a song to the Guild Queue.
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Util.PlayOptions} options Search options.
      * @returns {Promise<Song>}
      */
     async addToQueue(message, options) {
@@ -156,13 +157,13 @@ class Player {
             throw new MusicPlayerError('QueueIsNull');
         options = Util.deserializeOptions(options);
         // Some last checks
-        if (typeof options.search !== 'string' ||
-            options.search.length === 0)
+        if (typeof options['search'] !== 'string' ||
+            options['search'].length === 0)
             throw new MusicPlayerError('SongTypeInvalid');
 
         try {
             // Searches the song
-            let song = await Util.getVideoBySearch(options.search, options, queue, options.requestedBy);
+            let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
             // Updates the queue
             queue.songs.push(song);
 
@@ -176,66 +177,80 @@ class Player {
 
     /**
      * Seeks the current playing song.
-     * @param {String} guildID Guild ID.
+     * @param {Discord.Message} message The Discord Message object.
      * @param {Number} seek Seek (in milliseconds) time.
-     * @returns {Promise<{Song} || MusicPlayerError>}
+     * @returns {Promise<Song>}
      */
-    async seek(guildID, seek) {
-        if(isNaN(seek)) return new MusicPlayerError('NotANumber', 'song');
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
+    async seek(message, seek) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
+        // Gets guild queue
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+        if(isNaN(seek)) throw new MusicPlayerError('NotANumber');
 
         queue.songs[0].seekTime = seek;
-        await this._playSong(guildID, true, seek);
-        return { error: null, song: queue.songs[0] };
+        await this._playSong(message.guild.id, true, seek);
+
+        return queue.songs[0];
     }
 
 
 
     /**
-     * Plays or adds the Playlist songs to the queue.
-     * @param {String} guildID
-     * @param {String} playlistLink The name of the song to play.
-     * @param {VoiceChannel} voiceChannel The voice channel in which the song will be played.
-     * @param {Number} maxSongs Max songs to add to the queue.
-     * @param {String} requestedBy The user who requested the song.
-     * @returns {Promise<{song: (null|Song), playlist: Playlist} || MusicPlayerError>}
+     * Adds a song to the Guild Queue.
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Util.PlaylistOptions} options Search options.
+     * @returns {Promise<Playlist>}
      */
-    async playlist(guildID, playlistLink, voiceChannel, maxSongs, requestedBy) {
-        let queue = this.queues.get(guildID);
-        if (!queue) if (voiceChannel ? voiceChannel.type !== 'voice' : true) return new MusicPlayerError('VoiceChannelTypeInvalid', 'song', 'playlist');
-        if (typeof playlistLink !== 'string' || playlistLink.length === 0) return new MusicPlayerError('PlaylistTypeInvalid', 'song', 'playlist');
-        if (typeof maxSongs !== 'number') return new MusicPlayerError('MaxSongsTypeInvalid', 'song', 'playlist');
+    async playlist(message, options) {
+        let _voiceState;
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
+        // Gets guild queue
+        let queue = this.queues.get(message.guild.id);
+        if (!queue) {
+            // Check for Voice Channel
+            _voiceState = message.member.voice;
+            if(!_voiceState instanceof Discord.VoiceState ||
+                !_voiceState.channel instanceof Discord.VoiceChannel)
+                throw new MusicPlayerError('VoiceChannelTypeInvalid');
+        }
+
+        options = Util.deserializeOptionsPlaylist(options);
+        // Some last checks
+        if (typeof options['search'] !== 'string' ||
+            options['search'].length === 0)
+            throw new MusicPlayerError('SongTypeInvalid');
 
         try {
-            let connection = queue ? queue.connection : null
+            let connection = queue ? queue.connection : null;
             let isFirstPlay = !!queue;
             if (!queue) {
                 // Joins the voice channel if needed
-                connection = await voiceChannel.join();
+                connection = await _voiceState.channel.join();
                 // Creates a new guild with data if needed
-                queue = new Queue(voiceChannel.guild.id, this.options);
+                queue = new Queue(_voiceState.guild.id, this.options);
                 queue.connection = connection;
             }
             // Searches the playlist
-            let playlist = await Util.getVideoFromPlaylist(playlistLink, maxSongs, queue, requestedBy);
+            let playlist = await Util.getVideoFromPlaylist(options['search'], options['maxSongs'], queue, options['requestedBy']);
             // Add all songs to the GuildQueue
             queue.songs = queue.songs.concat(playlist.videos);
             // Updates the queue
-            this.queues.set(voiceChannel.guild.id, queue);
+            this.queues.set(_voiceState.guild.id, queue);
             // Plays the song
 
             if (!isFirstPlay)
                 await this._playSong(queue.guildID, !isFirstPlay);
 
-            return {
-                error: null,
-                song: isFirstPlay ? null : queue.songs[0],
-                playlist
-            };
+            return playlist;
         }
         catch (err) {
-            return new MusicPlayerError('InvalidPlaylist', 'song', 'playlist');
+            throw new MusicPlayerError(err.message || err);
         }
     }
 
