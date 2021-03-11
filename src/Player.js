@@ -392,29 +392,38 @@ class Player {
 
     /**
      * Clears the guild queue, but not the current song.
-     * @param {string} guildID
-     * @returns {Queue || MusicPlayerError}
+     * @param {Discord.Message} message The Discord Message object.
+     * @returns {Queue}
      */
-    clearQueue(guildID) {
+    clearQueue(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
         // Clears queue
         let currentlyPlaying = queue.songs.shift();
-        queue.songs = [currentlyPlaying];
+        queue.songs = [ currentlyPlaying ];
         // Resolves guild queue
         return queue;
     }
 
     /**
      * Skips a song.
-     * @param {string} guildID
-     * @returns {Song || MusicPlayerError}
+     * @param {Discord.Message} message The Discord Message object.
+     * @returns {Song}
      */
-    skip(guildID) {
+    skip(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         let currentSong = queue.songs[0];
         // Make sure dispatcher exists
         if(queue.dispatcher) queue.dispatcher.end();
@@ -425,75 +434,105 @@ class Player {
 
     /**
      * Gets the currently playing song.
-     * @param {string} guildID
-     * @returns {Song || MusicPlayerError}
+     * @param {Discord.Message} message The Discord Message object.
+     * @returns {Song}
      */
-    nowPlaying(guildID) {
+    nowPlaying(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
-        // Resolves the current song
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
 
+        // Resolves the current song
         return queue.songs[0];
     }
 
     /**
      * Enable or disable the repeat mode
-     * @param {string} guildID
-     * @param {boolean} enabled Whether the repeat mode should be enabled
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Boolean} enabled Whether the queue repeat mode should be enabled.
      */
-    setQueueRepeatMode(guildID, enabled) {
+    setQueueRepeatMode(message, enabled) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         // Enable/Disable repeat mode
         queue.repeatQueue = enabled;
-        if(queue.repeatQueue === true) queue.repeatMode = false;
+        if(queue.repeatQueue)
+            queue.repeatMode = false;
     }
 
     /**
      * Enable or disable the Queue repeat loop
-     * @param {string} guildID
-     * @param {boolean} enabled Whether the repeat mode should be enabled
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Boolean} enabled Whether the repeat mode should be enabled.
      */
-    setRepeatMode(guildID, enabled) {
+    setRepeatMode(message, enabled) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         // Enable/Disable repeat mode
         queue.repeatMode = enabled;
-        if(queue.repeatMode === true) queue.repeatQueue = false;
+        if(queue.repeatMode)
+            queue.repeatQueue = false;
     }
 
 
     /**
      * Toggle the repeat mode
-     * @param {string} guildID
-     * @returns {boolean || MusicPlayerError} Returns the current set state
+     * @param {Discord.Message} message The Discord Message object.
+     * @returns {Boolean} Returns the current set state
      */
-    toggleLoop(guildID) {
+    toggleLoop(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         // Enable/Disable repeat mode
         queue.repeatMode = !queue.repeatMode;
-        if(queue.repeatMode === true) queue.repeatQueue = false;
+        if(queue.repeatMode)
+            queue.repeatQueue = false;
+
         // Resolve
         return queue.repeatMode;
     }
 
     /**
      * Toggle the Queue repeat mode
-     * @param {string} guildID
-     * @returns {boolean || MusicPlayerError} Returns the current set state
+     * @param {Discord.Message} message The Discord Message object.
+     * @returns {Boolean} Returns the current set state
      */
-    toggleQueueLoop(guildID) {
+    toggleQueueLoop(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         // Enable/Disable repeat mode
         queue.repeatQueue = !queue.repeatQueue;
-        if(queue.repeatQueue === true) queue.repeatMode = false;
+        if(queue.repeatQueue)
+            queue.repeatMode = false;
+
         // Resolve
         return queue.repeatQueue;
     }
@@ -501,35 +540,45 @@ class Player {
 
     /**
      * Removes a song from the queue
-     * @param {string} guildID 
-     * @param {number} song The index of the song to remove or the song to remove object.
-     * @returns {Song|MusicPlayerError}
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Number} index The index of the song to remove or the song to remove object.
+     * @returns {?Song}
      */
-    remove(guildID, song) {
+    remove(message, index) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+
         // Remove the song from the queue
         let songFound = null;
-        if (typeof song === "number") {
-            songFound = queue.songs[song];
+        if (typeof index === "number") {
+            songFound = queue.songs[index];
             if (songFound) {
                 queue.songs = queue.songs.filter((s) => s !== songFound);
             }
-        } else return new MusicPlayerError('NotANumber');
+        } else throw new MusicPlayerError('NotANumber');
+
         // Resolve
         return songFound;
     }
 
     /**
      * Shuffles the guild queue.
-     * @param {string} guildID 
+     * @param {Discord.Message} message The Discord Message object.
      * @returns {Song[]}
      */
-    shuffle(guildID) {
+    shuffle(message) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
 
         let currentSong = queue.songs.shift();
         queue.songs = queue.songs.sort(() => Math.random() - 0.5);
