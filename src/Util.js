@@ -245,17 +245,15 @@ class Util {
      * @returns {String}
      */
     static MillisecondsToTime(ms) {
-        let seconds = ms / 1000;
-        let hours = parseInt(seconds / 3600);
-        seconds = seconds % 3600;
-        let minutes = parseInt(seconds / 60);
-        seconds = Math.ceil(seconds % 60);
+        const seconds = Math.floor(ms / 1000 % 60);
+        const minutes = Math.floor(ms / 60000 % 60);
+        const hours = Math.floor(ms / 3600000);
 
-        seconds = (`0${seconds}`).slice(-2);
-        minutes = (`0${minutes}`).slice(-2);
-        hours = (`0${hours}`).slice(-2);
+        const secondsT = `${seconds}`.padStart(2,'0');
+        const minutesT = `${minutes}`.padStart(2,'0');
+        const hoursT = `${hours}`.padStart(2,'0');
 
-        return `${hours === 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
+        return `${hours ? `${hoursT}:` : ''}${minutesT}:${secondsT}`;
     }
 
     /**
