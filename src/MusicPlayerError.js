@@ -2,6 +2,7 @@
  * Specific errors.
  */
 const customErrors = {
+    'MessageTypeInvalid': 'Message must me a type of Message.',
     'SearchIsNull': 'No Song was found with that query.',
     'VoiceChannelTypeInvalid': 'Voice Channel must be a type of VoiceChannel.',
     'SongTypeInvalid': 'Song must be a type of String.',
@@ -19,30 +20,20 @@ const customErrors = {
  */
 class MusicPlayerError {
     /**
-     * @param {String} error Error.
-     * @param {?Object} nullObject Object.
-     * @param {?Object} playlistNull Object.
+     * @param {String} error Error message type.
      */
-    constructor(error, nullObject= null, playlistNull= null) {
-        /**
-         * Error type.
-         * @type {string}
-        */
-
-        this.error = {};
-
-        this.error.type = error;
+    constructor(error) {
 
         /**
          * Error message.
-         * @type {string}
+         * @type {String}
          */
-        this.error.message = customErrors[error];
-
-        if (nullObject)
-            this[nullObject] = null;
-        if (playlistNull)
-            this[playlistNull] = null;
+        this.type = error;
+        /**
+         * Error message.
+         * @type {String}
+         */
+        this.message = customErrors[error];
     }
 }
 

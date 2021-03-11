@@ -1,13 +1,15 @@
-const scrapeYT = require('scrape-yt');
+const YouTubeClient = require("youtubei");
+const YouTube = new YouTubeClient.Client();
 const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
 const { getPreview } = require("spotify-url-info");
+const mergeOptions = require('merge-options').bind({ignoreUndefined: true});
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#\&\?]*).*/;
+let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/;
 let PlaylistRegexID = /[&?]list=([^&]+)/;
 let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
@@ -32,8 +34,8 @@ function playlist_parser(url) {
 }
 /**
  * Gets Video Duration from Int
- * @param {String} d
- * @returns {String}
+ * @param {String|Number} d
+ * @returns {String|Number}
  */
 function getVideoDuration(d) {
     let date = new Date(null);
@@ -75,6 +77,26 @@ class Util {
 
     constructor() { }
 
+    static PlayOptions = {
+        search: '',
+        uploadDate: null,
+        duration: null,
+        sortBy: 'relevance',
+        requestedBy: null
+    };
+
+    static PlaylistOptions =  {
+        search: '',
+        maxSongs: -1,
+        requestedBy: null,
+    };
+
+    static ProgressOptions =  {
+        size: 20,
+        arrow: '>',
+        block: '=',
+    };
+
     /**
      * Gets the first youtube results for your search.
      * @param {String} search The name of the video or the video URL.
@@ -103,10 +125,9 @@ class Util {
                 let VideoID = youtube_parser(search);
                 if (!VideoID) return reject('SearchIsNull');
 
-                let video = await scrapeYT.getVideo(VideoID);
-
-                video.duration = getVideoDuration(video.duration);
-                video.url = search;
+                let video = await YouTube.getVideo(VideoID);
+                video['duration'] = getVideoDuration(video.duration);
+                video['url'] = search;
 
                 return resolve(new Song(video, queue, requestedBy));
             } else {
@@ -178,7 +199,7 @@ class Util {
                     }));
 
                     return resolve(new Song(items[0], queue, requestedBy));
-                }).catch((error) => {
+                }).catch(() => {
                     return reject('SearchIsNull');
                 });
 
@@ -203,11 +224,13 @@ class Util {
             let PlaylistID = playlist_parser(search);
             if (!PlaylistID) return reject('InvalidPlaylist');
 
-            let playlist = await scrapeYT.getPlaylist(PlaylistID);
+            /**
+             * @type {YouTubeClient.Playlist}
+             */
+            let playlist = await YouTube.getPlaylist(PlaylistID);
             if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
             await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
-
                 if (max !== -1 && index >= max) return null;
                 video.duration = getVideoDuration(video.duration);
                 video.url = `http://youtube.com/watch?v=${video.id}`;
@@ -215,7 +238,7 @@ class Util {
                 return new Song(video, queue, requestedBy);
             }));
             playlist.videos = playlist.videos.filter(function (obj) { return obj });
-            playlist.url = search;
+            playlist['url'] = search;
             playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
             resolve(new Playlist(playlist, queue, requestedBy));
@@ -241,7 +264,7 @@ class Util {
 
     /**
      * Converts Milliseconds to Time (HH:MM:SS)
-     * @param {String} ms Milliseconds
+     * @param {Number} ms Milliseconds
      * @returns {String}
      */
     static MillisecondsToTime(ms) {
@@ -263,7 +286,6 @@ class Util {
      */
     static TimeToMilliseconds(time) {
         const items = time.split(':');
-
         return items.reduceRight(
             (prev,curr,i,arr) => prev + parseInt(curr) * 60**(arr.length-1-i),
             0
@@ -290,7 +312,37 @@ class Util {
         return `[${progressText}${emptyProgressText}][${this.MillisecondsToTime(value)}/${this.MillisecondsToTime(maxValue)}]`;
     };
 
+    /**
+     * @param {Partial<Util.PlayOptions>} options
+     * @returns {PlayOptions}
+     */
+    static deserializeOptionsPlay(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlayOptions, options);
+        else return mergeOptions(this.PlaylistOptions);
+    }
 
-};
+    /**
+     * @param {Partial<Util.PlaylistOptions>} options
+     * @returns {PlaylistOptions}
+     */
+    static deserializeOptionsPlaylist(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlaylistOptions, options);
+        else return mergeOptions(this.PlaylistOptions);
+    }
+
+    /**
+     * @param {Partial<Util.ProgressOptions>} options
+     * @returns {ProgressOptions}
+     */
+    static deserializeOptionsProgress(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.ProgressOptions, options);
+        else return mergeOptions(this.ProgressOptions);
+    }
+
+
+}
 
 module.exports = Util;

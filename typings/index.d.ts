@@ -1,10 +1,13 @@
-import { Client, VoiceChannel } from "discord.js";
+import { Client, VoiceChannel, Message } from "discord.js";
 import ytsr from "ytsr";
 import MusicPlayerError from "../src/MusicPlayerError";
 import Queue from "../src/Queue";
 import Song from "../src/Song";
+import Playlist from "../src/Playlist";
 import Util from "../src/Util";
 
+type PlayOptions = Util.PlayOptions;
+type PlaylistOptions = Util.PlaylistOptions;
 type PlayerOptions = {
     leaveOnEnd:Boolean
     leaveOnStop:Boolean
@@ -22,10 +25,10 @@ class Player {
     ytsr:ytsr
 
     isPlaying(guildID:String):Boolean
-    play(voiceChannel:VoiceChannel, songName:String, options:Object, requestedBy:String):Promise<Song|MusicPlayerError>
-    addToQueue(guildID:String, songName:String, options:Object, requestedBy:String):Promise<Song|MusicPlayerError>
-    seek(guildID:String, seek:Number):Promise<Song|MusicPlayerError>
-    playlist(guildID:String, playlistLink:String, voiceChannel:VoiceChannel, maxSongs:Number, requestedBy:String):Promise<{song:null|Song, playlist:Playlist}>
+    play(message:Message, options:PlayOptions):Promise<Song>
+    addToQueue(message:Message, options:PlayOptions):Promise<Song>
+    seek(message:Message, seek:Number):Promise<Song>
+    playlist(message:Message, options:PlaylistOptions):Promise<Playlist>
     pause(guildID:String):Song
     resume(guildID:String):Song
     stop(guildID:String):Song
