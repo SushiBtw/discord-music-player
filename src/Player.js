@@ -122,7 +122,7 @@ class Player {
 
         try {
             // Creates a new guild with data
-            let queue = new Queue(_voiceState.guild.id, this.options);
+            let queue = new Queue(_voiceState.guild.id, this.options, message);
             // Searches the song
             let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
             // Joins the voice channel
@@ -233,7 +233,7 @@ class Player {
                 // Joins the voice channel if needed
                 connection = await _voiceState.channel.join();
                 // Creates a new guild with data if needed
-                queue = new Queue(_voiceState.guild.id, this.options);
+                queue = new Queue(_voiceState.guild.id, this.options, message);
                 queue.connection = connection;
             }
             // Searches the playlist
@@ -372,18 +372,22 @@ class Player {
 
     /**
      * Sets the queue for a guild.
-     * @param {string} guildID
-     * @param {Array<Song>} songs The songs list
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Song[]} songs Songs object
      * @returns {Queue}
      */
-    setQueue(guildID, songs) {
+    setQueue(message, songs) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
         // Updates queue
         queue.songs = songs;
         // Resolves the queue
-        return queue.songs;
+        return queue;
     }
 
     /**

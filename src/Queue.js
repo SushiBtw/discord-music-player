@@ -1,7 +1,11 @@
 const { EventEmitter } = require('events');
+const Discord = require('discord.js')
 
 /**
  * Represents a guild queue.
+ * @param {string} guildID
+ * @param {Object} options
+ * @param {Discord.Message} message
  */
 class Queue extends EventEmitter {
 
@@ -9,8 +13,9 @@ class Queue extends EventEmitter {
      * Represents a guild queue.
      * @param {string} guildID
      * @param {Object} options
+     * @param {Discord.Message} message
      */
-    constructor(guildID, options = {}){
+    constructor(guildID, options = {}, message){
         super();
         /**
          * The guild ID.
@@ -62,6 +67,11 @@ class Queue extends EventEmitter {
          * @type {Boolean}
          */
         this.repeatQueue = false;
+        /**
+         * Whether the full queue repeat mode is enabled.
+         * @type {Discord.Message}
+         */
+        this.initMessage = message;
 
     }
 
