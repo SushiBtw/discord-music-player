@@ -100,20 +100,20 @@ class Player {
      * Plays a song in a voice channel.
      * @param {Discord.Message} message The voice channel in which the song will be played.
      * @param {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>} options Search options.
+     * @returns {Promise<Song>}
      */
     async play(message, options) {
         // Check for Message
         if(!message instanceof Discord.Message)
             throw new MusicPlayerError('MessageTypeInvalid');
         // Check for Voice Channel
-        let _voiceChannel = message.member.voice;
-        if(!_voiceChannel instanceof Discord.VoiceState ||
-            !_voiceChannel.channel instanceof Discord.VoiceChannel)
+        let _voiceState = message.member.voice;
+        if(!_voiceState instanceof Discord.VoiceState ||
+            !_voiceState.channel instanceof Discord.VoiceChannel)
             throw new MusicPlayerError('VoiceChannelTypeInvalid');
         // Delete the queue if already exists
         this.queues.delete(message.guild.id);
         options = Util.deserializeOptions(options);
-
         // Some last checks
         if (typeof options.search !== 'string' ||
             options.search.length === 0)
@@ -121,49 +121,55 @@ class Player {
 
         try {
             // Creates a new guild with data
-            let queue = new Queue(_voiceChannel.guild.id, this.options);
+            let queue = new Queue(_voiceState.guild.id, this.options);
             // Searches the song
             let song = await Util.getVideoBySearch(options.search, options, queue, options.requestedBy);
             // Joins the voice channel
-            queue.connection = await _voiceChannel.channel.join();
+            queue.connection = await _voiceState.channel.join();
             queue.songs.push(song);
             // Add the queue to the list
-            this.queues.set(_voiceChannel.guild.id, queue);
+            this.queues.set(_voiceState.guild.id, queue);
             // Plays the song
             await this._playSong(queue.guildID, true);
 
-            return { error: null, song: song };
+            return song;
         }
         catch (err) {
-            return new MusicPlayerError(err === 'InvalidSpotify' ? err : 'SearchIsNull', 'song');
+            throw new MusicPlayerError(err.message || err);
         }
     }
 
 
     /**
-     * Adds a song to the guild queue.
-     * @param {String} guildID Guild ID.
-     * @param {String} songName The name of the song to add to the queue.
-     * @param {Object} options Search options.
-     * @param {String} requestedBy The user who requested the song.
-     * @returns {Promise<{Song} || MusicPlayerError>}
+     * Plays a song in a voice channel.
+     * @param {Discord.Message} message The voice channel in which the song will be played.
+     * @param {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>} options Search options.
+     * @returns {Promise<Song>}
      */
-    async addToQueue(guildID, songName, options = {}, requestedBy) {
+    async addToQueue(message, options) {
+        // Check for Message
+        if(!message instanceof Discord.Message)
+            throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull', 'song');
-        if (typeof songName !== 'string' || songName.length === 0) return new MusicPlayerError('SongTypeInvalid', 'song');
-        if (typeof options !== 'object') return new MusicPlayerError('OptionsTypeInvalid', 'song');
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
+        options = Util.deserializeOptions(options);
+        // Some last checks
+        if (typeof options.search !== 'string' ||
+            options.search.length === 0)
+            throw new MusicPlayerError('SongTypeInvalid');
+
         try {
             // Searches the song
-            let song = await Util.getVideoBySearch(songName, options, queue, requestedBy);
+            let song = await Util.getVideoBySearch(options.search, options, queue, options.requestedBy);
             // Updates the queue
             queue.songs.push(song);
-            // Resolves the song
-            return { error: null, song: song };
+
+            return song;
         }
         catch (err) {
-            return new MusicPlayerError(err === 'InvalidSpotify' ? err : 'SearchIsNull', 'song');
+            throw new MusicPlayerError(err.message || err);
         }
     }
 

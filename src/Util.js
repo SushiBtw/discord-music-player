@@ -4,6 +4,7 @@ const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
 const { getPreview } = require("spotify-url-info");
+const mergeOptions = require('merge-options').bind({ignoreUndefined: true});
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
@@ -68,6 +69,14 @@ const defaultSearchOptions = {
     sortBy: 'relevance',
 }
 
+const PlayOptions =  Object.freeze({
+    search: '',
+    uploadDate: null,
+    duration: null,
+    sortBy: 'relevance',
+    requestedBy: null
+});
+
 /**
  * Utilities.
  * @ignore
@@ -75,14 +84,6 @@ const defaultSearchOptions = {
 class Util {
 
     constructor() { }
-
-    static PlayOptions =  Object.freeze({
-        search: '',
-        uploadDate: null,
-        duration: null,
-        sortBy: 'relevance',
-        requestedBy: null
-    });
 
     /**
      * Gets the first youtube results for your search.
@@ -302,17 +303,13 @@ class Util {
     };
 
     /**
-     * @param {Object} options
-     * @returns {Object}
+     * @param {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>} options
+     * @returns {Readonly<{duration: null, requestedBy: null, search: string, uploadDate: null, sortBy: string}>}
      */
     static deserializeOptions(options) {
-        let _returnOptions = this.PlayOptions;
-        _returnOptions = {
-            ..._returnOptions,
-            ...options
-        };
-
-        return _returnOptions;
+        if(typeof options === 'object')
+            return mergeOptions(PlayOptions, options);
+        else return PlayOptions;
     }
 
 
