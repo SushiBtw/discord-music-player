@@ -1,7 +1,7 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
-const { VoiceChannel, version } = require("discord.js");
+const { VoiceChannel, version, Message } = require("discord.js");
 const Discord = require("discord.js");
 if (Number(version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
@@ -105,16 +105,16 @@ class Player {
      */
     async play(message, options) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Check for Voice Channel
         let _voiceState = message.member.voice;
-        if(!_voiceState instanceof Discord.VoiceState ||
-            !_voiceState.channel instanceof Discord.VoiceChannel)
+        if(!(_voiceState instanceof Discord.VoiceState) ||
+            !(_voiceState.channel instanceof Discord.VoiceChannel))
             throw new MusicPlayerError('VoiceChannelTypeInvalid');
         // Delete the queue if already exists
         this.queues.delete(message.guild.id);
-        options = Util.deserializeOptions(options);
+        options = Util.deserializeOptionsPlay(options);
         // Some last checks
         if (typeof options['search'] !== 'string' ||
             options['search'].length === 0)
@@ -149,13 +149,13 @@ class Player {
      */
     async addToQueue(message, options) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
             throw new MusicPlayerError('QueueIsNull');
-        options = Util.deserializeOptions(options);
+        options = Util.deserializeOptionsPlay(options);
         // Some last checks
         if (typeof options['search'] !== 'string' ||
             options['search'].length === 0)
@@ -183,7 +183,7 @@ class Player {
      */
     async seek(message, seek) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -208,15 +208,15 @@ class Player {
     async playlist(message, options) {
         let _voiceState;
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue) {
             // Check for Voice Channel
             _voiceState = message.member.voice;
-            if(!_voiceState instanceof Discord.VoiceState ||
-                !_voiceState.channel instanceof Discord.VoiceChannel)
+            if(!(_voiceState instanceof Discord.VoiceState) ||
+                !(_voiceState.channel instanceof Discord.VoiceChannel))
                 throw new MusicPlayerError('VoiceChannelTypeInvalid');
         }
 
@@ -262,7 +262,7 @@ class Player {
      */
     pause(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -283,7 +283,7 @@ class Player {
      */
     resume(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -306,7 +306,7 @@ class Player {
      */
     stop(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -327,7 +327,7 @@ class Player {
      */
     setVolume(message, percentage) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -346,7 +346,7 @@ class Player {
      */
     getVolume(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -364,7 +364,7 @@ class Player {
      */
     getQueue(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets & returns guild queue
         return this.queues.get(message.guild.id);
@@ -378,7 +378,7 @@ class Player {
      */
     setQueue(message, songs) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -397,7 +397,7 @@ class Player {
      */
     clearQueue(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -417,7 +417,7 @@ class Player {
      */
     skip(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -439,7 +439,7 @@ class Player {
      */
     nowPlaying(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -457,7 +457,7 @@ class Player {
      */
     setQueueRepeatMode(message, enabled) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -477,7 +477,7 @@ class Player {
      */
     setRepeatMode(message, enabled) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -498,7 +498,7 @@ class Player {
      */
     toggleLoop(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -521,7 +521,7 @@ class Player {
      */
     toggleQueueLoop(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -546,7 +546,7 @@ class Player {
      */
     remove(message, index) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -573,7 +573,7 @@ class Player {
      */
     shuffle(message) {
         // Check for Message
-        if(!message instanceof Discord.Message)
+        if(!(message instanceof Discord.Message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -589,29 +589,33 @@ class Player {
 
 
     /**
-    * Creates a progress bar per current playing song.
-    * @param {String} guildID Guild ID
-    * @param {String} barSize Bar Size
-    * @param {String} arrowIcon Arrow Icon
-    * @param {String} loadedIcon Loaded Icon
-    * @returns {String}
-    */
-    createProgressBar(guildID, barSize = 20, arrowIcon = '>', loadedIcon = '=') {
-        let queue = this.queues.get(guildID);
-        if (!queue) return new MusicPlayerError('QueueIsNull');
+     * Creates a progress bar per current playing song.
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Util.ProgressOptions} options Progressbar options.
+     * @returns {String}
+     */
+    createProgressBar(message, options) {
+        // Check for Message
+        if(!(message instanceof Discord.Message))
+            throw new MusicPlayerError('MessageTypeInvalid');
+        // Gets guild queue
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+            throw new MusicPlayerError('QueueIsNull');
 
         let timePassed = queue.dispatcher.streamTime + queue.songs[0].seekTime;
         let timeEnd = Util.TimeToMilliseconds(queue.songs[0].duration);
+        options = Util.deserializeOptionsProgress(options);
 
-        return `${Util.buildBar(timePassed, timeEnd, barSize, loadedIcon, arrowIcon)}`;
+        return `${Util.buildBar(timePassed, timeEnd, options['size'], options['block'], options['arrow'])}`;
     }
 
     /**
      * Start playing songs in a guild.
      * @ignore
-     * @param {string} guildID
-     * @param {Boolean} firstPlay Whether the function was called from the play() one
-     * @param {Number || null} seek Seek the song.
+     * @param {Discord.Snowflake} guildID
+     * @param {Boolean} firstPlay Whether this is the first playing song in the Queue.
+     * @param {?Number} seek Seek time.
      */
     async _playSong(guildID, firstPlay, seek= null) {
         // Gets guild queue
@@ -620,7 +624,7 @@ class Player {
         if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode && !queue.repeatQueue) {
             // Emits stop event
             if (queue.stopped) {
-                // Remoces the guild from the guilds list
+                // Removes the guild from the guilds list
                 this.queues.delete(guildID);
 
                 if (this.options.leaveOnStop)
@@ -632,7 +636,7 @@ class Player {
             if (this.options.leaveOnEnd) {
                 // Emits the end event
                 queue.emit('end');
-                // Remoces the guild from the guilds list
+                // Removes the guild from the guilds list
                 this.queues.delete(guildID);
                 // Timeout
                 let connectionChannel = queue.connection.channel;

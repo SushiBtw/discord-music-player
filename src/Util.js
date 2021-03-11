@@ -91,6 +91,12 @@ class Util {
         requestedBy: null,
     };
 
+    static ProgressOptions =  {
+        size: 20,
+        arrow: '>',
+        block: '=',
+    };
+
     /**
      * Gets the first youtube results for your search.
      * @param {String} search The name of the video or the video URL.
@@ -312,7 +318,7 @@ class Util {
      * @param {Partial<Util.PlayOptions>} options
      * @returns {PlayOptions}
      */
-    static deserializeOptions(options) {
+    static deserializeOptionsPlay(options) {
         if(typeof options === 'object')
             return mergeOptions(this.PlayOptions, options);
         else return mergeOptions(this.PlaylistOptions);
@@ -326,6 +332,16 @@ class Util {
         if(typeof options === 'object')
             return mergeOptions(this.PlaylistOptions, options);
         else return mergeOptions(this.PlaylistOptions);
+    }
+
+    /**
+     * @param {Partial<Util.ProgressOptions>} options
+     * @returns {ProgressOptions}
+     */
+    static deserializeOptionsProgress(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.ProgressOptions, options);
+        else return mergeOptions(this.ProgressOptions);
     }
 
 
