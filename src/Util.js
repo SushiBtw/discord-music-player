@@ -5,6 +5,7 @@ const Song = require('./Song');
 const ytsr = require('ytsr');
 const { getPreview } = require("spotify-url-info");
 const mergeOptions = require('merge-options').bind({ignoreUndefined: true});
+const Discord = require('discord.js');
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
@@ -344,6 +345,24 @@ class Util {
         else return mergeOptions(this.ProgressOptions);
     }
 
+    /**
+     * @param {Discord.Message} message
+     * @return {Boolean}
+     */
+    static isMessage(message) {
+        return message.constructor.name === Discord.Message.name;
+    }
+
+    /**
+     * @param {Discord.VoiceState} voice
+     * @return {Boolean}
+     */
+    static isVoice(voice) {
+        if(voice.constructor.name !== Discord.VoiceState.name)
+            return false;
+
+        return voice.channel ? voice.channel.constructor.name === Discord.VoiceChannel.name : false;
+    }
 
 }
 

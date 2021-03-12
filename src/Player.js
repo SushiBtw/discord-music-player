@@ -1,9 +1,8 @@
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
-const { VoiceChannel, version, Message } = require("discord.js");
 const Discord = require("discord.js");
-if (Number(version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
+if (Number(Discord.version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Playlist = require('./Playlist');
@@ -32,7 +31,7 @@ const PlayerOptions = {
 class Player {
 
     /**
-     * @param {Client} client Your Discord Client instance.
+     * @param {Discord.Client} client Your Discord Client instance.
      * @param {PlayerOptions} options The PlayerOptions object.
      */
     constructor(client, options = {}) {
@@ -43,7 +42,7 @@ class Player {
 
         /**
          * Your Discord Client instance.
-         * @type {Client}
+         * @type {Discord.Client}
          */
         this.client = client;
         /**
@@ -61,7 +60,6 @@ class Player {
          * @type {Function || ytsr}
          */
         this.ytsr = ytsr;
-
         // Listener to check if the channel is empty
         client.on('voiceStateUpdate', (oldState, newState) => {
             if (!this.options.leaveOnEmpty) return;
@@ -105,12 +103,11 @@ class Player {
      */
     async play(message, options) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Check for Voice Channel
         let _voiceState = message.member.voice;
-        if(!(_voiceState instanceof Discord.VoiceState) ||
-            !(_voiceState.channel instanceof Discord.VoiceChannel))
+        if(!Util.isVoice(_voiceState))
             throw new MusicPlayerError('VoiceChannelTypeInvalid');
         // Delete the queue if already exists
         this.queues.delete(message.guild.id);
@@ -149,7 +146,7 @@ class Player {
      */
     async addToQueue(message, options) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -183,7 +180,7 @@ class Player {
      */
     async seek(message, seek) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -208,15 +205,14 @@ class Player {
     async playlist(message, options) {
         let _voiceState;
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue) {
             // Check for Voice Channel
             _voiceState = message.member.voice;
-            if(!(_voiceState instanceof Discord.VoiceState) ||
-                !(_voiceState.channel instanceof Discord.VoiceChannel))
+            if(!Util.isVoice(_voiceState))
                 throw new MusicPlayerError('VoiceChannelTypeInvalid');
         }
 
@@ -262,7 +258,7 @@ class Player {
      */
     pause(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -283,7 +279,7 @@ class Player {
      */
     resume(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -306,7 +302,7 @@ class Player {
      */
     stop(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -327,7 +323,7 @@ class Player {
      */
     setVolume(message, percentage) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -346,7 +342,7 @@ class Player {
      */
     getVolume(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -364,7 +360,7 @@ class Player {
      */
     getQueue(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets & returns guild queue
         return this.queues.get(message.guild.id);
@@ -378,7 +374,7 @@ class Player {
      */
     setQueue(message, songs) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -397,7 +393,7 @@ class Player {
      */
     clearQueue(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -417,7 +413,7 @@ class Player {
      */
     skip(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -439,7 +435,7 @@ class Player {
      */
     nowPlaying(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -457,7 +453,7 @@ class Player {
      */
     setQueueRepeatMode(message, enabled) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -477,7 +473,7 @@ class Player {
      */
     setRepeatMode(message, enabled) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -498,7 +494,7 @@ class Player {
      */
     toggleLoop(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -521,7 +517,7 @@ class Player {
      */
     toggleQueueLoop(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -546,7 +542,7 @@ class Player {
      */
     remove(message, index) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -573,7 +569,7 @@ class Player {
      */
     shuffle(message) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -596,7 +592,7 @@ class Player {
      */
     createProgressBar(message, options) {
         // Check for Message
-        if(!(message instanceof Discord.Message))
+        if(!Util.isMessage(message))
             throw new MusicPlayerError('MessageTypeInvalid');
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
@@ -691,6 +687,6 @@ class Player {
 
     }
 
-};
+}
 
 module.exports = Player;
