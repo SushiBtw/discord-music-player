@@ -1,17 +1,43 @@
-import { Client, VoiceChannel } from "discord.js";
+import {Client, VoiceChannel, Message, Snowflake, StreamDispatcher, VoiceConnection} from "discord.js";
+import { Video, Playlist } from "youtubei";
 import ytsr from "ytsr";
-import MusicPlayerError from "../src/MusicPlayerError";
-import Queue from "../src/Queue";
-import Song from "../src/Song";
 import Util from "../src/Util";
 
+interface PlayerEvents {
+    channelEmpty: [message: Message, queue: Queue];
+    songAdd: [message: Message, queue: Queue, song: Song];
+    playlistAdd: [message: Message, queue: Queue, playlist: Playlist];
+    queueEnd: [message: Message, queue: Queue];
+    songChanged: [message: Message, song: Song];
+    songFirst: [message: Message, song: Song];
+    error: [message: Message, message: String];
+    clientDisconnect: [message: Message, queue: Queue];
+}
+type PlayOptions = {
+    search: String,
+    uploadDate: 'hour'|'today'|'week'|'month'|'year',
+    duration: 'short'|'long',
+    sortBy: 'relevance'|'date'|'view count'|'rating',
+    requestedBy: String,
+    index: Number
+}
+type PlaylistOptions = {
+    search: String,
+    maxSongs: Number,
+    requestedBy: String
+}
+type ProgressOptions = {
+    size: Number,
+    arrow: String,
+    block: String,
+}
 type PlayerOptions = {
-    leaveOnEnd:Boolean
-    leaveOnStop:Boolean
-    leaveOnEmpty:Boolean
-    timeout:Number
-    volume:Number
-    quality:'high'|'low'
+    leaveOnEnd: Boolean
+    leaveOnStop: Boolean
+    leaveOnEmpty: Boolean
+    timeout: Number
+    volume: Number
+    quality: 'high'|'low'
 }
 
 class Player {
@@ -21,29 +47,72 @@ class Player {
     queues:Map<String,Queue>
     ytsr:ytsr
 
-    isPlaying(guildID:String):Boolean
-    play(voiceChannel:VoiceChannel, songName:String, options:Object, requestedBy:String):Promise<Song|MusicPlayerError>
-    addToQueue(guildID:String, songName:String, options:Object, requestedBy:String):Promise<Song|MusicPlayerError>
-    seek(guildID:String, seek:Number):Promise<Song|MusicPlayerError>
-    playlist(guildID:String, playlistLink:String, voiceChannel:VoiceChannel, maxSongs:Number, requestedBy:String):Promise<{song:null|Song, playlist:Playlist}>
-    pause(guildID:String):Song
-    resume(guildID:String):Song
-    stop(guildID:String):Song
-    setVolume(guildID:String, percent:Number):Song
-    getVolume(guildID:String):Number
-    getQueue(guildID:String):Queue
-    setQueue(guildID:String, songs:Array<Song>):Queue
-    clearQueue(guildID:String):Queue|MusicPlayerError
-    skip(guildID:String):Song|MusicPlayerError
-    nowPlaying(guildID:String):Song|MusicPlayerError
-    setQueueRepeatMode(guildID:String, enabled:Boolean):void
-    setRepeatMode(guildID:String, enabled:Boolean):void
-    toggleLoop(guildID:String):Boolean|MusicPlayerError
-    toggleQueueLoop(guildID:String):Boolean|MusicPlayerError
-    remove(guildID:String, song:Number):Song|MusicPlayerError
-    shuffle(guildID:String):Array<Song>
-    createProgressBar(guildID:String, barSize:Number, arrowIcon:String, loadedIcon:String):String
+    public on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+    isPlaying(message:Message):Boolean
+    play(message:Message, options:PlayOptions|String):Promise<Song>
+    addToQueue(message:Message, options:PlayOptions|String):Promise<Song>
+    seek(message:Message, seek:Number):Promise<Song>
+    playlist(message:Message, options:PlaylistOptions|String):Promise<Playlist>
+    pause(message:Message):Song
+    resume(message:Message):Song
+    stop(message:Message):Song
+    setVolume(message:Message, percentage:Number):Song
+    getVolume(message:Message):Number
+    getQueue(message:Message):Queue
+    setQueue(message:Message, songs:Song[]):Queue
+    clearQueue(message:Message):Queue
+    skip(message:Message):Song
+    nowPlaying(message:Message):Song
+    setQueueRepeatMode(message:Message, enabled:Boolean):Boolean
+    setRepeatMode(message:Message, enabled:Boolean):Boolean
+    toggleLoop(message:Message):Boolean
+    toggleQueueLoop(message:Message):Boolean
+    remove(message:Message, song:Number):Song
+    shuffle(message:Message):Array<Song>
+    createProgressBar(message:Message, options?:ProgressOptions):String
     _playSong(guildID:String, firstPlay:Boolean, seek:null|Number):void
+}
+
+class Queue {
+    constructor(guildID: Snowflake, options: Object, message: Message) {}
+    guildID: Snowflake;
+    dispatcher: StreamDispatcher;
+    connection: VoiceConnection;
+    songs: Song[];
+    stopped: Boolean;
+    skipped: Boolean;
+    volume: Number;
+    playing: Boolean;
+    repeatMode: Boolean;
+    repeatQueue: Boolean;
+    initMessage: Message;
+}
+
+class Song {
+    constructor(video: Video, queue: Queue, requestedBy: String) {}
+    name: String;
+    duration: String|Number;
+    author: String;
+    url: String;
+    thumbnail: String;
+    queue: Queue;
+    requestedBy: String;
+    seekTime: Number;
+}
+
+class Playlist {
+    constructor(playlist: Playlist, queue: Queue, requestedBy: String) {}
+    name: String;
+    author: String;
+    url: String;
+    videos: Song[];
+    videoCount: Number;
+}
+
+class MusicPlayerError {
+    constructor(error: String) {}
+    type: String;
+    message: String;
 }
 
 export const Player:Player

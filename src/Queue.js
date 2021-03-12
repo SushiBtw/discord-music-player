@@ -1,17 +1,20 @@
-const { EventEmitter } = require('events');
+const Discord = require('discord.js')
 
 /**
  * Represents a guild queue.
+ * @param {string} guildID
+ * @param {Object} options
+ * @param {Discord.Message} message
  */
-class Queue extends EventEmitter {
+class Queue {
 
     /**
      * Represents a guild queue.
      * @param {string} guildID
      * @param {Object} options
+     * @param {Discord.Message} message
      */
-    constructor(guildID, options = {}){
-        super();
+    constructor(guildID, options = {}, message){
         /**
          * The guild ID.
          * @type {Snowflake}
@@ -62,6 +65,11 @@ class Queue extends EventEmitter {
          * @type {Boolean}
          */
         this.repeatQueue = false;
+        /**
+         * First message object.
+         * @type {Discord.Message}
+         */
+        this.initMessage = message;
 
     }
 

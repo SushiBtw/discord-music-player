@@ -1,15 +1,19 @@
-const scrapeYT = require('scrape-yt');
+const YouTubeClient = require("youtubei");
+const YouTube = new YouTubeClient.Client();
 const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
-const { getPreview } = require("spotify-url-info");
+const { getPreview, getData } = require("spotify-url-info");
+const mergeOptions = require('merge-options').bind({ignoreUndefined: true});
+const Discord = require('discord.js');
 
 //RegEx Definitions
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#\&\?]*).*/;
+let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/;
 let PlaylistRegexID = /[&?]list=([^&]+)/;
 let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
+let SpotifyPlaylistRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
 /**
  * Get ID from YouTube link.
@@ -32,8 +36,8 @@ function playlist_parser(url) {
 }
 /**
  * Gets Video Duration from Int
- * @param {String} d
- * @returns {String}
+ * @param {String|Number} d
+ * @returns {String|Number}
  */
 function getVideoDuration(d) {
     let date = new Date(null);
@@ -76,6 +80,47 @@ class Util {
     constructor() { }
 
     /**
+     * Player options.
+     * @typedef {PlayerOptions}
+     *
+     * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
+     * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
+     * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
+     * @property {Number} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
+     * @property {Number} volume The default playing volume of the player. | Default: 100
+     * @property {String} quality Music quality ['high'/'low'] | Default: high
+     */
+    static PlayerOptions = {
+        leaveOnEnd: true,
+        leaveOnStop: true,
+        leaveOnEmpty: true,
+        timeout: 0,
+        volume: 100,
+        quality: 'high'
+    };
+
+    static PlayOptions = {
+        search: '',
+        uploadDate: null,
+        duration: null,
+        sortBy: 'relevance',
+        requestedBy: null,
+        index: null
+    };
+
+    static PlaylistOptions =  {
+        search: '',
+        maxSongs: -1,
+        requestedBy: null,
+    };
+
+    static ProgressOptions =  {
+        size: 20,
+        arrow: '>',
+        block: '=',
+    };
+
+    /**
      * Gets the first youtube results for your search.
      * @param {String} search The name of the video or the video URL.
      * @param {Object<defaultSearchOptions>} options Options.
@@ -103,10 +148,9 @@ class Util {
                 let VideoID = youtube_parser(search);
                 if (!VideoID) return reject('SearchIsNull');
 
-                let video = await scrapeYT.getVideo(VideoID);
-
-                video.duration = getVideoDuration(video.duration);
-                video.url = search;
+                let video = await YouTube.getVideo(VideoID);
+                video['duration'] = getVideoDuration(video.duration || 0);
+                video['url'] = search;
 
                 return resolve(new Song(video, queue, requestedBy));
             } else {
@@ -178,7 +222,7 @@ class Util {
                     }));
 
                     return resolve(new Song(items[0], queue, requestedBy));
-                }).catch((error) => {
+                }).catch(() => {
                     return reject('SearchIsNull');
                 });
 
@@ -197,28 +241,57 @@ class Util {
     static getVideoFromPlaylist(search, max, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
+            let isSpotifyPlaylist = SpotifyPlaylistRegex.test(search);
             let isPlaylistLink = PlaylistRegex.test(search);
-            if (!isPlaylistLink) return reject('InvalidPlaylist');
+            if(isSpotifyPlaylist) {
+                // Spotify Playlist
+                let playlist = await getData(search).catch(() => null);
+                if(!playlist || !['playlist', 'album'].includes(playlist['type'])) return reject('InvalidPlaylist');
+                playlist = {
+                    title: playlist['name'],
+                    channel: playlist['type'] === 'playlist' ? { name: playlist['owner']['display_name'] } : playlist['artists'][0],
+                    url: search,
+                    videos: playlist['tracks'] ? playlist['tracks'].items : [],
+                    videoCount: 0,
+                    type: playlist['type']
+                }
 
-            let PlaylistID = playlist_parser(search);
-            if (!PlaylistID) return reject('InvalidPlaylist');
+                playlist.videos = await Promise.all(playlist.videos.map(async (track, index) => {
+                    if (max !== -1 && index >= max) return null;
+                    if(playlist['type'] === 'playlist')
+                        track = track['track'];
+                    return await this.getVideoBySearch(`${track['artists'][0].name} - ${track['name']}`, {}, queue, requestedBy).catch(() => null);
+                }));
+                playlist.videos = playlist.videos.filter(function (obj) { return obj });
+                playlist.videoCount = playlist.videos.length;
+                playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
-            let playlist = await scrapeYT.getPlaylist(PlaylistID);
-            if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
+                return resolve(new Playlist(playlist, queue, requestedBy));
 
-            await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
+            } else if(isPlaylistLink) {
+                // YouTube Playlist
+                let PlaylistID = playlist_parser(search);
+                if (!PlaylistID) return reject('InvalidPlaylist');
 
-                if (max !== -1 && index >= max) return null;
-                video.duration = getVideoDuration(video.duration);
-                video.url = `http://youtube.com/watch?v=${video.id}`;
+                /**
+                 * @type {YouTubeClient.Playlist}
+                 */
+                let playlist = await YouTube.getPlaylist(PlaylistID);
+                if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
-                return new Song(video, queue, requestedBy);
-            }));
-            playlist.videos = playlist.videos.filter(function (obj) { return obj });
-            playlist.url = search;
-            playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
+                await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
+                    if (max !== -1 && index >= max) return null;
+                    video.duration = getVideoDuration(video.duration || 0);
+                    video.url = `http://youtube.com/watch?v=${video.id}`;
 
-            resolve(new Playlist(playlist, queue, requestedBy));
+                    return new Song(video, queue, requestedBy);
+                }));
+                playlist.videos = playlist.videos.filter(function (obj) { return obj });
+                playlist['url'] = search;
+                playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
+
+                resolve(new Playlist(playlist, queue, requestedBy));
+            } else return reject('InvalidPlaylist');
         });
     }
 
@@ -241,21 +314,19 @@ class Util {
 
     /**
      * Converts Milliseconds to Time (HH:MM:SS)
-     * @param {String} ms Milliseconds
+     * @param {Number} ms Milliseconds
      * @returns {String}
      */
     static MillisecondsToTime(ms) {
-        let seconds = ms / 1000;
-        let hours = parseInt(seconds / 3600);
-        seconds = seconds % 3600;
-        let minutes = parseInt(seconds / 60);
-        seconds = Math.ceil(seconds % 60);
+        const seconds = Math.floor(ms / 1000 % 60);
+        const minutes = Math.floor(ms / 60000 % 60);
+        const hours = Math.floor(ms / 3600000);
 
-        seconds = (`0${seconds}`).slice(-2);
-        minutes = (`0${minutes}`).slice(-2);
-        hours = (`0${hours}`).slice(-2);
+        const secondsT = `${seconds}`.padStart(2,'0');
+        const minutesT = `${minutes}`.padStart(2,'0');
+        const hoursT = `${hours}`.padStart(2,'0');
 
-        return `${hours === 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
+        return `${hours ? `${hoursT}:` : ''}${minutesT}:${secondsT}`;
     }
 
     /**
@@ -264,15 +335,11 @@ class Util {
      * @returns {number}
      */
     static TimeToMilliseconds(time) {
-        let items = time.split(':'),
-            s = 0, m = 1;
-
-        while (items.length > 0) {
-            s += m * parseInt(items.pop(), 10);
-            m *= 60;
-        }
-
-        return s * 1000;
+        const items = time.split(':');
+        return items.reduceRight(
+            (prev,curr,i,arr) => prev + parseInt(curr) * 60**(arr.length-1-i),
+            0
+        ) * 1000;
     }
 
     /**
@@ -295,7 +362,69 @@ class Util {
         return `[${progressText}${emptyProgressText}][${this.MillisecondsToTime(value)}/${this.MillisecondsToTime(maxValue)}]`;
     };
 
+    /**
+     * @param {Partial<Util.PlayerOptions>} options
+     * @returns {PlayerOptions}
+     */
+    static deserializeOptionsPlayer(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlayerOptions, options);
+        else return mergeOptions(this.PlayerOptions);
+    }
 
-};
+    /**
+     * @param {Partial<Util.PlayOptions>|String} options
+     * @returns {PlayOptions}
+     */
+    static deserializeOptionsPlay(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlayOptions, options);
+        else if(typeof options === 'string')
+            return mergeOptions(this.PlayOptions, { search: options })
+        else return mergeOptions(this.PlayOptions);
+    }
+
+    /**
+     * @param {Partial<Util.PlaylistOptions>|String} options
+     * @returns {PlaylistOptions}
+     */
+    static deserializeOptionsPlaylist(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlaylistOptions, options);
+        else if(typeof options === 'string')
+            return mergeOptions(this.PlaylistOptions, { search: options })
+        else return mergeOptions(this.PlaylistOptions);
+    }
+
+    /**
+     * @param {Partial<Util.ProgressOptions>} options
+     * @returns {ProgressOptions}
+     */
+    static deserializeOptionsProgress(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.ProgressOptions, options);
+        else return mergeOptions(this.ProgressOptions);
+    }
+
+    /**
+     * @param {Discord.Message} message
+     * @return {Boolean}
+     */
+    static isMessage(message) {
+        return message.constructor.name === Discord.Message.name;
+    }
+
+    /**
+     * @param {Discord.VoiceState} voice
+     * @return {Boolean}
+     */
+    static isVoice(voice) {
+        if(voice.constructor.name !== Discord.VoiceState.name)
+            return false;
+
+        return voice.channel ? voice.channel.constructor.name === Discord.VoiceChannel.name : false;
+    }
+
+}
 
 module.exports = Util;
