@@ -1,3 +1,4 @@
+const { EventEmitter } = require('events');
 const ytdl = require('ytdl-core');
 const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
@@ -28,13 +29,14 @@ const PlayerOptions = {
     quality: 'high'
 };
 
-class Player {
+class Player extends EventEmitter {
 
     /**
      * @param {Discord.Client} client Your Discord Client instance.
      * @param {PlayerOptions} options The PlayerOptions object.
      */
     constructor(client, options = {}) {
+        super();
         if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
         if (!options || typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
         if (typeof options.timeout != 'undefined' && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
@@ -79,8 +81,12 @@ class Player {
                     queue.connection.channel.leave();
                     // Delete the queue
                     this.queues.delete(queue.guildID);
-                    // Emit end event
-                    queue.emit('channelEmpty');
+
+                    /**
+                     * channelEmpty event.
+                     * @event Player#channelEmpty
+                     */
+                    this.emit('channelEmpty', queue.initMessage, queue);
                 }, this.options.timeout);
             }
         });
@@ -127,6 +133,11 @@ class Player {
             queue.songs.push(song);
             // Add the queue to the list
             this.queues.set(_voiceState.guild.id, queue);
+            /**
+             * songAdd event.
+             * @event Player#songAdd
+             */
+            this.emit('songAdd', queue.initMessage, queue, song);
             // Plays the song
             await this._playSong(queue.guildID, true);
 
@@ -163,6 +174,11 @@ class Player {
             let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
             // Updates the queue
             queue.songs.push(song);
+            /**
+             * songAdd event.
+             * @event Player#songAdd
+             */
+            this.emit('songAdd', queue.initMessage, queue, song);
 
             return song;
         }
@@ -238,8 +254,13 @@ class Player {
             queue.songs = queue.songs.concat(playlist.videos);
             // Updates the queue
             this.queues.set(_voiceState.guild.id, queue);
-            // Plays the song
+            /**
+             * playlistAdd event.
+             * @event Player#playlistAdd
+             */
+            this.emit('playlistAdd', queue.initMessage, queue, playlist);
 
+            // Plays the song
             if (!isFirstPlay)
                 await this._playSong(queue.guildID, !isFirstPlay);
 
@@ -625,13 +646,20 @@ class Player {
 
                 if (this.options.leaveOnStop)
                     queue.connection.channel.leave();
-                // Emits the stop event
-                return queue.emit('stop');
+                /**
+                 * queueEnd event.
+                 * @event Player#queueEnd
+                 */
+                return this.emit('queueEnd', queue.initMessage, queue);
             }
             // Emits end event
             if (this.options.leaveOnEnd) {
-                // Emits the end event
-                queue.emit('end');
+                /**
+                 * queueEnd event.
+                 * @event Player#queueEnd
+                 */
+                this.emit('queueEnd', queue.initMessage, queue);
+
                 // Removes the guild from the guilds list
                 this.queues.delete(guildID);
                 // Timeout
@@ -651,8 +679,20 @@ class Player {
             + 'Please do not use repeatMode and repeatQueue together');
             else queue.songs.push(queue.songs[0]);
         }
-        // Emit songChanged event
-        if (!firstPlay) queue.emit('songChanged', (!queue.repeatMode ? queue.songs.shift() : queue.songs[0]), queue.songs[0], queue.skipped, queue.repeatMode, queue.repeatQueue);
+        if (!firstPlay) {
+            /**
+             * songChanged event.
+             * @event Player#songChanged
+             */
+            this.emit('songChanged', queue.initMessage, !queue.repeatMode ? queue.songs.shift() : queue.songs[0]);
+        } else {
+            /**
+             * songFirst event.
+             * @event Player#songFirst
+             */
+            this.emit('songFirst', queue.initMessage, queue.songs[0]);
+        }
+
         queue.skipped = false;
         let song = queue.songs[0];
         // Download the song
@@ -665,7 +705,11 @@ class Player {
             dlChunkSize: 0,
             highWaterMark: 1 << 25,
         }).on('error', err => {
-            queue.emit('songError', (err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message), queue.songs[0]);
+            /**
+             * songError event.
+             * @event Player#songError
+             */
+            this.emit('songError', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
             queue.repeatMode = false;
             return this._playSong(guildID, false);
         });
