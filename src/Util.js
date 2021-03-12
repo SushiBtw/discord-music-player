@@ -148,7 +148,7 @@ class Util {
                 if (!VideoID) return reject('SearchIsNull');
 
                 let video = await YouTube.getVideo(VideoID);
-                video['duration'] = getVideoDuration(video.duration);
+                video['duration'] = getVideoDuration(video.duration || 0);
                 video['url'] = search;
 
                 return resolve(new Song(video, queue, requestedBy));
@@ -254,7 +254,7 @@ class Util {
 
             await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
                 if (max !== -1 && index >= max) return null;
-                video.duration = getVideoDuration(video.duration);
+                video.duration = getVideoDuration(video.duration || 0);
                 video.url = `http://youtube.com/watch?v=${video.id}`;
 
                 return new Song(video, queue, requestedBy);
