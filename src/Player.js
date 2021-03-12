@@ -9,38 +9,18 @@ const Util = require('./Util');
 const Playlist = require('./Playlist');
 const MusicPlayerError = require('./MusicPlayerError');
 
-/**
- * Player options.
- * @typedef {PlayerOptions}
- * 
- * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
- * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
- * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
- * @property {Number} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
- * @property {Number} volume The default playing volume of the player. | Default: 100
- * @property {String} quality Music quality ['high'/'low'] | Default: high
- */
-const PlayerOptions = {
-    leaveOnEnd: true,
-    leaveOnStop: true,
-    leaveOnEmpty: true,
-    timeout: 0,
-    volume: 100,
-    quality: 'high'
-};
-
 class Player extends EventEmitter {
 
     /**
      * @param {Discord.Client} client Your Discord Client instance.
-     * @param {PlayerOptions} options The PlayerOptions object.
+     * @param {Util.PlayerOptions|Partial<Util.PlayerOptions>} options The PlayerOptions object.
      */
-    constructor(client, options = {}) {
+    constructor(client, options = Util.PlayerOptions) {
         super();
-        if (!client) throw new SyntaxError('[Discord_Client_Invalid] Invalid Discord Client');
-        if (!options || typeof options != 'object') throw new SyntaxError('[Options is not an Object] The Player constructor was updated in v5.0.2, please use: new Player(client, { options }) instead of new Player(client, token, { options })');
-        if (typeof options.timeout != 'undefined' && (isNaN(options.timeout) || !isFinite(options.timeout))) throw new TypeError('[TimeoutInvalidType] Timeout should be a Number presenting a value in milliseconds.');
-        if (typeof options.volume != 'undefined' && (isNaN(options.volume) || !isFinite(options.volume))) throw new TypeError('[VolumeInvalidType] Volume should be a Number presenting a value in percentual.');
+        options = Util.deserializeOptionsPlayer(options);
+        if (!client) throw new SyntaxError('[DMP] Invalid Discord Client');
+        if (isNaN(options['timeout'])) throw new TypeError('[DMP] Timeout should be a Number presenting a value in milliseconds.');
+        if (isNaN(options['volume'])) throw new TypeError('[DMP] Volume should be a Number presenting a value in percentage.');
 
         /**
          * Your Discord Client instance.
@@ -54,42 +34,19 @@ class Player extends EventEmitter {
         this.queues = new Map();
         /**
          * Player options.
-         * @type {PlayerOptions}
+         * @type {Util.PlayerOptions}
          */
-        this.options = mergeOptions(PlayerOptions, options);
+        this.options = options;
         /**
          * ytsr
          * @type {Function || ytsr}
          */
         this.ytsr = ytsr;
-        // Listener to check if the channel is empty
-        client.on('voiceStateUpdate', (oldState, newState) => {
-            if (!this.options.leaveOnEmpty) return;
-            // If message leaves the current voice channel
-            if (oldState.channelID === newState.channelID) return;
-            // Search for a queue for this channel
-            let queue = this.queues.get(oldState.guild.id);
-            if (queue) {
-                // If the channel is not empty
-                if (queue.connection.channel.members.size > 1) return;
-                // Start timeout
 
-                setTimeout(() => {
-                    // If the channel is not empty
-                    if (queue.connection.channel.members.size > 1) return;
-                    // Disconnect from the voice channel
-                    queue.connection.channel.leave();
-                    // Delete the queue
-                    this.queues.delete(queue.guildID);
-
-                    /**
-                     * channelEmpty event.
-                     * @event Player#channelEmpty
-                     */
-                    this.emit('channelEmpty', queue.initMessage, queue);
-                }, this.options.timeout);
-            }
-        });
+        // Voice Updates Listener
+        client.on('voiceStateUpdate',
+            (oldState, newState)=>
+                this._voiceUpdate(oldState, newState));
     }
 
     /**
@@ -688,7 +645,7 @@ class Player extends EventEmitter {
         // Add to the end if repeatQueue is enabled
         if(queue.repeatQueue && !seek) {
             if(queue.repeatMode) console.warn('[DMP] The song was not added at the end of the queue (repeatQueue was enabled) due repeatMode was enabled too.\n'
-            + 'Please do not use repeatMode and repeatQueue together');
+                + 'Please do not use repeatMode and repeatQueue together');
             else queue.songs.push(queue.songs[0]);
         }
         if (!firstPlay) {
@@ -741,6 +698,40 @@ class Player extends EventEmitter {
             });
         }, 1000);
 
+    }
+
+    /**
+     * Handle a VoiceUpdate
+     * @ignore
+     * @param {Discord.VoiceState} oldState
+     * @param {Discord.VoiceState} newState
+     */
+    _voiceUpdate(oldState, newState) {
+        if (!this.options.leaveOnEmpty) return;
+        // If message leaves the current voice channel
+        if (oldState.channelID === newState.channelID) return;
+        // Search for a queue for this channel
+        let queue = this.queues.get(oldState.guild.id);
+        if (queue) {
+            // If the channel is not empty
+            if (queue.connection.channel.members.size > 1) return;
+            // Start timeout
+
+            setTimeout(() => {
+                // If the channel is not empty
+                if (queue.connection.channel.members.size > 1) return;
+                // Disconnect from the voice channel
+                queue.connection.channel.leave();
+                // Delete the queue
+                this.queues.delete(queue.guildID);
+
+                /**
+                 * channelEmpty event.
+                 * @event Player#channelEmpty
+                 */
+                this.emit('channelEmpty', queue.initMessage, queue);
+            }, this.options.timeout);
+        }
     }
 
 }

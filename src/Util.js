@@ -78,6 +78,26 @@ class Util {
 
     constructor() { }
 
+    /**
+     * Player options.
+     * @typedef {PlayerOptions}
+     *
+     * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
+     * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
+     * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
+     * @property {Number} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
+     * @property {Number} volume The default playing volume of the player. | Default: 100
+     * @property {String} quality Music quality ['high'/'low'] | Default: high
+     */
+    static PlayerOptions = {
+        leaveOnEnd: true,
+        leaveOnStop: true,
+        leaveOnEmpty: true,
+        timeout: 0,
+        volume: 100,
+        quality: 'high'
+    };
+
     static PlayOptions = {
         search: '',
         uploadDate: null,
@@ -342,6 +362,16 @@ class Util {
         if(typeof options === 'object')
             return mergeOptions(this.ProgressOptions, options);
         else return mergeOptions(this.ProgressOptions);
+    }
+
+    /**
+     * @param {Partial<Util.PlayerOptions>} options
+     * @returns {PlayerOptions}
+     */
+    static deserializeOptionsPlayer(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlayerOptions, options);
+        else return mergeOptions(this.PlayerOptions);
     }
 
     /**

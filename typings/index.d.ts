@@ -109,6 +109,12 @@ class Playlist {
     videoCount: Number;
 }
 
+class MusicPlayerError {
+    constructor(error: String) {}
+    type: String;
+    message: String;
+}
+
 export const Player:Player
 export const Util:Util
 export const version:String
