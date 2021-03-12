@@ -49,10 +49,10 @@ class Player {
 
     public on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
     isPlaying(message:Message):Boolean
-    play(message:Message, options:PlayOptions):Promise<Song>
-    addToQueue(message:Message, options:PlayOptions):Promise<Song>
+    play(message:Message, options:PlayOptions|String):Promise<Song>
+    addToQueue(message:Message, options:PlayOptions|String):Promise<Song>
     seek(message:Message, seek:Number):Promise<Song>
-    playlist(message:Message, options:PlaylistOptions):Promise<Playlist>
+    playlist(message:Message, options:PlaylistOptions|String):Promise<Playlist>
     pause(message:Message):Song
     resume(message:Message):Song
     stop(message:Message):Song

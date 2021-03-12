@@ -26,16 +26,6 @@ function youtube_parser(url) {
 }
 
 /**
- * Get ID from Spotify playlist link.
- * @param {String} url
- * @returns {String}
- */
-function spotify_playlist_parser(url) {
-    const match = url.match(SpotifyPlaylistRegex);
-    return (match && match[1].length === 34) ? match[1] : false;
-}
-
-/**
  * Get ID from Playlist link.
  * @param {String} url
  * @returns {String}
@@ -373,22 +363,36 @@ class Util {
     };
 
     /**
-     * @param {Partial<Util.PlayOptions>} options
+     * @param {Partial<Util.PlayerOptions>} options
+     * @returns {PlayerOptions}
+     */
+    static deserializeOptionsPlayer(options) {
+        if(typeof options === 'object')
+            return mergeOptions(this.PlayerOptions, options);
+        else return mergeOptions(this.PlayerOptions);
+    }
+
+    /**
+     * @param {Partial<Util.PlayOptions>|String} options
      * @returns {PlayOptions}
      */
     static deserializeOptionsPlay(options) {
         if(typeof options === 'object')
             return mergeOptions(this.PlayOptions, options);
-        else return mergeOptions(this.PlaylistOptions);
+        else if(typeof options === 'string')
+            return mergeOptions(this.PlayOptions, { search: options })
+        else return mergeOptions(this.PlayOptions);
     }
 
     /**
-     * @param {Partial<Util.PlaylistOptions>} options
+     * @param {Partial<Util.PlaylistOptions>|String} options
      * @returns {PlaylistOptions}
      */
     static deserializeOptionsPlaylist(options) {
         if(typeof options === 'object')
             return mergeOptions(this.PlaylistOptions, options);
+        else if(typeof options === 'string')
+            return mergeOptions(this.PlaylistOptions, { search: options })
         else return mergeOptions(this.PlaylistOptions);
     }
 
@@ -400,16 +404,6 @@ class Util {
         if(typeof options === 'object')
             return mergeOptions(this.ProgressOptions, options);
         else return mergeOptions(this.ProgressOptions);
-    }
-
-    /**
-     * @param {Partial<Util.PlayerOptions>} options
-     * @returns {PlayerOptions}
-     */
-    static deserializeOptionsPlayer(options) {
-        if(typeof options === 'object')
-            return mergeOptions(this.PlayerOptions, options);
-        else return mergeOptions(this.PlayerOptions);
     }
 
     /**

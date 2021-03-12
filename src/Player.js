@@ -289,7 +289,7 @@ class Player extends EventEmitter {
     /**
      * Resumes the current Song.
      * @param {Discord.Message} message The Discord Message object.
-     * @returns {Boolean}
+     * @returns {Song}
      */
     resume(message) {
         // Check for Message
@@ -313,7 +313,7 @@ class Player extends EventEmitter {
         }
         queue.playing = true;
         // Resolves the guild queue
-        return true;
+        return queue.songs[0];
     }
 
     /**
