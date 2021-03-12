@@ -136,6 +136,10 @@ class Player extends EventEmitter {
             /**
              * songAdd event.
              * @event Player#songAdd
+             * @type {Object}
+             * @property {Discord.Message} initMessage
+             * @property {Queue} queue
+             * @property {Song} song
              */
             this.emit('songAdd', queue.initMessage, queue, song);
             // Plays the song
@@ -168,15 +172,23 @@ class Player extends EventEmitter {
         if (typeof options['search'] !== 'string' ||
             options['search'].length === 0)
             throw new MusicPlayerError('SongTypeInvalid');
+        let index = options['index'];
+        if (index !== null && typeof index !== 'number')
+            index = null;
 
         try {
             // Searches the song
             let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
             // Updates the queue
-            queue.songs.push(song);
+            if(!index)
+                queue.songs.push(song);
+            else queue.songs.splice(index, 0, song);
             /**
              * songAdd event.
              * @event Player#songAdd
+             * @param {Discord.Message} queue.initMessage
+             * @param {Queue} queue
+             * @param {Song} song
              */
             this.emit('songAdd', queue.initMessage, queue, song);
 

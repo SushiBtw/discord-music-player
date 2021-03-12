@@ -83,7 +83,8 @@ class Util {
         uploadDate: null,
         duration: null,
         sortBy: 'relevance',
-        requestedBy: null
+        requestedBy: null,
+        index: null
     };
 
     static PlaylistOptions =  {

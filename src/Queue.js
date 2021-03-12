@@ -66,7 +66,7 @@ class Queue {
          */
         this.repeatQueue = false;
         /**
-         * Whether the full queue repeat mode is enabled.
+         * First message object.
          * @type {Discord.Message}
          */
         this.initMessage = message;

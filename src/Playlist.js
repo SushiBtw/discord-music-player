@@ -1,9 +1,10 @@
+const YouTube = require('youtubei');
 /**
  * Represents a playlist.
  */
 class Playlist {
     /**
-     * @param {Playlist} playlist The Youtube playlist
+     * @param {Object} playlist The Youtube playlist
      * @param {Queue} queue The queue in which the playlist
      * @param {String} requestedBy The request user
      */
@@ -25,7 +26,7 @@ class Playlist {
         this.url = playlist.url;
         /**
          * Array of Playlist songs.
-         * @type {Array<Song>}
+         * @type {Song[]}
          */
         this.videos = playlist.videos;
         /**
