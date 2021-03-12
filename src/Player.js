@@ -713,6 +713,20 @@ class Player extends EventEmitter {
         // Search for a queue for this channel
         let queue = this.queues.get(oldState.guild.id);
         if (queue) {
+            //
+            if (!newState.channelID && this.client.user.id === newState.member.id) {
+                // Disconnect from the voice channel and destroy the stream
+                if(queue.stream) queue.stream.destroy();
+                if(queue.connection.channel) queue.connection.channel.leave();
+                // Delete the queue
+                this.queues.delete(queue.guildID);
+
+                /**
+                 * clientDisconnect event.
+                 * @event Player#clientDisconnect
+                 */
+                return this.emit('clientDisconnect', queue.initMessage, queue);
+            }
             // If the channel is not empty
             if (queue.connection.channel.members.size > 1) return;
             // Start timeout
@@ -720,8 +734,9 @@ class Player extends EventEmitter {
             setTimeout(() => {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
-                // Disconnect from the voice channel
-                queue.connection.channel.leave();
+                // Disconnect from the voice channel and destroy the stream
+                if(queue.stream) queue.stream.destroy();
+                if(queue.connection.channel) queue.connection.channel.leave();
                 // Delete the queue
                 this.queues.delete(queue.guildID);
 
