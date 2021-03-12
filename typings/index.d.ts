@@ -20,18 +20,17 @@ type PlayOptions = {
     sortBy: 'relevance'|'date'|'view count'|'rating',
     requestedBy: String,
     index: Number
-};
+}
 type PlaylistOptions = {
     search: String,
     maxSongs: Number,
     requestedBy: String
-};
+}
 type ProgressOptions = {
     size: Number,
     arrow: String,
     block: String,
 }
-
 type PlayerOptions = {
     leaveOnEnd: Boolean
     leaveOnStop: Boolean
@@ -39,7 +38,7 @@ type PlayerOptions = {
     timeout: Number
     volume: Number
     quality: 'high'|'low'
-};
+}
 
 class Player {
     constructor(client: Client, options:PlayerOptions) {}
@@ -64,8 +63,8 @@ class Player {
     clearQueue(message:Message):Queue
     skip(message:Message):Song
     nowPlaying(message:Message):Song
-    setQueueRepeatMode(message:Message, enabled:Boolean):void
-    setRepeatMode(message:Message, enabled:Boolean):void
+    setQueueRepeatMode(message:Message, enabled:Boolean):Boolean
+    setRepeatMode(message:Message, enabled:Boolean):Boolean
     toggleLoop(message:Message):Boolean
     toggleQueueLoop(message:Message):Boolean
     remove(message:Message, song:Number):Song
