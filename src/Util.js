@@ -3,7 +3,7 @@ const YouTube = new YouTubeClient.Client();
 const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
-const { getPreview } = require("spotify-url-info");
+const { getPreview, getData } = require("spotify-url-info");
 const mergeOptions = require('merge-options').bind({ignoreUndefined: true});
 const Discord = require('discord.js');
 
@@ -13,6 +13,7 @@ let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?
 let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/;
 let PlaylistRegexID = /[&?]list=([^&]+)/;
 let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
+let SpotifyPlaylistRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
 /**
  * Get ID from YouTube link.
@@ -22,6 +23,16 @@ let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?
 function youtube_parser(url) {
     const match = url.match(VideoRegexID);
     return (match && match[7].length === 11) ? match[7] : false;
+}
+
+/**
+ * Get ID from Spotify playlist link.
+ * @param {String} url
+ * @returns {String}
+ */
+function spotify_playlist_parser(url) {
+    const match = url.match(SpotifyPlaylistRegex);
+    return (match && match[1].length === 34) ? match[1] : false;
 }
 
 /**
@@ -240,30 +251,57 @@ class Util {
     static getVideoFromPlaylist(search, max, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
+            let isSpotifyPlaylist = SpotifyPlaylistRegex.test(search);
             let isPlaylistLink = PlaylistRegex.test(search);
-            if (!isPlaylistLink) return reject('InvalidPlaylist');
+            if(isSpotifyPlaylist) {
+                // Spotify Playlist
+                let playlist = await getData(search).catch(() => null);
+                if(!playlist || !['playlist', 'album'].includes(playlist['type'])) return reject('InvalidPlaylist');
+                playlist = {
+                    title: playlist['name'],
+                    channel: playlist['type'] === 'playlist' ? { name: playlist['owner']['display_name'] } : playlist['artists'][0],
+                    url: search,
+                    videos: playlist['tracks'] ? playlist['tracks'].items : [],
+                    videoCount: 0,
+                    type: playlist['type']
+                }
 
-            let PlaylistID = playlist_parser(search);
-            if (!PlaylistID) return reject('InvalidPlaylist');
+                playlist.videos = await Promise.all(playlist.videos.map(async (track, index) => {
+                    if (max !== -1 && index >= max) return null;
+                    if(playlist['type'] === 'playlist')
+                        track = track['track'];
+                    return await this.getVideoBySearch(`${track['artists'][0].name} - ${track['name']}`, {}, queue, requestedBy).catch(() => null);
+                }));
+                playlist.videos = playlist.videos.filter(function (obj) { return obj });
+                playlist.videoCount = playlist.videos.length;
+                playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
 
-            /**
-             * @type {YouTubeClient.Playlist}
-             */
-            let playlist = await YouTube.getPlaylist(PlaylistID);
-            if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
+                return resolve(new Playlist(playlist, queue, requestedBy));
 
-            await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
-                if (max !== -1 && index >= max) return null;
-                video.duration = getVideoDuration(video.duration || 0);
-                video.url = `http://youtube.com/watch?v=${video.id}`;
+            } else if(isPlaylistLink) {
+                // YouTube Playlist
+                let PlaylistID = playlist_parser(search);
+                if (!PlaylistID) return reject('InvalidPlaylist');
 
-                return new Song(video, queue, requestedBy);
-            }));
-            playlist.videos = playlist.videos.filter(function (obj) { return obj });
-            playlist['url'] = search;
-            playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
+                /**
+                 * @type {YouTubeClient.Playlist}
+                 */
+                let playlist = await YouTube.getPlaylist(PlaylistID);
+                if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
-            resolve(new Playlist(playlist, queue, requestedBy));
+                await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
+                    if (max !== -1 && index >= max) return null;
+                    video.duration = getVideoDuration(video.duration || 0);
+                    video.url = `http://youtube.com/watch?v=${video.id}`;
+
+                    return new Song(video, queue, requestedBy);
+                }));
+                playlist.videos = playlist.videos.filter(function (obj) { return obj });
+                playlist['url'] = search;
+                playlist.videoCount = max === -1 ? playlist.videoCount : playlist.videoCount > max ? max : playlist.videoCount;
+
+                resolve(new Playlist(playlist, queue, requestedBy));
+            } else return reject('InvalidPlaylist');
         });
     }
 

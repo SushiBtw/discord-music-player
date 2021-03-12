@@ -51,11 +51,11 @@ class Player extends EventEmitter {
 
     /**
      * Whether a guild is currently playing songs
-     * @param {String} guildID The guild ID to check
+     * @param {Discord.Message} message The Discord Message object.
      * @returns {Boolean} Whether the guild is currently playing songs
      */
-    isPlaying(guildID) {
-        return this.queues.has(guildID);
+    isPlaying(message) {
+        return this.queues.has(message ? message.guild ? message.guild.id : null : null);
     }
 
     /**
@@ -67,7 +67,10 @@ class Player extends EventEmitter {
     async play(message, options) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Check for Voice Channel
         let _voiceState = message.member.voice;
         if(!Util.isVoice(_voiceState))
@@ -119,11 +122,17 @@ class Player extends EventEmitter {
     async addToQueue(message, options) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
         options = Util.deserializeOptionsPlay(options);
         // Some last checks
         if (typeof options['search'] !== 'string' ||
@@ -166,11 +175,17 @@ class Player extends EventEmitter {
     async seek(message, seek) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
         if(isNaN(seek)) throw new MusicPlayerError('NotANumber');
 
         queue.songs[0].seekTime = seek;
@@ -191,7 +206,10 @@ class Player extends EventEmitter {
         let _voiceState;
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue) {
@@ -249,11 +267,17 @@ class Player extends EventEmitter {
     pause(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+        {
+            this.emit('error', message, 'MessageTypeInvalid');
+            return null;
+        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
         // Pauses the dispatcher
         if(queue.dispatcher)
             queue.dispatcher.pause();
@@ -265,16 +289,22 @@ class Player extends EventEmitter {
     /**
      * Resumes the current Song.
      * @param {Discord.Message} message The Discord Message object.
-     * @returns {Song}
+     * @returns {Boolean}
      */
     resume(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+            this.emit('error', message, 'MessageTypeInvalid');
+            return null;
+        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
         // Resumes the dispatcher
         if(queue.dispatcher) {
             queue.dispatcher.resume();
@@ -283,46 +313,64 @@ class Player extends EventEmitter {
         }
         queue.playing = true;
         // Resolves the guild queue
-        return queue.songs[0];
+        return true;
     }
 
     /**
      * Stops playing music.
      * @param {Discord.Message} message The Discord Message object.
+     * @returns {Boolean}
      */
     stop(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Stops the dispatcher
         queue.stopped = true;
         queue.songs = [];
         // Make sure dispatcher exists
         if(queue.dispatcher) queue.dispatcher.end();
+
+        return true;
     }
 
     /**
      * Updates the volume.
      * @param {Discord.Message} message The Discord Message object.
      * @param {Number} percentage
+     * @returns {Boolean}
      */
     setVolume(message, percentage) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Updates volume
         queue.volume = percentage;
         queue.dispatcher.setVolumeLogarithmic(percentage / 200);
+
+        return true;
     }
 
     /**
@@ -333,11 +381,17 @@ class Player extends EventEmitter {
     getVolume(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Returns volume
         return queue.volume;
@@ -351,7 +405,10 @@ class Player extends EventEmitter {
     getQueue(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets & returns guild queue
         return this.queues.get(message.guild.id);
     }
@@ -365,11 +422,17 @@ class Player extends EventEmitter {
     setQueue(message, songs) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
         // Updates queue
         queue.songs = songs;
         // Resolves the queue
@@ -379,21 +442,27 @@ class Player extends EventEmitter {
     /**
      * Clears the guild queue, but not the current song.
      * @param {Discord.Message} message The Discord Message object.
-     * @returns {Queue}
+     * @returns {Boolean}
      */
     clearQueue(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
         // Clears queue
         let currentlyPlaying = queue.songs.shift();
         queue.songs = [ currentlyPlaying ];
-        // Resolves guild queue
-        return queue;
+
+        return true;
     }
 
     /**
@@ -404,11 +473,17 @@ class Player extends EventEmitter {
     skip(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         let currentSong = queue.songs[0];
         // Make sure dispatcher exists
@@ -426,11 +501,17 @@ class Player extends EventEmitter {
     nowPlaying(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Resolves the current song
         return queue.songs[0];
@@ -440,40 +521,58 @@ class Player extends EventEmitter {
      * Enable or disable the repeat mode
      * @param {Discord.Message} message The Discord Message object.
      * @param {Boolean} enabled Whether the queue repeat mode should be enabled.
+     * @returns {Boolean}
      */
     setQueueRepeatMode(message, enabled) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Enable/Disable repeat mode
         queue.repeatQueue = enabled;
         if(queue.repeatQueue)
             queue.repeatMode = false;
+
+        return queue.repeatQueue;
     }
 
     /**
      * Enable or disable the Queue repeat loop
      * @param {Discord.Message} message The Discord Message object.
      * @param {Boolean} enabled Whether the repeat mode should be enabled.
+     * @returns {Boolean}
      */
     setRepeatMode(message, enabled) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Enable/Disable repeat mode
         queue.repeatMode = enabled;
         if(queue.repeatMode)
             queue.repeatQueue = false;
+
+        return queue.repeatMode;
     }
 
 
@@ -481,15 +580,22 @@ class Player extends EventEmitter {
      * Toggle the repeat mode
      * @param {Discord.Message} message The Discord Message object.
      * @returns {Boolean} Returns the current set state
+     * @returns {Boolean}
      */
     toggleLoop(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Enable/Disable repeat mode
         queue.repeatMode = !queue.repeatMode;
@@ -508,11 +614,17 @@ class Player extends EventEmitter {
     toggleQueueLoop(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Enable/Disable repeat mode
         queue.repeatQueue = !queue.repeatQueue;
@@ -533,11 +645,17 @@ class Player extends EventEmitter {
     remove(message, index) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         // Remove the song from the queue
         let songFound = null;
@@ -546,7 +664,10 @@ class Player extends EventEmitter {
             if (songFound) {
                 queue.songs = queue.songs.filter((s) => s !== songFound);
             }
-        } else throw new MusicPlayerError('NotANumber');
+        } else {
+            this.emit('error', message, 'NotANumber');
+            return null;
+        }
 
         // Resolve
         return songFound;
@@ -560,11 +681,17 @@ class Player extends EventEmitter {
     shuffle(message) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         let currentSong = queue.songs.shift();
         queue.songs = queue.songs.sort(() => Math.random() - 0.5);
@@ -583,11 +710,17 @@ class Player extends EventEmitter {
     createProgressBar(message, options) {
         // Check for Message
         if(!Util.isMessage(message))
-            throw new MusicPlayerError('MessageTypeInvalid');
+            {
+                this.emit('error', message, 'MessageTypeInvalid');
+                return null;
+            }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
-            throw new MusicPlayerError('QueueIsNull');
+            {
+                this.emit('error', message, 'QueueIsNull');
+                return null;
+            }
 
         let timePassed = queue.dispatcher.streamTime + queue.songs[0].seekTime;
         let timeEnd = Util.TimeToMilliseconds(queue.songs[0].duration);
@@ -648,12 +781,14 @@ class Player extends EventEmitter {
                 + 'Please do not use repeatMode and repeatQueue together');
             else queue.songs.push(queue.songs[0]);
         }
+
         if (!firstPlay) {
+            if(!queue.repeatMode) queue.songs.shift();
             /**
              * songChanged event.
              * @event Player#songChanged
              */
-            this.emit('songChanged', queue.initMessage, !queue.repeatMode ? queue.songs.shift() : queue.songs[0]);
+            this.emit('songChanged', queue.initMessage, queue.songs[0]);
         } else {
             /**
              * songFirst event.
@@ -675,10 +810,10 @@ class Player extends EventEmitter {
             highWaterMark: 1 << 25,
         }).on('error', err => {
             /**
-             * songError event.
-             * @event Player#songError
+             * error event.
+             * @event Player#error
              */
-            this.emit('songError', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
+            this.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
             queue.repeatMode = false;
             return this._playSong(guildID, false);
         });

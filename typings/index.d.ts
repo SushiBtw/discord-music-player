@@ -10,7 +10,7 @@ interface PlayerEvents {
     queueEnd: [message: Message, queue: Queue];
     songChanged: [message: Message, song: Song];
     songFirst: [message: Message, song: Song];
-    songError: [message: Message, message: String];
+    error: [message: Message, message: String];
     clientDisconnect: [message: Message, queue: Queue];
 }
 type PlayOptions = {
@@ -70,7 +70,7 @@ class Player {
     toggleQueueLoop(message:Message):Boolean
     remove(message:Message, song:Number):Song
     shuffle(message:Message):Array<Song>
-    createProgressBar(message:Message, options:ProgressOptions):String
+    createProgressBar(message:Message, options?:ProgressOptions):String
     _playSong(guildID:String, firstPlay:Boolean, seek:null|Number):void
 }
 
