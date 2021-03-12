@@ -269,17 +269,15 @@ class Util {
      * @returns {String}
      */
     static MillisecondsToTime(ms) {
-        let seconds = ms / 1000;
-        let hours = seconds / 3600;
-        seconds = seconds % 3600;
-        let minutes = seconds / 60;
-        seconds = Math.ceil(seconds % 60);
+        const seconds = Math.floor(ms / 1000 % 60);
+        const minutes = Math.floor(ms / 60000 % 60);
+        const hours = Math.floor(ms / 3600000);
 
-        seconds = (`0${seconds}`).slice(-2);
-        minutes = (`0${minutes}`).slice(-2);
-        hours = (`0${hours}`).slice(-2);
+        const secondsT = `${seconds}`.padStart(2,'0');
+        const minutesT = `${minutes}`.padStart(2,'0');
+        const hoursT = `${hours}`.padStart(2,'0');
 
-        return `${parseInt(hours) === 0 ? '' : `${hours}:`}${minutes}:${seconds}`;
+        return `${hours ? `${hoursT}:` : ''}${minutesT}:${secondsT}`;
     }
 
     /**
@@ -289,10 +287,10 @@ class Util {
      */
     static TimeToMilliseconds(time) {
         const items = time.split(':');
-
-        return items.reduceRight((prev,curr,i) => {
-            return parseInt(prev, 10) + parseInt(curr, 10) * 60*(i + 1);
-        }) * 1000;
+        return items.reduceRight(
+            (prev,curr,i,arr) => prev + parseInt(curr) * 60**(arr.length-1-i),
+            0
+        ) * 1000;
     }
 
     /**
