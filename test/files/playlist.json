@@ -10,6 +10,7 @@
       "url": "http://youtube.com/watch?v=iRYvuS9OxdA",
       "thumbnail": "https://i.ytimg.com/vi/iRYvuS9OxdA/hqdefault.jpg?sqp=-oaymwEjCNACELwBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLDCbS0F_gbbNrfJdyv_pUgatGwiTg",
       "queue": null,
+      "isLive": false,
       "requestedBy": null,
       "seekTime": 0
     },
@@ -20,6 +21,7 @@
       "url": "http://youtube.com/watch?v=iP6XpLQM2Cs",
       "thumbnail": "https://i.ytimg.com/vi/iP6XpLQM2Cs/hqdefault.jpg?sqp=-oaymwEjCNACELwBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLAhvyhKNpqGWszehintHFwh0yRzGg",
       "queue": null,
+      "isLive": false,
       "requestedBy": null,
       "seekTime": 0
     }

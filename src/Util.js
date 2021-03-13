@@ -284,6 +284,7 @@ class Util {
                     if (max !== -1 && index >= max) return null;
                     video.duration = getVideoDuration(video.duration || 0);
                     video.url = `http://youtube.com/watch?v=${video.id}`;
+                    video.isLiveContent = video.isLive;
 
                     return new Song(video, queue, requestedBy);
                 }));
