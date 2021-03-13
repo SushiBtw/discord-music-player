@@ -740,7 +740,7 @@ class Player extends EventEmitter {
         // Gets guild queue
         let queue = this.queues.get(guildID);
         // If there isn't any music in the queue
-        if (queue.songs.length < 2 && !firstPlay && !queue.repeatMode && !queue.repeatQueue) {
+        if (queue.stopped || queue.songs.length < 2 && !firstPlay && !queue.repeatMode && !queue.repeatQueue) {
             // Emits stop event
             if (queue.stopped) {
                 // Removes the guild from the guilds list
