@@ -184,17 +184,45 @@ client.player
     // Emitted when there was an error with NonAsync functions.
     .on('error', (message, error) => {
         switch (error) {
+            // Thrown when the YouTube search could not find any song with that query.
+            case 'SearchIsNull':
+                message.channel.send(`No song with that query was found.`);
+                break;
+            // Thrown when the provided YouTube Playlist could not be found.
+            case 'InvalidPlaylist':
+                message.channel.send(`No Playlist was found with that link.`);
+                break;
+            // Thrown when the provided Spotify Song could not be found.
+            case 'InvalidSpotify':
+                message.channel.send(`No Spotify Song was found with that link.`);
+                break;
+            // Thrown when the Guild Queue does not exist (no music is playing).
             case 'QueueIsNull':
                 message.channel.send(`There is no music playing right now.`);
                 break;
-            case 'MessageTypeInvalid':
-                message.channel.send(`The Message object was not provided.`);
+            // Thrown when the Members is not in a VoiceChannel.
+            case 'VoiceChannelTypeInvalid':
+                message.channel.send(`You need to be in a Voice Channel to play music.`);
                 break;
+            // Thrown when the current playing song was an live transmission (that is unsupported).
+            case 'LiveUnsupported':
+                message.channel.send(`We do not support YouTube Livestreams.`);
+                break;
+            // Thrown when the current playing song was unavailable.
             case 'VideoUnavailable':
                 message.channel.send(`Something went wrong while playing the current song, skipping...`);
                 break;
+            // Thrown when provided argument was Not A Number.
+            case 'NotANumber':
+                message.channel.send(`The provided argument was Not A Number.`);
+                break;
+            // Thrown when the first method argument was not a Discord Message object.
+            case 'MessageTypeInvalid':
+                message.channel.send(`The Message object was not provided.`);
+                break;
+            // Thrown when the Guild Queue does not exist (no music is playing).
             default:
-                message.channel.send(`**An Error Ocurred:** ${error}`);
+                message.channel.send(`**Unknown Error Ocurred:** ${error}`);
                 break;
         }
     });
@@ -211,6 +239,11 @@ client.player.play(Message, OptionsOrString);
 ```
 **Example**:
 ```js
+client.player.on('songAdd',  (message, queue, song) =>
+    message.channel.send(`**${song.name}** has been added to the queue!`))
+    .on('songFirst',  (message, song) =>
+        message.channel.send(`**${song.name}** is now playing!`));
+
 client.on('message', async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
@@ -221,12 +254,11 @@ client.on('message', async (message) => {
     // will play "All Summer Long" in the Voice Channel
 
     if(command === 'play'){
-        let song = await client.player.play(message, args.join(' '))
-            .catch(error => {
-                return message.channel.send(error.message);
-            });
+        let song = await client.player.play(message, args.join(' '));
         
-        console.log(`Started playing ${song.name}`);
+        // If there were no errors the Player#songAdd event will fire and the song will not be null.
+        if(song)
+            console.log(`Started playing ${song.name}`);
         return;
     }
     
@@ -235,12 +267,11 @@ client.on('message', async (message) => {
         let song = await client.player.play(message, {
             search: args.join(' '),
             requestedBy: message.author.tag
-        })
-            .catch(error => {
-                return message.channel.send(error.message);
-            });
+        });
 
-        console.log(`Started playing ${song.name}`);
+        // If there were no errors the Player#songAdd event will fire and the song will not be null.
+        if(song)
+            console.log(`Started playing ${song.name}`);
         return;
     }
 });
@@ -258,6 +289,11 @@ client.player.addToQueue(Message, OptionsOrString);
 **Example:**
 *If there is an already playing song, add a new one to the queue.*
 ```js
+client.player.on('songAdd',  (message, queue, song) =>
+    message.channel.send(`**${song.name}** has been added to the queue!`))
+    .on('songFirst',  (message, song) =>
+        message.channel.send(`**${song.name}** is now playing!`));
+
 client.on('message', async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
@@ -269,20 +305,18 @@ client.on('message', async (message) => {
 
     if(command === 'play'){
         if(client.player.isPlaying(message)) {
-            let song = await client.player.addToQueue(message, args.join(' '))
-                .catch(error => {
-                    return message.channel.send(error.message);
-                });
+            let song = await client.player.addToQueue(message, args.join(' '));
 
-            console.log(`Added ${song.name} to queue`);
+            // If there were no errors the Player#songAdd event will fire and the song will not be null.
+            if(song)
+                console.log(`Added ${song.name} to the queue`);
             return;
         } else {
-            let song = await client.player.play(message, args.join(' '))
-                .catch(error => {
-                    return message.channel.send(error.message);
-                });
+            let song = await client.player.play(message, args.join(' '));
 
-            console.log(`Started playing ${song.name}`);
+            // If there were no errors the Player#songAdd event will fire and the song will not be null.
+            if(song)
+                console.log(`Started playing ${song.name}`);
             return;
         }
     }
@@ -298,22 +332,22 @@ client.player.playlist(Message, OptionsOrString);
 ```
 **Example:**
 ```js
+client.player
+    .on('playlistAdd',  (message, queue, playlist) => 
+        message.channel.send(`${playlist.name} playlist with ${playlist.videoCount} songs has been added to the queue!`));
+
 client.on('message', async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     if (command === 'playlist') {
-        let isPlaying = client.player.isPlaying(message);
         // If maxSongs is -1, will be infinite.
-        let playlist = await client.player.playlist(message, {
+        await client.player.playlist(message, {
             search: args.join(' '),
             maxSongs: 20
-        }).catch(error => {
-            return message.channel.send(error.message);
         });
 
-        // Send information about adding the Playlist to the Queue
-        message.channel.send(`Added a Playlist to the queue with **${playlist.videoCount} songs**, that was **made by ${playlist.author}**.`)
+        // If there were no errors the Player#playlistAdd event will fire and the playlist will not be null.
     }
 });
 ```
