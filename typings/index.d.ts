@@ -96,6 +96,7 @@ class Song {
     url: String;
     thumbnail: String;
     queue: Queue;
+    isLive: Boolean;
     requestedBy: String;
     seekTime: Number;
 }
