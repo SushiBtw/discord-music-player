@@ -218,6 +218,7 @@ class Util {
                             },
                             url: vid.url,
                             thumbnail: vid.bestThumbnail.url,
+                            isLiveContent: vid.isLive
                         };
                     }));
 

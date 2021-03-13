@@ -799,6 +799,12 @@ class Player extends EventEmitter {
 
         queue.skipped = false;
         let song = queue.songs[0];
+        // Live Video is unsupported
+        if(song.isLive) {
+            this.emit('error', queue.initMessage, 'LiveUnsupported');
+            queue.repeatMode = false;
+            return this._playSong(guildID, false);
+        }
         // Download the song
         let Quality = this.options.quality;
         Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
