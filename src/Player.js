@@ -817,46 +817,51 @@ class Player extends EventEmitter {
         }
 
         queue.skipped = false;
-        let song = queue.songs[0];
-        // Live Video is unsupported
-        if(song.isLive) {
-            this.emit('error', queue.initMessage, 'LiveUnsupported');
-            queue.repeatMode = false;
-            return this._playSong(guildID, false);
-        }
-        // Download the song
-        let Quality = this.options.quality;
-        Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
-        const stream = ytdl(song.url, {
-            filter: 'audioonly',
-            quality: Quality,
-            dlChunkSize: 0,
-            highWaterMark: 1 << 25,
-        }).on('error', err => {
-            /**
-             * error event.
-             * @event Player#error
-             */
-            this.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
-            queue.repeatMode = false;
-            return this._playSong(guildID, false);
-        });
+        setTimeout(function () {
 
-        setTimeout(() => {
-            if (queue.dispatcher) queue.dispatcher.destroy();
-            let dispatcher = queue.connection.play(stream, {
-                seek: seek / 1000 || 0,
-            });
-            queue.dispatcher = dispatcher;
-            // Set volume
-            dispatcher.setVolumeLogarithmic(queue.volume / 200);
-            // When the song ends
-            dispatcher.on('finish', () => {
-                // Play the next song
+            let song = queue.songs[0];
+            // Live Video is unsupported
+            if(song.isLive) {
+                this.emit('error', queue.initMessage, 'LiveUnsupported');
+                queue.repeatMode = false;
+                return this._playSong(guildID, false);
+            }
+            // Download the song
+            let Quality = this.options.quality;
+            Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
+
+            const stream = ytdl(song.url, {
+                filter: 'audioonly',
+                quality: Quality,
+                dlChunkSize: 0,
+                highWaterMark: 1 << 25,
+            }).on('error', err => {
+                /**
+                 * error event.
+                 * @event Player#error
+                 */
+                this.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
+                queue.repeatMode = false;
                 return this._playSong(guildID, false);
             });
-        }, 1000);
+
+            setTimeout(() => {
+                if (queue.dispatcher) queue.dispatcher.destroy();
+                let dispatcher = queue.connection.play(stream, {
+                    seek: seek / 1000 || 0,
+                });
+                queue.dispatcher = dispatcher;
+                // Set volume
+                dispatcher.setVolumeLogarithmic(queue.volume / 200);
+                // When the song ends
+                dispatcher.on('finish', () => {
+                    // Play the next song
+                    return this._playSong(guildID, false);
+                });
+            }, 1000);
+
+        }, 0);
 
     }
 

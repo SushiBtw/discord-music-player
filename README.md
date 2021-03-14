@@ -593,7 +593,7 @@ client.on('message', async (message) => {
 
     if(command === 'enable-repeat'){
         // Enable repeat mode
-        let status = client.player.setRepeatMode(message.guild.id, true);
+        let status = client.player.setRepeatMode(message, true);
         if(status === null)
             return;
         // Get the current song
@@ -736,7 +736,7 @@ client.on('message', async (message) => {
     const command = args.shift().toLowerCase();
 
     if(command === 'progress'){
-        let progressBar = client.player.createProgressBar(message.guild.id, {
+        let progressBar = client.player.createProgressBar(message, {
             size: 15,
             block: '=',
             arrow: '>'
