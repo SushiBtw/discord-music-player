@@ -817,18 +817,17 @@ class Player extends EventEmitter {
         }
 
         queue.skipped = false;
-
+        let thisHelper = this;
         setTimeout(function () {
-
             let song = queue.songs[0];
             // Live Video is unsupported
             if(song.isLive) {
-                this.emit('error', queue.initMessage, 'LiveUnsupported');
+                thisHelper.emit('error', queue.initMessage, 'LiveUnsupported');
                 queue.repeatMode = false;
-                return this._playSong(guildID, false);
+                return thisHelper._playSong(guildID, false);
             }
             // Download the song
-            let Quality = this.options.quality;
+            let Quality = thisHelper.options.quality;
             Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
             const stream = ytdl(song.url, {
@@ -841,9 +840,9 @@ class Player extends EventEmitter {
                  * error event.
                  * @event Player#error
                  */
-                this.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
+                thisHelper.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
                 queue.repeatMode = false;
-                return this._playSong(guildID, false);
+                return thisHelper._playSong(guildID, false);
             });
 
             setTimeout(() => {
@@ -857,7 +856,7 @@ class Player extends EventEmitter {
                 // When the song ends
                 dispatcher.on('finish', () => {
                     // Play the next song
-                    return this._playSong(guildID, false);
+                    return thisHelper._playSong(guildID, false);
                 });
             }, 1000);
 
