@@ -368,7 +368,7 @@ class Util {
      * @returns {Partial<PlayerOptions>}
      */
     static deserializeOptionsPlayer(options) {
-        if(typeof options === 'object')
+        if(options && typeof options === 'object')
             return { ...this.PlayerOptions, ...options };
         else return this.PlayerOptions;
     }
@@ -378,7 +378,7 @@ class Util {
      * @returns {Partial<PlayOptions>}
      */
     static deserializeOptionsPlay(options) {
-        if(typeof options === 'object')
+        if(options && typeof options === 'object')
             return { ...this.PlayOptions, ...options };
         else if(typeof options === 'string')
             return { ...this.PlayOptions, ...{ search: options } };
@@ -390,7 +390,7 @@ class Util {
      * @returns {Partial<PlayOptions>}
      */
     static deserializeOptionsPlaylist(options) {
-        if(typeof options === 'object')
+        if(options && typeof options === 'object')
             return { ...this.PlaylistOptions, ...options };
         else if(typeof options === 'string')
             return {...this.PlaylistOptions, ...{ search: options } };
@@ -399,12 +399,12 @@ class Util {
 
     /**
      * @param {Partial<Util.ProgressOptions>} options
-     * @returns {ProgressOptions}
+     * @returns {Partial<ProgressOptions>}
      */
     static deserializeOptionsProgress(options) {
-        if(typeof options === 'object')
-            return mergeOptions(this.ProgressOptions, options);
-        else return mergeOptions(this.ProgressOptions);
+        if(options && typeof options === 'object')
+            return { ...this.ProgressOptions, ...options };
+        else return this.ProgressOptions;
     }
 
     /**
