@@ -9,9 +9,9 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 
 ### *We support NodeJS 12-15.*
 
-## **DMP v7.0.0 Update (IMPORTANT):**
+## **DMP v7.0.1 Update (IMPORTANT):**
 - **All methods require now Message Object (easier to use),**
-- **`Queue` is not longer a EventEmitter,**
+- **`Queue` is not longer a EventEmitter and `Queue[]` is now a Discord#Collection,**
 - **`Player` is now a EventEmitter - [Check It Out](#events),**
 - **Fixed issues with Livestreams,**,
 - **Fixed issues with Client leaving without any specific reason,**
