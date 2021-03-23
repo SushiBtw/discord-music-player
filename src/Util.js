@@ -111,6 +111,7 @@ class Util {
         search: '',
         maxSongs: -1,
         requestedBy: null,
+        shuffle: false,
     };
 
     static ProgressOptions =  {

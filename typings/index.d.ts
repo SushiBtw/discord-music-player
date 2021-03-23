@@ -25,6 +25,7 @@ type PlaylistOptions = {
     search: String,
     maxSongs: Number,
     requestedBy: String
+    shuffle: Boolean,
 }
 type ProgressOptions = {
     size: Number,
