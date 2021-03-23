@@ -4,7 +4,6 @@ const Playlist = require('./Playlist');
 const Song = require('./Song');
 const ytsr = require('ytsr');
 const { getPreview, getData } = require("spotify-url-info");
-const mergeOptions = require('merge-options').bind({ignoreUndefined: true});
 const Discord = require('discord.js');
 
 //RegEx Definitions
@@ -366,36 +365,36 @@ class Util {
 
     /**
      * @param {Partial<Util.PlayerOptions>} options
-     * @returns {PlayerOptions}
+     * @returns {Partial<PlayerOptions>}
      */
     static deserializeOptionsPlayer(options) {
         if(typeof options === 'object')
-            return mergeOptions(this.PlayerOptions, options);
-        else return mergeOptions(this.PlayerOptions);
+            return { ...this.PlayerOptions, ...options };
+        else return this.PlayerOptions;
     }
 
     /**
      * @param {Partial<Util.PlayOptions>|String} options
-     * @returns {PlayOptions}
+     * @returns {Partial<PlayOptions>}
      */
     static deserializeOptionsPlay(options) {
         if(typeof options === 'object')
-            return mergeOptions(this.PlayOptions, options);
+            return { ...this.PlayOptions, ...options };
         else if(typeof options === 'string')
-            return mergeOptions(this.PlayOptions, { search: options })
-        else return mergeOptions(this.PlayOptions);
+            return { ...this.PlayOptions, ...{ search: options } };
+        else return this.PlayOptions;
     }
 
     /**
      * @param {Partial<Util.PlaylistOptions>|String} options
-     * @returns {PlaylistOptions}
+     * @returns {Partial<PlayOptions>}
      */
     static deserializeOptionsPlaylist(options) {
         if(typeof options === 'object')
-            return mergeOptions(this.PlaylistOptions, options);
+            return { ...this.PlaylistOptions, ...options };
         else if(typeof options === 'string')
-            return mergeOptions(this.PlaylistOptions, { search: options })
-        else return mergeOptions(this.PlaylistOptions);
+            return {...this.PlaylistOptions, ...{ search: options } };
+        else return this.PlaylistOptions;
     }
 
     /**

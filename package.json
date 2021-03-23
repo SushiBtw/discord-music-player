@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "7.0.0-fix3",
+  "version": "7.0.1",
   "description": "Complete framework to facilitate music commands using discord.js v12",
   "main": "index.js",
   "scripts": {
@@ -31,7 +31,6 @@
   "dependencies": {
     "ffmpeg-static": "^4.2.7",
     "html-entities": "^2.1.0",
-    "merge-options": "^3.0.4",
     "miniget": "^4.2.0",
     "spotify-url-info": "^2.2.0",
     "youtubei": "^0.0.1-rc.14",

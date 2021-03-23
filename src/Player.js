@@ -1,6 +1,5 @@
 const { EventEmitter } = require('events');
 const ytdl = require('ytdl-core');
-const mergeOptions = require('merge-options');
 const ytsr = require('ytsr');
 const Discord = require("discord.js");
 if (Number(Discord.version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
@@ -13,7 +12,7 @@ class Player extends EventEmitter {
 
     /**
      * @param {Discord.Client} client Your Discord Client instance.
-     * @param {Util.PlayerOptions|Partial<Util.PlayerOptions>} options The PlayerOptions object.
+     * @param {Partial<Util.PlayerOptions>} options The PlayerOptions object.
      */
     constructor(client, options = Util.PlayerOptions) {
         super();
@@ -29,12 +28,12 @@ class Player extends EventEmitter {
         this.client = client;
         /**
          * The guilds data.
-         * @type {Map<string,Queue>}
+         * @type {Discord.Collection}
          */
-        this.queues = new Map();
+        this.queues = new Discord.Collection();
         /**
          * Player options.
-         * @type {Util.PlayerOptions}
+         * @type {Partial<Util.PlayerOptions>}
          */
         this.options = options;
         /**
@@ -61,7 +60,7 @@ class Player extends EventEmitter {
     /**
      * Plays a song in a voice channel.
      * @param {Discord.Message} message The Discord Message object.
-     * @param {Util.PlayOptions} options Search options.
+     * @param {Partial<Util.PlayOptions>} options Search options.
      * @returns {Promise<Song>|Null}
      */
     async play(message, options) {
@@ -109,7 +108,7 @@ class Player extends EventEmitter {
              */
             this.emit('songAdd', queue.initMessage, queue, song);
             // Plays the song
-            await this._playSong(queue.guildID, true);
+            await this._playSong(_voiceState.guild.id, true);
 
             return song;
         }
@@ -122,7 +121,7 @@ class Player extends EventEmitter {
     /**
      * Adds a song to the Guild Queue.
      * @param {Discord.Message} message The Discord Message object.
-     * @param {Util.PlayOptions} options Search options.
+     * @param {Partial<Util.PlayOptions>} options Search options.
      * @returns {Promise<Song>|Null}
      */
     async addToQueue(message, options) {
@@ -212,7 +211,7 @@ class Player extends EventEmitter {
     /**
      * Adds a song to the Guild Queue.
      * @param {Discord.Message} message The Discord Message object.
-     * @param {Util.PlaylistOptions} options Search options.
+     * @param {Partial<Util.PlayOptions>} options Search options.
      * @returns {Promise<Playlist>|Null}
      */
     async playlist(message, options) {
@@ -759,7 +758,7 @@ class Player extends EventEmitter {
         // Gets guild queue
         let queue = this.queues.get(guildID);
         // If there isn't any music in the queue
-        if (queue.stopped || queue.songs.length < 2 && !firstPlay && !queue.repeatMode && !queue.repeatQueue) {
+        if (queue.stopped || ((queue.songs.length < 2 && !firstPlay) && (!queue.repeatMode && !queue.repeatQueue))) {
             // Emits stop event
             if (queue.stopped) {
                 // Removes the guild from the guilds list
@@ -774,12 +773,8 @@ class Player extends EventEmitter {
                 return this.emit('queueEnd', queue.initMessage, queue);
             }
             // Emits end event
+            this.emit('queueEnd', queue.initMessage, queue);
             if (this.options.leaveOnEnd) {
-                /**
-                 * queueEnd event.
-                 * @event Player#queueEnd
-                 */
-                this.emit('queueEnd', queue.initMessage, queue);
 
                 // Removes the guild from the guilds list
                 this.queues.delete(guildID);
@@ -793,6 +788,7 @@ class Player extends EventEmitter {
                 }, this.options.timeout);
                 return;
             }
+            return;
         }
         // Add to the end if repeatQueue is enabled
         if(queue.repeatQueue && !seek) {
@@ -818,50 +814,46 @@ class Player extends EventEmitter {
 
         queue.skipped = false;
         let thisHelper = this;
-        setTimeout(function () {
-            let song = queue.songs[0];
-            // Live Video is unsupported
-            if(song.isLive) {
-                thisHelper.emit('error', queue.initMessage, 'LiveUnsupported');
-                queue.repeatMode = false;
-                return thisHelper._playSong(guildID, false);
-            }
-            // Download the song
-            let Quality = thisHelper.options.quality;
-            Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
+        let song = queue.songs[0];
+        // Live Video is unsupported
+        if(song.isLive) {
+            thisHelper.emit('error', queue.initMessage, 'LiveUnsupported');
+            queue.repeatMode = false;
+            return thisHelper._playSong(guildID, false);
+        }
+        // Download the song
+        let Quality = thisHelper.options.quality;
+        Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
-            const stream = ytdl(song.url, {
-                filter: 'audioonly',
-                quality: Quality,
-                dlChunkSize: 0,
-                highWaterMark: 1 << 25,
-            }).on('error', err => {
-                /**
-                 * error event.
-                 * @event Player#error
-                 */
-                thisHelper.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
-                queue.repeatMode = false;
+        const stream = ytdl(song.url, {
+            filter: 'audioonly',
+            quality: Quality,
+            dlChunkSize: 0,
+            highWaterMark: 1 << 25,
+        }).on('error', err => {
+            /**
+             * error event.
+             * @event Player#error
+             */
+            thisHelper.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
+            queue.repeatMode = false;
+            return thisHelper._playSong(guildID, false);
+        });
+
+        setTimeout(() => {
+            if (queue.dispatcher) queue.dispatcher.destroy();
+            let dispatcher = queue.connection.play(stream, {
+                seek: seek / 1000 || 0,
+            });
+            queue.dispatcher = dispatcher;
+            // Set volume
+            dispatcher.setVolumeLogarithmic(queue.volume / 200);
+            // When the song ends
+            dispatcher.on('finish', () => {
+                // Play the next song
                 return thisHelper._playSong(guildID, false);
             });
-
-            setTimeout(() => {
-                if (queue.dispatcher) queue.dispatcher.destroy();
-                let dispatcher = queue.connection.play(stream, {
-                    seek: seek / 1000 || 0,
-                });
-                queue.dispatcher = dispatcher;
-                // Set volume
-                dispatcher.setVolumeLogarithmic(queue.volume / 200);
-                // When the song ends
-                dispatcher.on('finish', () => {
-                    // Play the next song
-                    return thisHelper._playSong(guildID, false);
-                });
-            }, 1000);
-
-        }, 0);
-
+        }, 1000);
     }
 
     /**
