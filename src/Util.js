@@ -433,12 +433,13 @@ class Util {
      */
     static shuffle(array) {
         if(!Array.isArray(array)) return [];
+        const clone = [...array];
         const shuffled = [];
-        while(array.length > 0) 
+        while(clone.length > 0) 
             shuffled.push(
-                array.splice(
+                clone.splice(
                     Math.floor(
-                        Math.random() * array.length
+                        Math.random() * clone.length
                     ), 1
                 )[0]
             );
