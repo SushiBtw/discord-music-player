@@ -182,7 +182,7 @@ client.player
     .on('clientDisconnect', (message, queue) =>
         message.channel.send(`I got disconnected from the channel, music was removed.`))
     // Emitted when there was an error with NonAsync functions.
-    .on('error', (message, error) => {
+    .on('error', (error, message) => {
         switch (error) {
             // Thrown when the YouTube search could not find any song with that query.
             case 'SearchIsNull':
