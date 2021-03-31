@@ -257,7 +257,7 @@ class Player extends EventEmitter {
             let playlist = await Util.getVideoFromPlaylist(options['search'], options['maxSongs'], queue, options['requestedBy']);
             // Shuffles if shuffle option is true
             if (options['shuffle'])
-                playlist.videos = playlist.videos.sort(() => Math.random() - 0.5);
+                playlist.videos = Util.shuffle(playlist.videos);
             // Add all songs to the GuildQueue
             queue.songs = queue.songs.concat(playlist.videos);
             // Updates the queue
@@ -715,7 +715,7 @@ class Player extends EventEmitter {
         }
 
         let currentSong = queue.songs.shift();
-        queue.songs = queue.songs.sort(() => Math.random() - 0.5);
+        queue.songs = Util.shuffle(queue.songs);
         queue.songs.unshift(currentSong);
 
         return queue.songs;

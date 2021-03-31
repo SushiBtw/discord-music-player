@@ -427,6 +427,25 @@ class Util {
         return voice.channel ? voice.channel.constructor.name === Discord.VoiceChannel.name : false;
     }
 
+    /**
+     * @param {Array} array
+     * @return {Array}
+     */
+    static shuffle(array) {
+        if(!Array.isArray(array)) return [];
+        const clone = [...array];
+        const shuffled = [];
+        while(clone.length > 0) 
+            shuffled.push(
+                clone.splice(
+                    Math.floor(
+                        Math.random() * clone.length
+                    ), 1
+                )[0]
+            );
+        return shuffled;
+    }
+
 }
 
 module.exports = Util;
