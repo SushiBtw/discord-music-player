@@ -67,14 +67,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return;
         }
         // Check for Voice Channel
         let _voiceState = message.member.voice;
         if(!Util.isVoice(_voiceState))
         {
-            this.emit('error', message, 'VoiceChannelTypeInvalid');
+            this.emit('error', 'VoiceChannelTypeInvalid', message);
             return;
         }
         // Delete the queue if already exists
@@ -84,7 +84,7 @@ class Player extends EventEmitter {
         if (typeof options['search'] !== 'string' ||
             options['search'].length === 0)
         {
-            this.emit('error', message, 'SongTypeInvalid');
+            this.emit('error', 'SongTypeInvalid', message);
             return;
         }
 
@@ -112,8 +112,8 @@ class Player extends EventEmitter {
 
             return song;
         }
-        catch (err) {
-            this.emit('error', message, err.message || err);
+        catch (err = {}) {
+            this.emit('error', err.message || err, message);
         }
     }
 
@@ -128,14 +128,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
         options = Util.deserializeOptionsPlay(options);
@@ -143,7 +143,7 @@ class Player extends EventEmitter {
         if (typeof options['search'] !== 'string' ||
             options['search'].length === 0)
         {
-            this.emit('error', message, 'SongTypeInvalid');
+            this.emit('error', 'SongTypeInvalid', message);
             return;
         }
         let index = options['index'];
@@ -168,8 +168,8 @@ class Player extends EventEmitter {
 
             return song;
         }
-        catch (err) {
-            this.emit('error', message, err.message || err);
+        catch (err = {}) {
+            this.emit('error', err.message || err, message);
         }
     }
 
@@ -184,19 +184,19 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
         if(isNaN(seek))
         {
-            this.emit('error', message, 'NotANumber');
+            this.emit('error', 'NotANumber', message);
             return;
         }
 
@@ -219,7 +219,7 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return;
         }
         // Gets guild queue
@@ -229,7 +229,7 @@ class Player extends EventEmitter {
             _voiceState = message.member.voice;
             if(!Util.isVoice(_voiceState))
             {
-                this.emit('error', message, 'VoiceChannelTypeInvalid');
+                this.emit('error', 'VoiceChannelTypeInvalid', message);
                 return;
             }
         }
@@ -239,7 +239,7 @@ class Player extends EventEmitter {
         if (typeof options['search'] !== 'string' ||
             options['search'].length === 0)
         {
-            this.emit('error', message, 'SongTypeInvalid');
+            this.emit('error', 'SongTypeInvalid', message);
             return;
         }
 
@@ -274,8 +274,8 @@ class Player extends EventEmitter {
 
             return playlist;
         }
-        catch (err) {
-            this.emit('error', message, err.message || err);
+        catch (err = {}) {
+            this.emit('error', err.message || err, message);
         }
     }
 
@@ -289,14 +289,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
         // Pauses the dispatcher
@@ -316,14 +316,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
         // Resumes the dispatcher
@@ -346,14 +346,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -376,14 +376,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -403,14 +403,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -427,7 +427,7 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets & returns guild queue
@@ -444,14 +444,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
         // Updates queue
@@ -469,14 +469,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
         // Clears queue
@@ -495,14 +495,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -523,14 +523,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -548,14 +548,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -577,14 +577,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -607,14 +607,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -636,14 +636,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -667,14 +667,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -686,7 +686,7 @@ class Player extends EventEmitter {
                 queue.songs = queue.songs.filter((s) => s !== songFound);
             }
         } else {
-            this.emit('error', message, 'NotANumber');
+            this.emit('error', 'NotANumber', message);
             return null;
         }
 
@@ -703,14 +703,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
@@ -732,14 +732,14 @@ class Player extends EventEmitter {
         // Check for Message
         if(!Util.isMessage(message))
         {
-            this.emit('error', message, 'MessageTypeInvalid');
+            this.emit('error', 'MessageTypeInvalid', message);
             return null;
         }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
         {
-            this.emit('error', message, 'QueueIsNull');
+            this.emit('error', 'QueueIsNull', message);
             return null;
         }
 
