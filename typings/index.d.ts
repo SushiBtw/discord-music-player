@@ -10,7 +10,7 @@ interface PlayerEvents {
     queueEnd: [message: Message, queue: Queue];
     songChanged: [message: Message, song: Song];
     songFirst: [message: Message, song: Song];
-    error: [message: Message, message: String];
+    error: [error: String, message: Message];
     clientDisconnect: [message: Message, queue: Queue];
 }
 type PlayOptions = {
