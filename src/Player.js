@@ -112,8 +112,8 @@ class Player extends EventEmitter {
 
             return song;
         }
-        catch (err = {}) {
-            this.emit('error', err.message || err, message);
+        catch (err) {
+            this.emit('error', err instanceof Error ? err.message : err, message);
         }
     }
 
@@ -168,8 +168,8 @@ class Player extends EventEmitter {
 
             return song;
         }
-        catch (err = {}) {
-            this.emit('error', err.message || err, message);
+        catch (err) {
+            this.emit('error', err instanceof Error ? err.message : err, message);
         }
     }
 
@@ -274,8 +274,8 @@ class Player extends EventEmitter {
 
             return playlist;
         }
-        catch (err = {}) {
-            this.emit('error', err.message || err, message);
+        catch (err) {
+            this.emit('error', err instanceof Error ? err.message : err, message);
         }
     }
 
