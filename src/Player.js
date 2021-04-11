@@ -800,14 +800,15 @@ class Player extends EventEmitter {
                 + 'Please do not use repeatMode and repeatQueue together');
             else queue.songs.push(queue.songs[0]);
         }
-
         if (!firstPlay) {
-            if(!queue.repeatMode) queue.songs.shift();
+            let _oldSong;
+            if(!queue.repeatMode)
+                _oldSong = queue.songs.shift();
             /**
              * songChanged event.
              * @event Player#songChanged
              */
-            this.emit('songChanged', queue.initMessage, queue.songs[0]);
+            this.emit('songChanged', queue.initMessage, queue.songs[0], _oldSong);
         } else {
             /**
              * songFirst event.
