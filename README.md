@@ -9,16 +9,12 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 
 ### *We support NodeJS 12-15.*
 
-## **DMP v7.0.1 Update (IMPORTANT):**
-- **All methods require now Message Object (easier to use),**
-- **`Queue` is not longer a EventEmitter and `Queue[]` is now a Discord#Collection,**
-- **`Player` is now a EventEmitter - [Check It Out](#events),**
-- **Fixed issues with Livestreams,**,
-- **Fixed issues with Client leaving without any specific reason,**
-- **Added support for SPOTIFY PLAYLISTS - [Check It Out](#playlist),**
-- **Fixed `setQueueRepeatMode` method,**
-- **Fixed issues with Invalid URL while playing some songs,**
-- **Added ``index: Int`` to [addToQueue Options](#documentation).**
+## **DMP v7.1.0 Update:**
+- **Added [updateQueueOptions](#update-queue-options) method,**
+- **`Queue` contains a `options` object now`,**
+- **Fixed `Player#songChanged` event (it contains `oldSong` now ),**
+- **Fixed `Player#clientDisconnect` event that  was not firing up,**,
+- **Fixed `playlist` method not working while Queue existed.**
 
 # Page Sections
 - **[Installation](#installation)**
@@ -696,6 +692,31 @@ client.on('message', async (message) => {
             message.channel.send('I will now repeat the full queue indefinitely.');
         else message.channel.send('I will not longer repeat the full queue indefinitely.');
 
+    }
+});
+```
+
+### Update Queue Options
+Update the queue options.
+
+**Usage:**
+```js
+client.player.updateQueueOptions(Message, Options);
+```
+**Example**:
+```js
+client.on('message', async (message) => {
+    const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    if (command === 'stayOnChannel') {
+        client.player.updateQueueOptions(message, {
+            leaveOnEnd: true,
+            leaveOnEmpty: true,
+            leaveOnStop: true
+        });
+        
+        message.channel.send('I will now stay on the channel until I get kicked.');
     }
 });
 ```
