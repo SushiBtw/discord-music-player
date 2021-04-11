@@ -8,7 +8,7 @@ interface PlayerEvents {
     songAdd: [message: Message, queue: Queue, song: Song];
     playlistAdd: [message: Message, queue: Queue, playlist: Playlist];
     queueEnd: [message: Message, queue: Queue];
-    songChanged: [message: Message, song: Song];
+    songChanged: [message: Message, newSong: Song, oldSong: Song];
     songFirst: [message: Message, song: Song];
     error: [error: String, message: Message];
     clientDisconnect: [message: Message, queue: Queue];
