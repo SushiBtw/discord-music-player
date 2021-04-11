@@ -261,7 +261,8 @@ class Player extends EventEmitter {
             // Add all songs to the GuildQueue
             queue.songs = queue.songs.concat(playlist.videos);
             // Updates the queue
-            this.queues.set(_voiceState.guild.id, queue);
+            if(!isFirstPlay)
+                this.queues.set(_voiceState.guild.id, queue);
             /**
              * playlistAdd event.
              * @event Player#playlistAdd

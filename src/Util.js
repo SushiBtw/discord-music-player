@@ -278,7 +278,7 @@ class Util {
                  * @type {YouTubeClient.Playlist}
                  */
                 let playlist = await YouTube.getPlaylist(PlaylistID);
-                if (Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
+                if (!playlist || Object.keys(playlist).length === 0) return reject('InvalidPlaylist');
 
                 await Promise.all(playlist.videos = playlist.videos.map((video, index) => {
                     if (max !== -1 && index >= max) return null;
