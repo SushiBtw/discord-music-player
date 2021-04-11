@@ -98,7 +98,7 @@ class Song {
     thumbnail: String;
     queue: Queue;
     isLive: Boolean;
-    requestedBy: String;
+    requestedBy: Object|String;
     seekTime: Number;
 }
 
