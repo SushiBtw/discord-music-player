@@ -12,10 +12,11 @@ class Player extends EventEmitter {
 
     /**
      * @param {Discord.Client} client Your Discord Client instance.
-     * @param {Partial<Util.PlayerOptions>} options The PlayerOptions object.
+     * @param {Partial<Util.PlayerOptions>|Util.PlayerOptions} options The PlayerOptions object.
      */
     constructor(client, options = Util.PlayerOptions) {
         super();
+        options = Util.deserializeOptionsPlayer(options);
         if (!client) throw new SyntaxError('[DMP] Invalid Discord Client');
         if (isNaN(options['timeout'])) throw new TypeError('[DMP] Timeout should be a Number presenting a value in milliseconds.');
         if (isNaN(options['volume'])) throw new TypeError('[DMP] Volume should be a Number presenting a value in percentage.');
@@ -34,7 +35,7 @@ class Player extends EventEmitter {
          * Player options.
          * @type {Util.PlayerOptions}
          */
-        this.options = Util.deserializeOptionsPlayer(options);
+        this.options = options;
         /**
          * ytsr
          * @type {Function || ytsr}
