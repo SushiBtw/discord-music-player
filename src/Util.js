@@ -366,7 +366,7 @@ class Util {
 
     /**
      * @param {Partial<Util.PlayerOptions>} options
-     * @returns {Partial<PlayerOptions>}
+     * @returns {PlayerOptions|Partial<PlayerOptions>}
      */
     static deserializeOptionsPlayer(options) {
         if(options && typeof options === 'object')

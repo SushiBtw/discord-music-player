@@ -16,7 +16,6 @@ class Player extends EventEmitter {
      */
     constructor(client, options = Util.PlayerOptions) {
         super();
-        options = Util.deserializeOptionsPlayer(options);
         if (!client) throw new SyntaxError('[DMP] Invalid Discord Client');
         if (isNaN(options['timeout'])) throw new TypeError('[DMP] Timeout should be a Number presenting a value in milliseconds.');
         if (isNaN(options['volume'])) throw new TypeError('[DMP] Volume should be a Number presenting a value in percentage.');
@@ -33,9 +32,9 @@ class Player extends EventEmitter {
         this.queues = new Discord.Collection();
         /**
          * Player options.
-         * @type {Partial<Util.PlayerOptions>}
+         * @type {Util.PlayerOptions}
          */
-        this.options = options;
+        this.options = Util.deserializeOptionsPlayer(options);
         /**
          * ytsr
          * @type {Function || ytsr}
@@ -726,7 +725,7 @@ class Player extends EventEmitter {
     /**
      * Creates a progress bar per current playing song.
      * @param {Discord.Message} message The Discord Message object.
-     * @param {Util.ProgressOptions} options Progressbar options.
+     * @param {Partial<Util.ProgressOptions>} options Progressbar options.
      * @returns {String}
      */
     createProgressBar(message, options) {
@@ -760,6 +759,9 @@ class Player extends EventEmitter {
      */
     async _playSong(guildID, firstPlay, seek= null) {
         // Gets guild queue
+        /**
+         * @type {?Queue}
+         */
         let queue = this.queues.get(guildID);
         // If there isn't any music in the queue
         if (queue.stopped || ((queue.songs.length < 2 && !firstPlay) && (!queue.repeatMode && !queue.repeatQueue))) {
@@ -767,8 +769,7 @@ class Player extends EventEmitter {
             if (queue.stopped) {
                 // Removes the guild from the guilds list
                 this.queues.delete(guildID);
-
-                if (this.options.leaveOnStop)
+                if (queue.options.leaveOnStop)
                     queue.connection.channel.leave();
                 /**
                  * queueEnd event.
@@ -778,7 +779,7 @@ class Player extends EventEmitter {
             }
             // Emits end event
             this.emit('queueEnd', queue.initMessage, queue);
-            if (this.options.leaveOnEnd) {
+            if (queue.options.leaveOnEnd) {
 
                 // Removes the guild from the guilds list
                 this.queues.delete(guildID);
@@ -789,7 +790,7 @@ class Player extends EventEmitter {
                     if (!queue || queue.songs.length < 1) {
                         return connectionChannel.leave();
                     }
-                }, this.options.timeout);
+                }, queue.options.timeout);
                 return;
             }
             return;
@@ -868,13 +869,11 @@ class Player extends EventEmitter {
      * @param {Discord.VoiceState} newState
      */
     _voiceUpdate(oldState, newState) {
-        if (!this.options.leaveOnEmpty) return;
         // If message leaves the current voice channel
         if (oldState.channelID === newState.channelID) return;
         // Search for a queue for this channel
         let queue = this.queues.get(oldState.guild.id);
         if (queue) {
-            //
             if (!newState.channelID && this.client.user.id === oldState.member.id) {
                 // Disconnect from the voice channel and destroy the stream
                 if(queue.stream) queue.stream.destroy();
@@ -889,9 +888,8 @@ class Player extends EventEmitter {
                 return this.emit('clientDisconnect', queue.initMessage, queue);
             }
             // If the channel is not empty
-            if (queue.connection.channel.members.size > 1) return;
+            if (!queue.options.leaveOnEmpty && queue.connection.channel.members.size > 1) return;
             // Start timeout
-
             setTimeout(() => {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;

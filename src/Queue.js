@@ -1,9 +1,10 @@
 const Discord = require('discord.js')
+const { PlayerOptions } = require('./Util');
 
 /**
  * Represents a guild queue.
  * @param {string} guildID
- * @param {Object} options
+ * @param {PlayerOptions} options
  * @param {Discord.Message} message
  */
 class Queue {
@@ -11,10 +12,10 @@ class Queue {
     /**
      * Represents a guild queue.
      * @param {string} guildID
-     * @param {Object} options
+     * @param {PlayerOptions} options
      * @param {Discord.Message} message
      */
-    constructor(guildID, options = {}, message){
+    constructor(guildID, options, message){
         /**
          * The guild ID.
          * @type {Snowflake}
@@ -70,6 +71,11 @@ class Queue {
          * @type {Discord.Message}
          */
         this.initMessage = message;
+        /**
+         * Queue Options copied from Default Options.
+         * @type {PlayerOptions}
+         */
+        this.options = options;
 
     }
 
