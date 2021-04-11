@@ -71,6 +71,7 @@ class Player {
     remove(message:Message, song:Number):Song
     shuffle(message:Message):Array<Song>
     createProgressBar(message:Message, options?:ProgressOptions):String
+    updateQueueOptions(message: Message, options?:PlayerOptions):void
     _playSong(guildID:String, firstPlay:Boolean, seek:null|Number):void
 }
 
@@ -87,6 +88,7 @@ class Queue {
     repeatMode: Boolean;
     repeatQueue: Boolean;
     initMessage: Message;
+    options: PlayerOptions;
 }
 
 class Song {

@@ -751,6 +751,29 @@ class Player extends EventEmitter {
     }
 
     /**
+     * Updates Queue Options
+     * @param {Discord.Message} message The Discord Message object.
+     * @param {Partial<Util.PlayerOptions>} options Player options.
+     */
+    updateQueueOptions(message, options= {}) {
+        // Check for Message
+        if(!Util.isMessage(message))
+        {
+            this.emit('error', 'MessageTypeInvalid', message);
+            return null;
+        }
+        // Gets guild queue
+        let queue = this.queues.get(message.guild.id);
+        if (!queue)
+        {
+            this.emit('error', 'QueueIsNull', message);
+            return null;
+        }
+
+        queue.options = Object.assign(Util.PlayerOptions, options);
+    }
+
+    /**
      * Start playing songs in a guild.
      * @ignore
      * @param {Discord.Snowflake} guildID
