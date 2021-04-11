@@ -875,7 +875,7 @@ class Player extends EventEmitter {
         let queue = this.queues.get(oldState.guild.id);
         if (queue) {
             //
-            if (!newState.channelID && this.client.user.id === newState.member.id) {
+            if (!newState.channelID && this.client.user.id === oldState.member.id) {
                 // Disconnect from the voice channel and destroy the stream
                 if(queue.stream) queue.stream.destroy();
                 if(queue.connection.channel) queue.connection.channel.leave();
