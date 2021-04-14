@@ -643,7 +643,7 @@ class Player extends EventEmitter {
             return null;
         }
 
-        queue.options = Object.assign(Util.PlayerOptions, options);
+        queue.options = Object.assign({}, Util.PlayerOptions, options);
     }
 
     /**

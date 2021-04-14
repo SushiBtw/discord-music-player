@@ -133,7 +133,7 @@ class Util {
     static getVideoBySearch(search, options = {}, queue, requestedBy) {
         return new Promise(async (resolve, reject) => {
 
-            options = Object.assign(defaultSearchOptions, options);
+            options = Object.assign({}, defaultSearchOptions, options);
             options = pick(options, Object.keys(defaultSearchOptions))
 
             if(SpotifyRegex.test(search)) {
@@ -372,7 +372,7 @@ class Util {
      */
     static deserializeOptionsPlayer(options) {
         if(options && typeof options === 'object')
-            return Object.assign(this.PlayerOptions, options);
+            return Object.assign({}, this.PlayerOptions, options);
         else return this.PlayerOptions;
     }
 
@@ -382,9 +382,9 @@ class Util {
      */
     static deserializeOptionsPlay(options) {
         if(options && typeof options === 'object')
-            return Object.assign(this.PlayOptions, options);
+            return Object.assign({}, this.PlayOptions, options);
         else if(typeof options === 'string')
-            return Object.assign(this.PlayOptions, { search: options });
+            return Object.assign({}, this.PlayOptions, { search: options });
         else return this.PlayOptions;
     }
 
@@ -394,9 +394,9 @@ class Util {
      */
     static deserializeOptionsPlaylist(options) {
         if(options && typeof options === 'object')
-            return Object.assign(this.PlaylistOptions, options);
+            return Object.assign({}, this.PlaylistOptions, options);
         else if(typeof options === 'string')
-            return Object.assign(this.PlaylistOptions, { search: options });
+            return Object.assign({}, this.PlaylistOptions, { search: options });
         else return this.PlaylistOptions;
     }
 
@@ -406,7 +406,7 @@ class Util {
      */
     static deserializeOptionsProgress(options) {
         if(options && typeof options === 'object')
-            return Object.assign(this.ProgressOptions, options);
+            return Object.assign({}, this.ProgressOptions, options);
         else return this.ProgressOptions;
     }
 
