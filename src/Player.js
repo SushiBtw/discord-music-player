@@ -64,12 +64,6 @@ class Player extends EventEmitter {
      * @returns {Promise<Song>|Null}
      */
     async play(message, options) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return;
-        }
         // Check for Voice Channel
         let _voiceState = message.member.voice;
         if(!Util.isVoice(_voiceState))
@@ -127,12 +121,6 @@ class Player extends EventEmitter {
      * @returns {Promise<Song>|Null}
      */
     async addToQueue(message, options) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -183,12 +171,6 @@ class Player extends EventEmitter {
      * @returns {Promise<Song>|Null}
      */
     async seek(message, seek) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -218,12 +200,6 @@ class Player extends EventEmitter {
      */
     async playlist(message, options) {
         let _voiceState;
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue) {
@@ -291,12 +267,6 @@ class Player extends EventEmitter {
      * @returns {Song}
      */
     pause(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -318,12 +288,6 @@ class Player extends EventEmitter {
      * @returns {Song}
      */
     resume(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -348,12 +312,6 @@ class Player extends EventEmitter {
      * @returns {Boolean}
      */
     stop(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -378,12 +336,6 @@ class Player extends EventEmitter {
      * @returns {Boolean}
      */
     setVolume(message, percentage) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -405,12 +357,6 @@ class Player extends EventEmitter {
      * @returns {Number}
      */
     getVolume(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -429,12 +375,6 @@ class Player extends EventEmitter {
      * @returns {?Queue}
      */
     getQueue(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets & returns guild queue
         return this.queues.get(message.guild.id);
     }
@@ -446,12 +386,6 @@ class Player extends EventEmitter {
      * @returns {Queue}
      */
     setQueue(message, songs) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -471,12 +405,6 @@ class Player extends EventEmitter {
      * @returns {Boolean}
      */
     clearQueue(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -497,12 +425,6 @@ class Player extends EventEmitter {
      * @returns {Song}
      */
     skip(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -525,12 +447,6 @@ class Player extends EventEmitter {
      * @returns {Song}
      */
     nowPlaying(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -550,12 +466,6 @@ class Player extends EventEmitter {
      * @returns {Boolean}
      */
     setQueueRepeatMode(message, enabled) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -579,12 +489,6 @@ class Player extends EventEmitter {
      * @returns {Boolean}
      */
     setRepeatMode(message, enabled) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -609,12 +513,6 @@ class Player extends EventEmitter {
      * @returns {Boolean}
      */
     toggleLoop(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -638,12 +536,6 @@ class Player extends EventEmitter {
      * @returns {Boolean} Returns the current set state
      */
     toggleQueueLoop(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -669,12 +561,6 @@ class Player extends EventEmitter {
      * @returns {?Song}
      */
     remove(message, index) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -705,12 +591,6 @@ class Player extends EventEmitter {
      * @returns {Song[]}
      */
     shuffle(message) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -734,12 +614,6 @@ class Player extends EventEmitter {
      * @returns {String}
      */
     createProgressBar(message, options) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)
@@ -761,12 +635,6 @@ class Player extends EventEmitter {
      * @param {Partial<Util.PlayerOptions>} options Player options.
      */
     updateQueueOptions(message, options= {}) {
-        // Check for Message
-        if(!Util.isMessage(message))
-        {
-            this.emit('error', 'MessageTypeInvalid', message);
-            return null;
-        }
         // Gets guild queue
         let queue = this.queues.get(message.guild.id);
         if (!queue)

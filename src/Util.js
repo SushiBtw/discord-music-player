@@ -411,14 +411,6 @@ class Util {
     }
 
     /**
-     * @param {Discord.Message} message
-     * @return {Boolean}
-     */
-    static isMessage(message) {
-        return message.constructor.name === Discord.Message.name;
-    }
-
-    /**
      * @param {Discord.VoiceState} voice
      * @return {Boolean}
      */
