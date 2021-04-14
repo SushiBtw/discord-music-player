@@ -85,6 +85,7 @@ class Util {
      * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
      * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
      * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
+     * @property {Boolean} deafenOnJoin Whether the bot should deafen while connecting to the voice channel.
      * @property {Number} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
      * @property {Number} volume The default playing volume of the player. | Default: 100
      * @property {String} quality Music quality ['high'/'low'] | Default: high
@@ -93,9 +94,10 @@ class Util {
         leaveOnEnd: true,
         leaveOnStop: true,
         leaveOnEmpty: true,
+        deafenOnJoin: false,
         timeout: 0,
         volume: 100,
-        quality: 'high'
+        quality: 'high',
     };
 
     static PlayOptions = {

@@ -36,6 +36,7 @@ type PlayerOptions = {
     leaveOnEnd: Boolean
     leaveOnStop: Boolean
     leaveOnEmpty: Boolean
+    deafenOnJoin: Boolean
     timeout: Number
     volume: Number
     quality: 'high'|'low'
@@ -120,5 +121,5 @@ class MusicPlayerError {
 }
 
 export const Player:Player
-export const Util:Util
+export const Utils:Util
 export const version:String

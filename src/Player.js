@@ -95,6 +95,8 @@ class Player extends EventEmitter {
             let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
             // Joins the voice channel
             queue.connection = await _voiceState.channel.join();
+            if(this.options['deafenOnJoin'])
+                await queue.connection.voice.setDeaf(true).catch(() => null);
             queue.songs.push(song);
             // Add the queue to the list
             this.queues.set(_voiceState.guild.id, queue);
@@ -249,6 +251,8 @@ class Player extends EventEmitter {
             if (!queue) {
                 // Joins the voice channel if needed
                 connection = await _voiceState.channel.join();
+                if(this.options['deafenOnJoin'])
+                    await queue.connection.voice.setDeaf(true).catch(() => null);
                 // Creates a new guild with data if needed
                 queue = new Queue(_voiceState.guild.id, this.options, message);
                 queue.connection = connection;
