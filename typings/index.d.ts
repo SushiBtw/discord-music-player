@@ -12,6 +12,7 @@ interface PlayerEvents {
     songFirst: [message: Message, song: Song];
     error: [error: String, message: Message];
     clientDisconnect: [message: Message, queue: Queue];
+    clientUndeafen: [message: Message, queue: Queue]
 }
 type PlayOptions = {
     search: String,
