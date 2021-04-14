@@ -892,6 +892,7 @@ class Player extends EventEmitter {
 
     /**
      * Handle a VoiceUpdate
+     * @private
      * @ignore
      * @param {Discord.VoiceState} oldState
      * @param {Discord.VoiceState} newState
@@ -900,6 +901,9 @@ class Player extends EventEmitter {
         // If message leaves the current voice channel
         if (oldState.channelID === newState.channelID) return;
         // Search for a queue for this channel
+        /**
+         * @type {?Queue}
+         */
         let queue = this.queues.get(oldState.guild.id);
         if (queue) {
             if (!newState.channelID && this.client.user.id === oldState.member.id) {
@@ -914,6 +918,8 @@ class Player extends EventEmitter {
                  * @event Player#clientDisconnect
                  */
                 return this.emit('clientDisconnect', queue.initMessage, queue);
+            } else if(queue.options.deafenOnJoin && oldState.serverDeaf && !newState.serverDeaf) {
+                this.emit('clientUndeafen', queue.initMessage, queue);
             }
             // If the channel is not empty
             if (!queue.options.leaveOnEmpty && queue.connection.channel.members.size > 1) return;
