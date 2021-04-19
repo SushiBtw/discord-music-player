@@ -228,7 +228,7 @@ class Player extends EventEmitter {
                 // Joins the voice channel if needed
                 connection = await _voiceState.channel.join();
                 if(this.options['deafenOnJoin'])
-                    await queue.connection.voice.setDeaf(true).catch(() => null);
+                    await connection.voice.setDeaf(true).catch(() => null);
                 // Creates a new guild with data if needed
                 queue = new Queue(_voiceState.guild.id, this.options, message);
                 queue.connection = connection;

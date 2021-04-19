@@ -9,7 +9,8 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 
 ### *We support NodeJS 12-15.*
 
-## **DMP v7.1.2 Update:**
+## **DMP v7.1.3 Update:**
+- **Fixed `playlist` method while `Queue` is empty,**
 - **Added `PlayerOptions#deafenOnJoin` option that auto-deafens the bot while joining the voice channel - [Read More](#player-options),**
 - **Added `PlayerEvent#clientUndeafen` event - [Read More](#events),**
 - **Removed `Message` object checkout while running a method.**
