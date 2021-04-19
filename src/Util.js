@@ -417,8 +417,7 @@ class Util {
     static isVoice(voice) {
         if(voice.constructor.name !== Discord.VoiceState.name)
             return false;
-
-        return voice.channel ? voice.channel.constructor.name === Discord.VoiceChannel.name : false;
+        return voice.channel ? voice.channel.constructor.name === 'VoiceChannel' || voice.channel.constructor.name === 'StageChannel' : false;
     }
 
     /**

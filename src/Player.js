@@ -790,7 +790,7 @@ class Player extends EventEmitter {
             // Handle same channels
             if (oldState.channelID === newState.channelID) return;
             // If the channel is not empty
-            if (!queue.options.leaveOnEmpty && queue.connection.channel.members.size > 1) return;
+            if (!queue.options.leaveOnEmpty || queue.connection.channel.members.size > 1) return;
             // Start timeout
             setTimeout(() => {
                 // If the channel is not empty
