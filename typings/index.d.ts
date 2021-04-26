@@ -34,13 +34,13 @@ type ProgressOptions = {
     block: String,
 }
 type PlayerOptions = {
-    leaveOnEnd: Boolean
-    leaveOnStop: Boolean
-    leaveOnEmpty: Boolean
-    deafenOnJoin: Boolean
-    timeout: Number
-    volume: Number
-    quality: 'high'|'low'
+    leaveOnEnd?: Boolean
+    leaveOnStop?: Boolean
+    leaveOnEmpty?: Boolean
+    deafenOnJoin?: Boolean
+    timeout?: Number
+    volume?: Number
+    quality?: 'high'|'low'
 }
 
 class Player {
