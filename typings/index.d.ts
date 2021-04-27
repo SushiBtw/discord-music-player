@@ -16,22 +16,22 @@ interface PlayerEvents {
 }
 type PlayOptions = {
     search: String,
-    uploadDate: 'hour'|'today'|'week'|'month'|'year',
-    duration: 'short'|'long',
-    sortBy: 'relevance'|'date'|'view count'|'rating',
-    requestedBy: String,
-    index: Number
+    uploadDate?: 'hour'|'today'|'week'|'month'|'year',
+    duration?: 'short'|'long',
+    sortBy?: 'relevance'|'date'|'view count'|'rating',
+    requestedBy?: String,
+    index?: Number
 }
 type PlaylistOptions = {
     search: String,
-    maxSongs: Number,
-    requestedBy: String
-    shuffle: Boolean,
+    maxSongs?: Number,
+    requestedBy?: String
+    shuffle?: Boolean,
 }
 type ProgressOptions = {
-    size: Number,
-    arrow: String,
-    block: String,
+    size?: Number,
+    arrow?: String,
+    block?: String,
 }
 type PlayerOptions = {
     leaveOnEnd?: Boolean
