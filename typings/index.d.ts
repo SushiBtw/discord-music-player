@@ -15,7 +15,7 @@ interface PlayerEvents {
     clientUndeafen: [message: Message, queue: Queue]
 }
 type PlayOptions = {
-    search?: String,
+    search: String,
     uploadDate?: 'hour'|'today'|'week'|'month'|'year',
     duration?: 'short'|'long',
     sortBy?: 'relevance'|'date'|'view count'|'rating',
@@ -23,7 +23,7 @@ type PlayOptions = {
     index?: Number
 }
 type PlaylistOptions = {
-    search?: String,
+    search: String,
     maxSongs?: Number,
     requestedBy?: String
     shuffle?: Boolean,
