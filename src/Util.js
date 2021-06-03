@@ -1,12 +1,25 @@
-const YouTubeClient = require("youtubei");
-const YouTube = new YouTubeClient.Client();
+// Self Definitions
 const Playlist = require('./Playlist');
 const Song = require('./Song');
-const ytsr = require('ytsr');
-const { getPreview, getData } = require("spotify-url-info");
-const Discord = require('discord.js');
+const Queue = require('./Queue');
 
-//RegEx Definitions
+// External Packages
+const Discord = require('discord.js');
+const YTSR = require('ytsr');
+const YouTubeClient = require("youtubei");
+const YouTube = new YouTubeClient.Client();
+const { getPreview, getData } = require("spotify-url-info");
+
+// RegExp Definitions
+const RegExpList = {
+    YouTubeVideo: /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/,
+    YouTubeVideoID: /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/,
+    YouTubePlaylist: /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/,
+    YouTubePlaylistID: /[&?]list=([^&]+)/,
+    Spotify: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
+    SpotifyPlaylist: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
+
+}
 let VideoRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/;
 let VideoRegexID = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 let PlaylistRegex = /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/;
@@ -14,41 +27,41 @@ let PlaylistRegexID = /[&?]list=([^&]+)/;
 let SpotifyRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 let SpotifyPlaylistRegex = /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-){22})(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/;
 
+// Helper Functions
 /**
  * Get ID from YouTube link.
  * @param {String} url
  * @returns {String}
  */
-function youtube_parser(url) {
+function ParseYouTubeVideo(url) {
     const match = url.match(VideoRegexID);
     return (match && match[7].length === 11) ? match[7] : false;
 }
-
 /**
  * Get ID from Playlist link.
  * @param {String} url
  * @returns {String}
  */
-function playlist_parser(url) {
+function ParseYouTubePlaylist(url) {
     const match = url.match(PlaylistRegexID);
     return (match && match[1].length === 34) ? match[1] : false;
 }
 /**
- * Gets Video Duration from Int
- * @param {String|Number} d
- * @returns {String|Number}
+ * Stringify Video duration.
+ * @param {Number} time
+ * @returns {String}
  */
-function getVideoDuration(d) {
+function VideoDurationResolver(time) {
     let date = new Date(null);
-    date.setSeconds(parseInt(d));
+    date.setSeconds(time);
     let duration = date.toISOString().substr(11, 8);
     return duration.replace(/^0(?:0:0?)?/, '');
 }
-
 /**
  * A pure function to pick specific keys from object.
  * @param {Object} obj: The object to pick the specified keys from
  * @param {Array} keys: A list of all keys to pick from obj
+ * @return {Object}
  */
 const pick = (obj, keys) =>
     Object.keys(obj)
@@ -56,71 +69,147 @@ const pick = (obj, keys) =>
         .reduce((acc, key) => {
             acc[key] = obj[key];
             return acc;
-        }, {})
+        }, {});
 
-/**
- * Default search options
- * @property {String} uploadDate Upload date [Options: 'hour', 'today', 'week', 'month', 'year'] | Default: none
- * @property {String} duration Duration [Options: 'short', 'long'] | Default: none
- * @property {String} sortBy Sort by [Options: 'relevance', 'date', 'view count', 'rating'] | Default: relevance
- */
-const defaultSearchOptions = {
+// Options
+const SearchOptions = Object.freeze({
     uploadDate: null,
     duration: null,
     sortBy: 'relevance',
-}
+    limit: 1,
+});
+const PlayerOptions = Object.freeze({
+    leaveOnEnd: true,
+    leaveOnStop: true,
+    leaveOnEmpty: true,
+    deafenOnJoin: false,
+    timeout: 0,
+    volume: 100,
+    quality: 'high',
+});
+const PlayOptions = {
+    search: '',
+    uploadDate: null,
+    duration: null,
+    sortBy: 'relevance',
+    requestedBy: null,
+    index: null
+};
+const PlaylistOptions =  {
+    search: '',
+    maxSongs: -1,
+    requestedBy: null,
+    shuffle: false,
+};
+const ProgressOptions =  {
+    size: 20,
+    arrow: '>',
+    block: '=',
+};
 
 /**
- * Utilities.
+ * Utils Class
  * @ignore
  */
 class Util {
 
-    constructor() { }
+    /**
+     * @param {String} Search
+     * @param {SearchOptions} SOptions
+     * @param {Queue} Queue
+     * @param {String|Object} Requester
+     * @return {Promise<Song[]>}
+     */
+    async search(Search, SOptions, Queue, Requester) {
+        SOptions = Object.assign({}, SearchOptions, SOptions);
+        let Filters;
+
+        // Default Options - Type: Video
+        let FiltersTypes = await YTSR.getFilters(Search);
+        Filters = FiltersTypes.get('Type').get('Video');
+
+        // Custom Options - Upload date: null
+        if (SOptions?.uploadDate !== null)
+            Filters = Array.from(
+                (
+                    await YTSR.getFilters(Filters.url)
+                )
+                    .get('Upload date'), ([name, value]) => ({ name, url: value.url })
+                )
+                    .find(o => o.name.toLowerCase().includes(SOptions?.uploadDate))
+                ?? Filters;
+
+        // Custom Options - Duration: null
+        if (SOptions?.duration !== null)
+            Filters = Array.from(
+                (
+                    await YTSR.getFilters(Filters.url)
+                )
+                    .get('Duration'), ([name, value]) => ({ name, url: value.url })
+                )
+                    .find(o => o.name.toLowerCase().startsWith(SOptions?.duration))
+                ?? Filters;
+
+        // Custom Options - Sort by: relevance
+        if (SOptions?.duration !== null)
+            Filters = Array.from(
+                (
+                    await YTSR.getFilters(Filters.url)
+                )
+                    .get('Sort by'), ([name, value]) => ({ name, url: value.url })
+                )
+                    .find(o => o.name.toLowerCase().includes(SOptions?.sortBy))
+                ?? Filters;
+
+        try {
+            YTSR(
+                Filters.url,
+                {
+                    limit: SOptions?.limit,
+                    nextpageRef: Filters.url,
+                }
+            ).then(Result => {
+                let { items } = Result;
+                if(items[0]?.type?.toLowerCase() !== 'video')
+                    throw 'SearchIsNull';
+
+                items = items.map(item => {
+                    item = {
+                        title: item.title,
+                        duration: item.duration,
+                        channel: {
+                            name: item.author.name,
+                        },
+                        url: item.url,
+                        thumbnail: item.bestThumbnail.url,
+                        isLiveContent: item.isLive
+                    };
+                    return new Song(item, Queue, Requester);
+                })
+
+                return items;
+            })
+        }
+        catch (e) {
+            console.log(e);
+            throw 'SearchIsNull';
+        }
+    }
 
     /**
-     * Player options.
-     * @typedef {PlayerOptions}
-     *
-     * @property {Boolean} leaveOnEnd Whether the bot should leave the current voice channel when the queue ends.
-     * @property {Boolean} leaveOnStop Whether the bot should leave the current voice channel when the stop() function is used.
-     * @property {Boolean} leaveOnEmpty Whether the bot should leave the voice channel if there is no more member in it.
-     * @property {Boolean} deafenOnJoin Whether the bot should deafen while connecting to the voice channel.
-     * @property {Number} timeout After how much time the bot should leave the voice channel after the OnEnd & OnEmpty events. | Default: 0
-     * @property {Number} volume The default playing volume of the player. | Default: 100
-     * @property {String} quality Music quality ['high'/'low'] | Default: high
+     * @return {Promise<Song>}
      */
-    static PlayerOptions = {
-        leaveOnEnd: true,
-        leaveOnStop: true,
-        leaveOnEmpty: true,
-        deafenOnJoin: false,
-        timeout: 0,
-        volume: 100,
-        quality: 'high',
-    };
+    async best() {
 
-    static PlayOptions = {
-        search: '',
-        uploadDate: null,
-        duration: null,
-        sortBy: 'relevance',
-        requestedBy: null,
-        index: null
-    };
+    }
 
-    static PlaylistOptions =  {
-        search: '',
-        maxSongs: -1,
-        requestedBy: null,
-        shuffle: false,
-    };
+    /**
+     * @return {Promise<Playlist>}
+     */
+    async playlist() {
 
-    static ProgressOptions =  {
-        size: 20,
-        arrow: '>',
-        block: '=',
-    };
+    }
+
 
     /**
      * Gets the first youtube results for your search.
