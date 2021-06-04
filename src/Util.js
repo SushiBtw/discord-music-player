@@ -280,14 +280,15 @@ class Util {
                     Requester
                 ).catch(() => null);
                 return Result ? Result[0] : null;
-            }))
-                .filter(V => V);
+            })
+                .filter(V => V)
+            )
             SpotifyResult.videoCount =
                 Limit === -1 ?
-                    SpotifyResult.videoCount :
-                    SpotifyResult.videoCount > Limit ?
+                    SpotifyResult.videos.length :
+                    SpotifyResult.videos.length > Limit ?
                         Limit :
-                        SpotifyResult.videoCount;
+                        SpotifyResult.videos.length;
 
             return new Playlist(SpotifyResult, Queue, Requester);
         } else if(YouTubePlaylistLink) {
