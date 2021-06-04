@@ -1,5 +1,5 @@
 const Discord = require('discord.js')
-const { PlayerOptions } = require('./Util');
+const Util = require('./Util');
 
 /**
  * Represents a guild queue.
@@ -12,7 +12,7 @@ class Queue {
     /**
      * Represents a guild queue.
      * @param {string} guildID
-     * @param {PlayerOptions} options
+     * @param {Util.PlayerOptions} options
      * @param {Discord.Message} message
      */
     constructor(guildID, options, message){

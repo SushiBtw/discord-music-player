@@ -54,13 +54,13 @@ class Player extends EventEmitter {
      * @returns {Boolean} Whether the guild is currently playing songs
      */
     isPlaying(message) {
-        return this.queues.has(message ? message.guild ? message.guild.id : null : null);
+        return this.queues.has(message?.guild?.id);
     }
 
     /**
      * Plays a song in a voice channel.
      * @param {Discord.Message} message The Discord Message object.
-     * @param {Partial<Util.PlayOptions>} options Search options.
+     * @param {Partial<PlayOptions>} options Search options.
      * @returns {Promise<Song>|Null}
      */
     async play(message, options) {
@@ -117,7 +117,7 @@ class Player extends EventEmitter {
     /**
      * Adds a song to the Guild Queue.
      * @param {Discord.Message} message The Discord Message object.
-     * @param {Partial<Util.PlayOptions>} options Search options.
+     * @param {Partial<PlayOptions>} options Search options.
      * @returns {Promise<Song>|Null}
      */
     async addToQueue(message, options) {
@@ -142,7 +142,7 @@ class Player extends EventEmitter {
 
         try {
             // Searches the song
-            let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
+            let song = await Util.best(options['search'], options, queue, options['requestedBy']);
             // Updates the queue
             if(!index)
                 queue.songs.push(song);
@@ -234,7 +234,7 @@ class Player extends EventEmitter {
                 queue.connection = connection;
             }
             // Searches the playlist
-            let playlist = await Util.getVideoFromPlaylist(options['search'], options['maxSongs'], queue, options['requestedBy']);
+            let playlist = await Util.playlist(options['search'], options['maxSongs'], queue, options['requestedBy']);
             // Shuffles if shuffle option is true
             if (options['shuffle'])
                 playlist.videos = Util.shuffle(playlist.videos);
@@ -796,7 +796,7 @@ class Player extends EventEmitter {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
                 // Disconnect from the voice channel and destroy the stream
-                if(queue.stream) queue.stream.destroy();
+                if(queue?.stream) queue.stream.destroy();
                 if(queue.connection.channel) queue.connection.channel.leave();
                 // Delete the queue
                 this.queues.delete(queue.guildID);

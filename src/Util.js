@@ -58,13 +58,7 @@ function VideoDurationResolver(time) {
  */
 class Util {
 
-    // Options
-    static SearchOptions = Object.freeze({
-        uploadDate: null,
-        duration: null,
-        sortBy: 'relevance'
-    });
-    static PlayerOptions = Object.freeze({
+    static PlayerOptions = {
         leaveOnEnd: true,
         leaveOnStop: true,
         leaveOnEmpty: true,
@@ -72,7 +66,7 @@ class Util {
         timeout: 0,
         volume: 100,
         quality: 'high'
-    });
+    };
     static PlayOptions = {
         search: '',
         uploadDate: null,
@@ -95,14 +89,14 @@ class Util {
 
     /**
      * @param {String} Search
-     * @param {SearchOptions} SOptions
+     * @param {Partial<PlayOptions>} SOptions
      * @param {Queue} Queue
      * @param {String} Requester
      * @param {Number} Limit
      * @return {Promise<Song[]>}
      */
     static async search(Search, SOptions, Queue, Requester, Limit = 1) {
-        SOptions = Object.assign({}, this.SearchOptions, SOptions);
+        SOptions = Object.assign({}, this.PlayOptions, SOptions);
         let Filters;
 
         // Default Options - Type: Video
@@ -222,7 +216,7 @@ class Util {
 
     /**
      * @param {String} Search
-     * @param {SearchOptions} SOptions
+     * @param {Partial<PlayOptions>} SOptions
      * @param {Queue} Queue
      * @param {String} Requester
      * @param {Number} Limit
