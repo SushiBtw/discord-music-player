@@ -15,16 +15,14 @@ const testSearchOptions = {
 
 it('Check for Video', async() => {
     let expectedResult = require('./files/video.json');
-    let includedResult = await Util.getVideoBySearch(testStrings.video, testSearchOptions, null, null);
+    let includedResult = await Util.best(testStrings.video, testSearchOptions, null, null);
 
     ASSERT.deepEqual(expectedResult, includedResult);
 }, 10 * 1000);
 
 it('Check for Playlist', async() => {
     let expectedResult = require('./files/playlist.json');
-    let includedResult = await Util.getVideoFromPlaylist(testStrings.playlist, 10, null, null);
-
-    console.log(includedResult);
+    let includedResult = await Util.playlist(testStrings.playlist, null, null, 10);
 
     ASSERT.deepEqual(expectedResult, includedResult);
 }, 10 * 1000);

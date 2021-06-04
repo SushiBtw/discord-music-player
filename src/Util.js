@@ -168,7 +168,6 @@ class Util {
             })
         }
         catch (e) {
-            console.log(e);
             throw 'SearchIsNull';
         }
     }
@@ -244,9 +243,13 @@ class Util {
     }
 
     /**
+     * @param {String} Search
+     * @param {Queue} Queue
+     * @param {String} Requester
+     * @param {Number} Limit
      * @return {Promise<Playlist>}
      */
-    static async playlist(Search, Queue, Requester, Limit) {
+    static async playlist(Search, Queue, Requester, Limit= -1) {
 
         let SpotifyPlaylistLink =
             RegExpList.SpotifyPlaylist.test(Search);
