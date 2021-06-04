@@ -65,46 +65,46 @@ const pick = (obj, keys) =>
             return acc;
         }, {});
 
-// Options
-const SearchOptions = Object.freeze({
-    uploadDate: null,
-    duration: null,
-    sortBy: 'relevance'
-});
-const PlayerOptions = Object.freeze({
-    leaveOnEnd: true,
-    leaveOnStop: true,
-    leaveOnEmpty: true,
-    deafenOnJoin: false,
-    timeout: 0,
-    volume: 100,
-    quality: 'high'
-});
-const PlayOptions = {
-    search: '',
-    uploadDate: null,
-    duration: null,
-    sortBy: 'relevance',
-    requestedBy: null,
-    index: null
-};
-const PlaylistOptions =  {
-    search: '',
-    maxSongs: -1,
-    requestedBy: null,
-    shuffle: false
-};
-const ProgressOptions =  {
-    size: 20,
-    arrow: '>',
-    block: '='
-};
-
 /**
  * Utils Class
  * @ignore
  */
 class Util {
+
+    // Options
+    SearchOptions = Object.freeze({
+        uploadDate: null,
+        duration: null,
+        sortBy: 'relevance'
+    });
+    PlayerOptions = Object.freeze({
+        leaveOnEnd: true,
+        leaveOnStop: true,
+        leaveOnEmpty: true,
+        deafenOnJoin: false,
+        timeout: 0,
+        volume: 100,
+        quality: 'high'
+    });
+    PlayOptions = {
+        search: '',
+        uploadDate: null,
+        duration: null,
+        sortBy: 'relevance',
+        requestedBy: null,
+        index: null
+    };
+    PlaylistOptions =  {
+        search: '',
+        maxSongs: -1,
+        requestedBy: null,
+        shuffle: false
+    };
+    ProgressOptions =  {
+        size: 20,
+        arrow: '>',
+        block: '='
+    };
 
     /**
      * @param {String} Search
@@ -115,7 +115,7 @@ class Util {
      * @return {Promise<Song[]>}
      */
     async search(Search, SOptions, Queue, Requester, Limit = 1) {
-        SOptions = Object.assign({}, SearchOptions, SOptions);
+        SOptions = Object.assign({}, this.SearchOptions, SOptions);
         let Filters;
 
         // Default Options - Type: Video
