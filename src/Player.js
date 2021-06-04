@@ -86,7 +86,7 @@ class Player extends EventEmitter {
             // Creates a new guild with data
             let queue = new Queue(_voiceState.guild.id, this.options, message);
             // Searches the song
-            let song = await Util.getVideoBySearch(options['search'], options, queue, options['requestedBy']);
+            let song = await Util.best(options['search'], options, queue, options['requestedBy']);
             // Joins the voice channel
             queue.connection = await _voiceState.channel.join();
             if(this.options['deafenOnJoin'])

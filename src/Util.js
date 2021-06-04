@@ -51,19 +51,6 @@ function VideoDurationResolver(time) {
     let duration = date.toISOString().substr(11, 8);
     return duration.replace(/^0(?:0:0?)?/, '');
 }
-/**
- * A pure function to pick specific keys from object.
- * @param {Object} obj: The object to pick the specified keys from
- * @param {Array} keys: A list of all keys to pick from obj
- * @return {Object}
- */
-const pick = (obj, keys) =>
-    Object.keys(obj)
-        .filter(i => keys.includes(i))
-        .reduce((acc, key) => {
-            acc[key] = obj[key];
-            return acc;
-        }, {});
 
 /**
  * Utils Class
@@ -72,12 +59,12 @@ const pick = (obj, keys) =>
 class Util {
 
     // Options
-    SearchOptions = Object.freeze({
+    static SearchOptions = Object.freeze({
         uploadDate: null,
         duration: null,
         sortBy: 'relevance'
     });
-    PlayerOptions = Object.freeze({
+    static PlayerOptions = Object.freeze({
         leaveOnEnd: true,
         leaveOnStop: true,
         leaveOnEmpty: true,
@@ -86,7 +73,7 @@ class Util {
         volume: 100,
         quality: 'high'
     });
-    PlayOptions = {
+    static PlayOptions = {
         search: '',
         uploadDate: null,
         duration: null,
@@ -94,13 +81,13 @@ class Util {
         requestedBy: null,
         index: null
     };
-    PlaylistOptions =  {
+    static PlaylistOptions =  {
         search: '',
         maxSongs: -1,
         requestedBy: null,
         shuffle: false
     };
-    ProgressOptions =  {
+    static ProgressOptions =  {
         size: 20,
         arrow: '>',
         block: '='
@@ -114,7 +101,7 @@ class Util {
      * @param {Number} Limit
      * @return {Promise<Song[]>}
      */
-    async search(Search, SOptions, Queue, Requester, Limit = 1) {
+    static async search(Search, SOptions, Queue, Requester, Limit = 1) {
         SOptions = Object.assign({}, this.SearchOptions, SOptions);
         let Filters;
 
@@ -198,7 +185,7 @@ class Util {
      * @param {String} Requester
      * @return {Promise<Song>}
      */
-    async link(Search, Queue, Requester) {
+    static async link(Search, Queue, Requester) {
 
         let SpotifyLink =
             RegExpList.Spotify.test(Search);
@@ -239,9 +226,9 @@ class Util {
      * @param {Queue} Queue
      * @param {String} Requester
      * @param {Number} Limit
-     * @return {Promise<Song[]>}
+     * @return {Promise<Song>}
      */
-    async best(Search, SOptions, Queue, Requester, Limit = 1) {
+    static async best(Search, SOptions, Queue, Requester, Limit = 1) {
         let Song;
 
         Song = await this.link(
@@ -265,7 +252,7 @@ class Util {
     /**
      * @return {Promise<Playlist>}
      */
-    async playlist(Search, Queue, Requester, Limit) {
+    static async playlist(Search, Queue, Requester, Limit) {
 
         let SpotifyPlaylistLink =
             RegExpList.SpotifyPlaylist.test(Search);
@@ -344,7 +331,7 @@ class Util {
      * @param {Number} ms Milliseconds
      * @returns {String}
      */
-    MillisecondsToTime(ms) {
+    static MillisecondsToTime(ms) {
         const seconds = Math.floor(ms / 1000 % 60);
         const minutes = Math.floor(ms / 60000 % 60);
         const hours = Math.floor(ms / 3600000);
@@ -361,7 +348,7 @@ class Util {
      * @param {String} time Time
      * @returns {number}
      */
-    TimeToMilliseconds(time) {
+    static TimeToMilliseconds(time) {
         const items = time.split(':');
         return items.reduceRight(
             (prev,curr,i,arr) => prev + parseInt(curr) * 60**(arr.length-1-i),
@@ -378,7 +365,7 @@ class Util {
      * @param {String} arrowIcon - Arrow Icon
      * @return {String} - Music Bar
      */
-    buildBar(value, maxValue, size, loadedIcon, arrowIcon) {
+    static buildBar(value, maxValue, size, loadedIcon, arrowIcon) {
         const percentage = value / maxValue;
         const progress = Math.round((size * percentage));
         const emptyProgress = size - progress;
@@ -393,7 +380,7 @@ class Util {
      * @param {Partial<PlayerOptions>} options
      * @returns {PlayerOptions|Partial<PlayerOptions>}
      */
-    deserializeOptionsPlayer(options) {
+    static deserializeOptionsPlayer(options) {
         if(options && typeof options === 'object')
             return Object.assign({}, this.PlayerOptions, options);
         else return this.PlayerOptions;
@@ -403,7 +390,7 @@ class Util {
      * @param {Partial<PlayerOptions>|String} options
      * @returns {Partial<PlayOptions>}
      */
-    deserializeOptionsPlay(options) {
+    static deserializeOptionsPlay(options) {
         if(options && typeof options === 'object')
             return Object.assign({}, this.PlayOptions, options);
         else if(typeof options === 'string')
@@ -415,7 +402,7 @@ class Util {
      * @param {Partial<PlayerOptions>|String} options
      * @returns {Partial<PlayOptions>}
      */
-    deserializeOptionsPlaylist(options) {
+    static deserializeOptionsPlaylist(options) {
         if(options && typeof options === 'object')
             return Object.assign({}, this.PlaylistOptions, options);
         else if(typeof options === 'string')
@@ -427,7 +414,7 @@ class Util {
      * @param {Partial<PlayerOptions>} options
      * @returns {Partial<ProgressOptions>}
      */
-    deserializeOptionsProgress(options) {
+    static deserializeOptionsProgress(options) {
         if(options && typeof options === 'object')
             return Object.assign({}, this.ProgressOptions, options);
         else return this.ProgressOptions;
@@ -437,7 +424,7 @@ class Util {
      * @param {Discord.VoiceState} voice
      * @return {Boolean}
      */
-    isVoice(voice) {
+    static isVoice(voice) {
         if(voice.constructor.name !== Discord.VoiceState.name)
             return false;
         return voice.channel ? voice.channel.constructor.name === 'VoiceChannel' || voice.channel.constructor.name === 'StageChannel' : false;
@@ -447,7 +434,7 @@ class Util {
      * @param {Array} array
      * @return {Array}
      */
-    shuffle(array) {
+    static shuffle(array) {
         if(!Array.isArray(array)) return [];
         const clone = [...array];
         const shuffled = [];
