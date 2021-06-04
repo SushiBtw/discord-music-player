@@ -137,35 +137,34 @@ class Util {
                 ?? Filters;
 
         try {
-            YTSR(
+            let Result = await YTSR(
                 Filters.url,
                 {
                     limit: Limit,
                     nextpageRef: Filters.url,
                 }
-            ).then(Result => {
-                let { items } = Result;
-                if(items[0]?.type?.toLowerCase() !== 'video')
-                    throw 'SearchIsNull';
+            );
 
-                items = items.map(item => {
-                    if(item?.type?.toLowerCase() !== 'video')
-                        return null;
-                    item = {
-                        title: item.title,
-                        duration: item.duration,
-                        channel: {
-                            name: item.author.name,
-                        },
-                        url: item.url,
-                        thumbnail: item.bestThumbnail.url,
-                        isLiveContent: item.isLive
-                    };
-                    return new Song(item, Queue, Requester);
-                }).filter(I => I);
+            let { items } = Result;
 
-                return items;
-            })
+            items = items.map(item => {
+                if(item?.type?.toLowerCase() !== 'video')
+                    return null;
+                item = {
+                    title: item.title,
+                    duration: item.duration,
+                    channel: {
+                        name: item.author.name,
+                    },
+                    url: item.url,
+                    thumbnail: item.bestThumbnail.url,
+                    isLiveContent: item.isLive
+                };
+                return new Song(item, Queue, Requester);
+            }).filter(I => I);
+
+            console.log(items);
+            return items;
         }
         catch (e) {
             throw 'SearchIsNull';
@@ -210,7 +209,7 @@ class Util {
             return new Song(VideoResult, Queue, Requester);
         }
 
-        throw 'SearchIsNull';
+        return null;
     }
 
     /**
@@ -230,14 +229,18 @@ class Util {
             Requester
         );
 
-        if(!Song)
-            Song = (await this.search(
+        if(!Song) {
+            let sub = await this.search(
                 Search,
                 SOptions,
                 Queue,
                 Requester,
                 Limit
-            ))[0];
+            );
+            console.log(sub);
+            Song = sub[0];
+        }
+
 
         return Song;
     }
