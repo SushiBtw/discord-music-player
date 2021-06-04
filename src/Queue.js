@@ -50,7 +50,7 @@ class Queue {
          * The stream volume.
          * @type {Number}
          */
-        this.volume = options.volume || 100;
+        this.volume = options['volume'] ?? 100;
         /**
          * Whether the stream is currently playing.
          * @type {Boolean}
