@@ -163,7 +163,6 @@ class Util {
                 return new Song(item, Queue, Requester);
             }).filter(I => I);
 
-            console.log(items);
             return items;
         }
         catch (e) {
@@ -229,17 +228,14 @@ class Util {
             Requester
         );
 
-        if(!Song) {
-            let sub = await this.search(
+        if(!Song)
+            Song = (await this.search(
                 Search,
                 SOptions,
                 Queue,
                 Requester,
                 Limit
-            );
-            console.log(sub);
-            Song = sub[0];
-        }
+            ))[0];
 
 
         return Song;

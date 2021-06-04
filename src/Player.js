@@ -109,7 +109,6 @@ class Player extends EventEmitter {
             return song;
         }
         catch (err) {
-            console.log(err);
             this.emit('error', err instanceof Error ? err.message : err, message);
         }
     }
