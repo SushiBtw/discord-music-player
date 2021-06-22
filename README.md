@@ -778,6 +778,7 @@ client.on('message', async (message) => {
 ## Contribution and Info
 **This module is used in the following Bots:**
 - **[SsumBOT (550 guilds)](https://ssumbot.xyz/)** made by **[SushiBtw](https://github.com/SushiBtw)**.
+- **[automodbot (450 guilds)](https://automodbot.com/invite/) ** made by **[cwkhan](https://github.com/khanmanan)**.
 - **[SpeckyBot (140 guilds)](https://github.com/SpeckyYT/SpeckyBot/)** made by **[SpeckyYT](https://github.com/SpeckyYT)**.
 
 *Contribute with the module on [the GitHub module page](https://github.com/SushiBtw/discord-music-player/).*
