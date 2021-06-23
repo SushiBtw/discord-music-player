@@ -1,5 +1,5 @@
 const { EventEmitter } = require('events');
-const ytdl = require('ytdl-core');
+const ytdl = require('@sushibtw/ytdl-core');
 const ytsr = require('ytsr');
 const Discord = require("discord.js");
 if (Number(Discord.version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");
@@ -64,15 +64,19 @@ class Player extends EventEmitter {
      * @returns {Promise<Song>|Null}
      */
     async play(message, options) {
-        // Check for Voice Channel
-        let _voiceState = message.member.voice;
-        if(!Util.isVoice(_voiceState))
-        {
-            this.emit('error', 'VoiceChannelTypeInvalid', message);
-            return;
+        let _voiceState;
+        // Gets guild queue
+        let queue = this.queues.get(message.guild.id);
+        if (!queue) {
+            // Check for Voice Channel
+            _voiceState = message.member.voice;
+            if(!Util.isVoice(_voiceState))
+            {
+                this.emit('error', 'VoiceChannelTypeInvalid', message);
+                return;
+            }
         }
-        // Delete the queue if already exists
-        this.queues.delete(message.guild.id);
+
         options = Util.deserializeOptionsPlay(options);
         // Some last checks
         if (typeof options['search'] !== 'string' ||
@@ -83,28 +87,28 @@ class Player extends EventEmitter {
         }
 
         try {
-            // Creates a new guild with data
-            let queue = new Queue(_voiceState.guild.id, this.options, message);
+            let connection = queue ? queue.connection : null;
+            let isFirstPlay = !!queue;
+            if (!queue) {
+                // Joins the voice channel if needed
+                connection = await _voiceState.channel.join();
+                if(this.options['deafenOnJoin'])
+                    await connection.voice.setDeaf(true).catch(() => null);
+                // Creates a new guild with data if needed
+                queue = new Queue(_voiceState.guild.id, this.options, message);
+                queue.connection = connection;
+            }
             // Searches the song
             let song = await Util.best(options['search'], options, queue, options['requestedBy']);
-            // Joins the voice channel
-            queue.connection = await _voiceState.channel.join();
-            if(this.options['deafenOnJoin'])
-                await queue.connection.voice.setDeaf(true).catch(() => null);
             queue.songs.push(song);
-            // Add the queue to the list
-            this.queues.set(_voiceState.guild.id, queue);
-            /**
-             * songAdd event.
-             * @event Player#songAdd
-             * @type {Object}
-             * @property {Discord.Message} initMessage
-             * @property {Queue} queue
-             * @property {Song} song
-             */
+            // Updates the queue
+            if(!isFirstPlay)
+                this.queues.set(_voiceState.guild.id, queue);
+
             this.emit('songAdd', queue.initMessage, queue, song);
             // Plays the song
-            await this._playSong(_voiceState.guild.id, true);
+            if (!isFirstPlay)
+                await this._playSong(queue.guildID, !isFirstPlay);
 
             return song;
         }
@@ -116,51 +120,14 @@ class Player extends EventEmitter {
 
     /**
      * Adds a song to the Guild Queue.
+     * @deprecated Use play method
      * @param {Discord.Message} message The Discord Message object.
      * @param {Partial<PlayOptions>} options Search options.
      * @returns {Promise<Song>|Null}
      */
     async addToQueue(message, options) {
-        // Gets guild queue
-        let queue = this.queues.get(message.guild.id);
-        if (!queue)
-        {
-            this.emit('error', 'QueueIsNull', message);
-            return null;
-        }
-        options = Util.deserializeOptionsPlay(options);
-        // Some last checks
-        if (typeof options['search'] !== 'string' ||
-            options['search'].length === 0)
-        {
-            this.emit('error', 'SongTypeInvalid', message);
-            return;
-        }
-        let index = options['index'];
-        if (index !== null && typeof index !== 'number')
-            index = null;
-
-        try {
-            // Searches the song
-            let song = await Util.best(options['search'], options, queue, options['requestedBy']);
-            // Updates the queue
-            if(!index)
-                queue.songs.push(song);
-            else queue.songs.splice(index, 0, song);
-            /**
-             * songAdd event.
-             * @event Player#songAdd
-             * @param {Discord.Message} queue.initMessage
-             * @param {Queue} queue
-             * @param {Song} song
-             */
-            this.emit('songAdd', queue.initMessage, queue, song);
-
-            return song;
-        }
-        catch (err) {
-            this.emit('error', err instanceof Error ? err.message : err, message);
-        }
+        console.warn('[DMP] This function is deprecated and will be deleted in the future updates, use play() instead.');
+        return this.play(message, options);
     }
 
 
@@ -189,7 +156,6 @@ class Player extends EventEmitter {
 
         return queue.songs[0];
     }
-
 
 
     /**
