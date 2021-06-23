@@ -7,15 +7,11 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 **We support YouTube Videos, Playlist's, Spotify Songs and even more!**
 *This package was made by **Androz2091** and rewritten by **SushiBtw** using the MIT License Rules.*
 
-### *We support NodeJS 12-15.*
+### *Support for NodeJS 14-16 (LTS and newer).*
 
-## **DMP v7.1.4 Update:**
-- **Fixed `PlayerOptions#leaveOnEmpty` option that fired up even if was set to `false`,**
-- **Added support for StageChannels (only for branches that support them),**
-- **Fixed `playlist` method while `Queue` is empty,**
-- **Added `PlayerOptions#deafenOnJoin` option that auto-deafens the bot while joining the voice channel - [Read More](#player-options),**
-- **Added `PlayerEvent#clientUndeafen` event - [Read More](#events),**
-- **Removed `Message` object checkout while running a method.**
+## **DMP v7.2.0 Update:**
+- **Fixed issues with `404` errors in the past days,**
+- **addToQueue() method is now deprecated, use play() instead.**
 
 # Page Sections
 - **[Installation](#installation)**
@@ -116,10 +112,9 @@ To create a **Guild Queue**, use the **play()** command, then you are able to ma
 ## Methods:
 ### Play Methods
 - **[play(Message, OptionsOrString)](#play)** - Play a Song and init the Server Queue. | Returning: `Promise<Song>`
-- **[addToQueue(Message, OptionsOrString)](#add-to-queue)** - Add a Song to the Server Queue. | Returning: `Promise<Song>`
 - **[playlist(Message, OptionsOrString)](#playlist)** - Add a Playlist to the Server Queue | Returning: `Promise<Playlist>`
 ### Queue Methods
-- **[isPlaying(GuildID)](#add-to-queue)** - Check if a Song is playing in the Guild. | Returning: `Boolean`
+- **[isPlaying(GuildID)](#is-playing)** - Check if a Song is playing in the Guild. | Returning: `Boolean`
 - **[nowPlaying(GuildID)](#now-playing)** - Get the currently playing Song in the Server Queue. | Returning: `Song`
 - **[clearQueue(GuildID)](#clearqueue)** - Clear the Server Queue (without the Playing song). | Returning: `Boolean`
 - **[getQueue(GuildID)](#getqueue)** - Get the Server Queue. | Returning: `Queue`
@@ -293,7 +288,7 @@ client.on('message', async (message) => {
         
         // If there were no errors the Player#songAdd event will fire and the song will not be null.
         if(song)
-            console.log(`Started playing ${song.name}`);
+            console.log(`Playing ${song.name}`);
         return;
     }
     
@@ -306,54 +301,29 @@ client.on('message', async (message) => {
 
         // If there were no errors the Player#songAdd event will fire and the song will not be null.
         if(song)
-            console.log(`Started playing ${song.name}`);
+            console.log(`Playing ${song.name}`);
         return;
     }
 });
 ```
 
-### Add To Queue
-**This part is per isPlaying (``client.player.isPlaying(Message)``) too.**
-Add a Song to the Server Queue if queue already exists.
+### Is Playing
+Check if a Queue exists.
 
 **Usage:**
 ```js
 client.player.isPlaying(Message);
-client.player.addToQueue(Message, OptionsOrString);
 ```
 **Example:**
-*If there is an already playing song, add a new one to the queue.*
 ```js
-client.player.on('songAdd',  (message, queue, song) =>
-    message.channel.send(`**${song.name}** has been added to the queue!`))
-    .on('songFirst',  (message, song) =>
-        message.channel.send(`**${song.name}** is now playing!`));
-
 client.on('message', async (message) => {
     const args = message.content.slice(settings.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-
-    // !play This is the Life
-    // will play/addToQueue "This is the Life" in the Voice Channel
-    // !play https://open.spotify.com/track/5rX6C5QVvvZB7XckETNych?si=WlrC_VZVRlOhuv55V357AQ
-    // will play/addToQueue "All Summer Long" in the Voice Channel
-
-    if(command === 'play'){
-        if(client.player.isPlaying(message)) {
-            let song = await client.player.addToQueue(message, args.join(' '));
-
-            // If there were no errors the Player#songAdd event will fire and the song will not be null.
-            if(song)
-                console.log(`Added ${song.name} to the queue`);
-            return;
-        } else {
-            let song = await client.player.play(message, args.join(' '));
-
-            // If there were no errors the Player#songAdd event will fire and the song will not be null.
-            if(song)
-                console.log(`Started playing ${song.name}`);
-            return;
-        }
+    
+    if(command === 'playing'){
+        if(client.player.isPlaying(message))
+            console.log('Queue exists.');
+        else console.log('Queue does not exist.');
     }
 });
 ```
