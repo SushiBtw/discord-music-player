@@ -200,7 +200,7 @@ class Player extends EventEmitter {
                 queue.connection = connection;
             }
             // Searches the playlist
-            let playlist = await Util.playlist(options['search'], queue, options['requestedBy'], options['maxSongs']);
+            let playlist = await Util.playlist(options['search'], queue, options['requestedBy'], options['maxSongs'], options['localAddress']);
             // Shuffles if shuffle option is true
             if (options['shuffle'])
                 playlist.videos = Util.shuffle(playlist.videos);

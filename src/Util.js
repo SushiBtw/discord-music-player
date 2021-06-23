@@ -251,9 +251,10 @@ class Util {
      * @param {Queue} Queue
      * @param {String} Requester
      * @param {Number} Limit
+     * @param {String?} LocalAddress
      * @return {Promise<Playlist>}
      */
-    static async playlist(Search, Queue, Requester, Limit= -1) {
+    static async playlist(Search, Queue, Requester, Limit= -1, LocalAddress) {
 
         let SpotifyPlaylistLink =
             RegExpList.SpotifyPlaylist.test(Search);
@@ -301,6 +302,7 @@ class Util {
             if (!PlaylistID)
                 throw 'InvalidPlaylist';
 
+            YouTube.options.localAddress = LocalAddress;
             let YouTubeResult = await YouTube.getPlaylist(PlaylistID);
             if (!YouTubeResult || Object.keys(YouTubeResult).length === 0)
                 throw 'InvalidPlaylist';
@@ -440,7 +442,7 @@ class Util {
         if(!Array.isArray(array)) return [];
         const clone = [...array];
         const shuffled = [];
-        while(clone.length > 0) 
+        while(clone.length > 0)
             shuffled.push(
                 clone.splice(
                     Math.floor(
