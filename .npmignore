@@ -11,3 +11,4 @@ coverage
 out
 .vs
 .jsdoc.json
+.github
