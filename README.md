@@ -161,70 +161,113 @@ let TIME = Utils.MillisecondsToTime('2002000'); // Return: 33:22
 client.player
     // Emitted when channel was empty.
     .on('channelEmpty',  (message, queue) =>
-        message.channel.send(`The **${queue.connection.channel}** was empty, music was removed!`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle(`The channel is empty, I have removed the music`).setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when a song was added to the queue.
     .on('songAdd',  (message, queue, song) =>
-        message.channel.send(`**${song.name}** has been added to the queue!`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle(song.name+' has been added to the queue').setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when a playlist was added to the queue.
     .on('playlistAdd',  (message, queue, playlist) =>
-        message.channel.send(`${playlist.name} playlist with ${playlist.videoCount} songs has been added to the queue!`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle(`I just added a playlist with ${playlist.videoCount} songs!`).setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when there was no more music to play.
     .on('queueEnd',  (message, queue) =>
-        message.channel.send(`The queue ended, nothing more to play!`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle('The queue has ended!').setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when a song changed.
     .on('songChanged', (message, newSong, oldSong) =>
-        message.channel.send(`**${newSong.name}** is now playing!`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle(newSong.name+' is now playing!').setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when a first song in the queue started playing (after play method).
     .on('songFirst',  (message, song) =>
-        message.channel.send(`**${song.name}** is now playing!`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle(song.name+' is now playing!').setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when someone disconnected the bot from the channel.
     .on('clientDisconnect', (message, queue) =>
-        message.channel.send(`I got disconnected from the channel, music was removed.`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle('I was disconnected!').setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when deafenOnJoin is true and the bot was undeafened
     .on('clientUndeafen', (message, queue) =>
-        message.channel.send(`I got disconnected from the channel, music was removed.`))
+        message.channel.send(new Discord.MessageEmbed().setColor('#0099ff').setTitle('I was undeafened!').setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp')))
     // Emitted when there was an error with NonAsync functions.
     .on('error', (error, message) => {
         switch (error) {
             // Thrown when the YouTube search could not find any song with that query.
             case 'SearchIsNull':
-                message.channel.send(`No song with that query was found.`);
+              var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Oops... I cant find this song')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the provided YouTube Playlist could not be found.
             case 'InvalidPlaylist':
-                message.channel.send(`No Playlist was found with that link.`);
+              var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Cant find this playlist!')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the provided Spotify Song could not be found.
             case 'InvalidSpotify':
-                message.channel.send(`No Spotify Song was found with that link.`);
+              var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Cant find this song!')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the Guild Queue does not exist (no music is playing).
             case 'QueueIsNull':
-                message.channel.send(`There is no music playing right now.`);
+              var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('There is no music playing right now.')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the Members is not in a VoiceChannel.
             case 'VoiceChannelTypeInvalid':
-                message.channel.send(`You need to be in a Voice Channel to play music.`);
+                var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('You need to be in a voice channel!')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the current playing song was an live transmission (that is unsupported).
             case 'LiveUnsupported':
                 message.channel.send(`We do not support YouTube Livestreams.`);
+                var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('We dont support Youtube streams!')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the current playing song was unavailable.
             case 'VideoUnavailable':
                 message.channel.send(`Something went wrong while playing the current song, skipping...`);
+                var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Error! Skipping song.')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when provided argument was Not A Number.
             case 'NotANumber':
                 message.channel.send(`The provided argument was Not A Number.`);
+                var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Not a number?')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the first method argument was not a Discord Message object.
             case 'MessageTypeInvalid':
-                message.channel.send(`The Message object was not provided.`);
+                var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Not an object!')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
             // Thrown when the Guild Queue does not exist (no music is playing).
             default:
-                message.channel.send(`**Unknown Error Ocurred:** ${error}`);
+                var exampleEmbed = new Discord.MessageEmbed()
+              .setColor('#0099ff')
+              .setTitle('Oops! Unknown Error.')
+              .setFooter('EnderPlus | Made by EnderDigital', 'https://cdn.discordapp.com/avatars/775090086458556437/f11643c3a87aede85667d1c360878beb.webp');
+              message.channel.send(exampleEmbed);
                 break;
         }
     });
