@@ -6,7 +6,6 @@ if (Number(Discord.version.split('.')[0]) < 12) throw new Error("Only the master
 const Queue = require('./Queue');
 const Util = require('./Util');
 const Playlist = require('./Playlist');
-const MusicPlayerError = require('./MusicPlayerError');
 
 class Player extends EventEmitter {
 
@@ -120,7 +119,7 @@ class Player extends EventEmitter {
 
     /**
      * Adds a song to the Guild Queue.
-     * @deprecated Use play method
+     * @deprecated Use play method instead.
      * @param {Discord.Message} message The Discord Message object.
      * @param {Partial<PlayOptions>} options Search options.
      * @returns {Promise<Song>|Null}

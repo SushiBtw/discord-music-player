@@ -1,5 +1,5 @@
 import {Client, VoiceChannel, Message, Snowflake, StreamDispatcher, VoiceConnection} from "discord.js";
-import { Video, Playlist } from "youtubei";
+import { Video, Playlist } from "@sushibtw/youtubei";
 import ytsr from "ytsr";
 import Util from "../src/Util";
 
@@ -20,13 +20,15 @@ type PlayOptions = {
     duration?: 'short'|'long',
     sortBy?: 'relevance'|'date'|'view count'|'rating',
     requestedBy?: String,
-    index?: Number
+    index?: Number,
+    localAddress?: String,
 }
 type PlaylistOptions = {
     search: String,
     maxSongs?: Number,
     requestedBy?: String
     shuffle?: Boolean,
+    localAddress?: String,
 }
 type ProgressOptions = {
     size?: Number,
@@ -53,6 +55,9 @@ class Player {
     public on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
     isPlaying(message:Message):Boolean
     play(message:Message, options:PlayOptions|String):Promise<Song>
+    /**
+     * @deprecated Use play method instead.
+     */
     addToQueue(message:Message, options:PlayOptions|String):Promise<Song>
     seek(message:Message, seek:Number):Promise<Song>
     playlist(message:Message, options:PlaylistOptions|String):Promise<Playlist>
@@ -113,12 +118,6 @@ class Playlist {
     url: String;
     videos: Song[];
     videoCount: Number;
-}
-
-class MusicPlayerError {
-    constructor(error: String) {}
-    type: String;
-    message: String;
 }
 
 export const Player:Player
