@@ -6,7 +6,7 @@ const Queue = require('./Queue');
 // External Packages
 const Discord = require('discord.js');
 const YTSR = require('ytsr');
-const YouTubeClient = require("youtubei");
+const YouTubeClient = require("@sushibtw/youtubei");
 const YouTube = new YouTubeClient.Client();
 const { getPreview, getData } = require("spotify-url-info");
 
@@ -42,7 +42,7 @@ function ParseYouTubePlaylist(url) {
 }
 /**
  * Stringify Video duration.
- * @param {Number} time
+ * @param {String|Number} time
  * @returns {String}
  */
 function VideoDurationResolver(time) {
@@ -65,7 +65,7 @@ class Util {
         deafenOnJoin: false,
         timeout: 0,
         volume: 100,
-        quality: 'high'
+        quality: 'high',
     };
     static PlayOptions = {
         search: '',
@@ -73,13 +73,15 @@ class Util {
         duration: null,
         sortBy: 'relevance',
         requestedBy: null,
-        index: null
+        index: null,
+        localAddress: null
     };
     static PlaylistOptions =  {
         search: '',
         maxSongs: -1,
         requestedBy: null,
-        shuffle: false
+        shuffle: false,
+        localAddress: null
     };
     static ProgressOptions =  {
         size: 20,
@@ -174,9 +176,10 @@ class Util {
      * @param {String} Search
      * @param {Queue} Queue
      * @param {String} Requester
+     * @param {String?} LocalAddress
      * @return {Promise<Song>}
      */
-    static async link(Search, Queue, Requester) {
+    static async link(Search, Queue, Requester, LocalAddress) {
 
         let SpotifyLink =
             RegExpList.Spotify.test(Search);
@@ -201,6 +204,7 @@ class Util {
             let VideoID = ParseYouTubeVideo(Search);
             if (!VideoID) throw 'SearchIsNull';
 
+            YouTube.options.localAddress = LocalAddress;
             let VideoResult = await YouTube.getVideo(VideoID);
             VideoResult['duration'] = VideoDurationResolver(VideoResult?.duration ?? 0);
             VideoResult['url'] = Search;
@@ -225,7 +229,8 @@ class Util {
         Song = await this.link(
             Search,
             Queue,
-            Requester
+            Requester,
+            SOptions?.localAddress
         );
 
         if(!Song)
@@ -303,7 +308,7 @@ class Util {
             YouTubeResult.videos = YouTubeResult.videos.map((video, index) => {
                 if (Limit !== -1 && index >= Limit) return null;
                 video.duration = VideoDurationResolver(video.duration ?? 0);
-                video.url = `http://youtube.com/watch?v=${video.id}`;
+                video.url = `https://youtube.com/watch?v=${video.id}`;
                 video.isLiveContent = video.isLive;
 
                 return new Song(video, Queue, Requester);

@@ -737,7 +737,7 @@ class Player extends EventEmitter {
              * error event.
              * @event Player#error
              */
-            thisHelper.emit('error', queue.initMessage, err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message);
+            thisHelper.emit('error', err.message === 'Video unavailable' ? 'VideoUnavailable' : err.message, queue.initMessage);
             queue.repeatMode = false;
             return thisHelper._playSong(guildID, false);
         });
