@@ -9,7 +9,7 @@ Discord Player is a powerful [Node.js](https://nodejs.org) module that allows yo
 
 ### *Support for NodeJS 14-16 (LTS and newer).*
 
-## **DMP v7.2.0 Update:**
+## **DMP v7.2.1 Update:**
 - **Fixed issues with `404` errors in the past days,**
 - **addToQueue() method is now deprecated, use play() instead.**
 
@@ -82,6 +82,7 @@ new Player(client, {
     leaveOnEmpty: true,
     timeout: 0,
     volume: 150,
+    localAdress: null,
     quality: 'high',
 });
 ```
