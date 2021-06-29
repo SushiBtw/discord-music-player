@@ -1,5 +1,5 @@
 import {Client, VoiceChannel, Message, Snowflake, StreamDispatcher, VoiceConnection} from "discord.js";
-import { Video, Playlist } from "@sushibtw/youtubei";
+import { Video, Playlist } from "youtubei";
 import ytsr from "ytsr";
 import Util from "../src/Util";
 

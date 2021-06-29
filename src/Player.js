@@ -1,5 +1,5 @@
 const { EventEmitter } = require('events');
-const ytdl = require('@sushibtw/ytdl-core');
+const ytdl = require('ytdl-core');
 const ytsr = require('ytsr');
 const Discord = require("discord.js");
 if (Number(Discord.version.split('.')[0]) < 12) throw new Error("Only the master branch of discord.js library is supported for now. Install it using 'npm install discordjs/discord.js'.");

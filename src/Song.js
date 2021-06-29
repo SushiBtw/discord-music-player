@@ -1,4 +1,4 @@
-const YouTubeClient = require("@sushibtw/youtubei");
+const YouTubeClient = require("youtubei");
 /**
  * Represents a song.
  */

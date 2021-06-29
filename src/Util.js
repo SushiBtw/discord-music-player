@@ -6,7 +6,7 @@ const Queue = require('./Queue');
 // External Packages
 const Discord = require('discord.js');
 const YTSR = require('ytsr');
-const YouTubeClient = require("@sushibtw/youtubei");
+const YouTubeClient = require("youtubei");
 const YouTube = new YouTubeClient.Client();
 const { getPreview, getData } = require("spotify-url-info");
 
@@ -204,7 +204,7 @@ class Util {
             let VideoID = ParseYouTubeVideo(Search);
             if (!VideoID) throw 'SearchIsNull';
 
-            YouTube.options.localAddress = LocalAddress;
+            YouTube.options.httpOptions.localAddress = LocalAddress;
             let VideoResult = await YouTube.getVideo(VideoID);
             VideoResult['duration'] = VideoDurationResolver(VideoResult?.duration ?? 0);
             VideoResult['url'] = Search;
@@ -302,7 +302,7 @@ class Util {
             if (!PlaylistID)
                 throw 'InvalidPlaylist';
 
-            YouTube.options.localAddress = LocalAddress;
+            YouTube.options.httpOptions.localAddress = LocalAddress;
             let YouTubeResult = await YouTube.getPlaylist(PlaylistID);
             if (!YouTubeResult || Object.keys(YouTubeResult).length === 0)
                 throw 'InvalidPlaylist';
