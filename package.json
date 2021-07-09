@@ -32,6 +32,7 @@
     "ffmpeg-static": "^4.2.7",
     "html-entities": "^2.1.0",
     "miniget": "^4.2.0",
+    "publish": "^0.6.0",
     "spotify-url-info": "^2.2.0",
     "youtubei": "0.0.1-rc.15",
     "ytdl-core": "^4.8.3",

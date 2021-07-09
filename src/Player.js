@@ -689,7 +689,7 @@ class Player extends EventEmitter {
             return thisHelper._playSong(guildID, false);
         }
         // Download the song
-        let Quality = thisHelper.options.quality;
+        let Quality = queue.options.quality;
         Quality = Quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio';
 
         const stream = ytdl(song.url, {
@@ -736,10 +736,10 @@ class Player extends EventEmitter {
          * @type {?Queue}
          */
         let queue = this.queues.get(oldState.guild.id);
+        let { deafenOnJoin, leaveOnEmpty, timeout } = queue.options;
         if (queue) {
             if (!newState.channelID && this.client.user.id === oldState.member.id) {
-                // Disconnect from the voice channel and destroy the stream
-                if(queue?.stream) queue.stream.destroy();
+                // Disconnect from the voice channel
                 if(queue.connection.channel) queue.connection.channel.leave();
                 // Delete the queue
                 this.queues.delete(queue.guildID);
@@ -749,19 +749,18 @@ class Player extends EventEmitter {
                  * @event Player#clientDisconnect
                  */
                 return this.emit('clientDisconnect', queue.initMessage, queue);
-            } else if(queue.options.deafenOnJoin && oldState.serverDeaf && !newState.serverDeaf) {
+            } else if(deafenOnJoin && oldState.serverDeaf && !newState.serverDeaf) {
                 this.emit('clientUndeafen', queue.initMessage, queue);
             }
             // Handle same channels
             if (oldState.channelID === newState.channelID) return;
             // If the channel is not empty
-            if (!queue.options.leaveOnEmpty || queue.connection.channel.members.size > 1) return;
+            if (!leaveOnEmpty || queue.connection.channel.members.size > 1) return;
             // Start timeout
             setTimeout(() => {
                 // If the channel is not empty
                 if (queue.connection.channel.members.size > 1) return;
-                // Disconnect from the voice channel and destroy the stream
-                if(queue?.stream) queue.stream.destroy();
+                // Disconnect from the voice channel
                 if(queue.connection.channel) queue.connection.channel.leave();
                 // Delete the queue
                 this.queues.delete(queue.guildID);
@@ -771,7 +770,7 @@ class Player extends EventEmitter {
                  * @event Player#channelEmpty
                  */
                 this.emit('channelEmpty', queue.initMessage, queue);
-            }, this.options.timeout);
+            }, timeout);
         }
     }
 
