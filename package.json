@@ -34,7 +34,7 @@
     "miniget": "^4.2.0",
     "publish": "^0.6.0",
     "spotify-url-info": "^2.2.0",
-    "youtubei": "0.0.1-rc.19",
+    "youtubei": "0.0.1-rc.20",
     "ytdl-core": "^4.8.3",
     "ytsr": "^3.3.1"
   },
