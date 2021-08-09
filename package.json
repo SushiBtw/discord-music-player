@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "assert-diff": "^3.0.2",
-    "discord.js": "^12.5.3",
+    "discord.js": "^13.0.1",
     "jest": "^27.0.3",
     "jsdoc": "^3.6.3"
   }
