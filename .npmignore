@@ -1,0 +1,8 @@
+src/
+tslint.json
+tsconfig.json
+.idea/
+.eslintrc.yaml
+.github
+.eslintrc
+.eslintignore
