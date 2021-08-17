@@ -85,7 +85,6 @@ export class Utils {
             return songs as Song[];
         }
         catch (e) {
-            console.log(e);
             throw 'SearchIsNull';
         }
     }
@@ -120,6 +119,26 @@ export class Utils {
             ))[0];
 
         return _Song;
+    }
+
+    /**
+     * @param {any[]}
+     * @returns {any[]}
+     */
+    static shuffle(array: any[]): any[] {
+        if(!Array.isArray(array))
+            return [];
+        const clone = [...array];
+        const shuffled = [];
+        while(clone.length > 0)
+            shuffled.push(
+                clone.splice(
+                    Math.floor(
+                        Math.random() * clone.length
+                    ), 1
+                )[0]
+            );
+        return shuffled;
     }
 
 }

@@ -12,7 +12,7 @@ export class Song {
     public duration: string;
     public isLive: boolean;
     public isFirst: boolean;
-    private seekTime: number;
+    public seekTime: number;
 
     constructor(raw: RawSong, queue: Queue, requestedBy?: User) {
 
@@ -39,7 +39,18 @@ export class Song {
         this.seekTime = 0;
     }
 
-    _setFirst() {
-        this.isFirst = true;
+    /**
+     * Converts duration (HH:MM:SS) to millisecons
+     * @returns {number}
+     */
+    get millisecons(): number {
+        return this.duration.split(':')
+            .reduceRight(
+                (prev, curr, i, arr) => prev + parseInt(curr) * 60**(arr.length-1-i), 0
+            ) * 1000;
+    }
+
+    _setFirst(first: boolean = true) {
+        this.isFirst = first;
     }
 }

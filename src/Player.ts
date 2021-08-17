@@ -36,7 +36,7 @@ class Player extends EventEmitter {
     /**
      * Creates the guild queue.
      * @param {Snowflake} guildId
-     * @param {PlayerOptions} options Queue options (& custom data)
+     * @param {PlayerOptions} options
      * @returns {Queue}
      */
     createQueue(guildId: Snowflake, options: PlayerOptions & { data?: any } = this.options): Queue {
@@ -76,7 +76,7 @@ class Player extends EventEmitter {
     /**
      * Deletes the guild queue.
      * @param {Snowflake} guildId
-     * * @param {Queue} queue
+     * @param {Queue} queue
      * @returns {void}
      */
     setQueue(guildId: Snowflake, queue: Queue): void {

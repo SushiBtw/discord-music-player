@@ -133,11 +133,28 @@ export class StreamConnection extends EventEmitter {
     }
 
     /**
+     * Pauses/Resumes the connection
+     * @param {boolean} state
+     * @returns {boolean}
+     */
+    setPauseState(state: boolean) {
+        if(state) {
+            this.player.pause(true);
+            this.paused = true;
+            return true;
+        } else {
+            this.player.unpause();
+            this.paused = false;
+            return false;
+        }
+    }
+
+    /**
      * Stops and ends the connection
-     * @returns {void}
+     * @returns {boolean}
      */
     stop() {
-        this.player.stop();
+        return this.player.stop();
     }
 
     /**
@@ -188,7 +205,7 @@ export declare interface StreamConnection {
     on<K extends keyof StreamConnectionEvents>(event: K, listener: (...args: StreamConnectionEvents[K]) => void): this;
 }
 
-interface StreamConnectionEvents {
+export interface StreamConnectionEvents {
     start: [AudioResource<Song>];
     end: [AudioResource<Song>];
     error: [AudioPlayerError];

@@ -56,6 +56,8 @@ export class Queue {
         if(this.connection)
             return this;
         const channel = this.guild.channels.resolve(channelId) as StageChannel | VoiceChannel;
+        if(!channel)
+            return 'NoVoiceChannel';
         if (!channel.isVoice())
             throw 'InvalidChannelType';
         let connection = joinVoiceChannel({
@@ -83,7 +85,7 @@ export class Queue {
         this.connection
             .on('start', (resource) => {
                 this.isPlaying = true;
-                if (resource?.metadata?.isFirst)
+                if (resource?.metadata?.isFirst && resource?.metadata?.seekTime !== 0)
                     this.player.emit('songFirst', this, this.nowPlaying);
             })
             .on('end', async (resource) => {
@@ -94,10 +96,13 @@ export class Queue {
                     return this.player.emit('queueEnd', this);
                 } else {
                     if (this.repeatMode === RepeatMode.SONG) {
-                        this.player.emit('songChanged', this, oldSong, oldSong);
-                        return this.play(oldSong as Song, { immediate: true });
+                        this.songs.unshift(oldSong!);
+                        this.songs[0]._setFirst(false);
+                        this.player.emit('songChanged', this, this.songs[0], oldSong);
+                        return this.play(this.songs[0] as Song, { immediate: true });
                     } else if (this.repeatMode === RepeatMode.QUEUE) {
                         this.songs.push(oldSong!);
+                        this.songs[this.songs.length - 1]._setFirst(false);
                         this.player.emit('songChanged', this, this.songs[0], oldSong);
                         return this.play(this.songs[0] as Song, { immediate: true });
                     }
@@ -116,7 +121,7 @@ export class Queue {
      * @param {PlayOptions} options
      * @returns {Promise<Queue>}
      */
-    async play(search: Song | string, options?: PlayOptions & { immediate?: boolean }): Promise<Song> {
+    async play(search: Song | string, options?: PlayOptions & { immediate?: boolean, seek?: number }): Promise<Song> {
         if(this.destroyed) throw 'QueueDestroyed';
         if(!this.connection?.connection)
             throw 'NoVoiceConnection';
@@ -132,12 +137,16 @@ export class Queue {
         } else if(!options?.immediate) {
             song._setFirst();
             this.songs.push(song);
-        }
+        } else if(options.seek)
+            this.songs[0].seekTime = options.seek;
+
+        console.log(this);
 
         let quality = this.options.quality;
 
         let stream = ytdl(song.url, {
             opusEncoded: false,
+            seek: options?.seek ? options.seek / 1000 : 0,
             fmt: 's16le',
             encoderArgs: [],
             quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
@@ -146,7 +155,6 @@ export class Queue {
             .on('error', (error: { message: string; }) => {
                 if(!error.message.toLowerCase().includes("premature close"))
                     this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
-               this.repeatMode = RepeatMode.DISABLED;
                return;
             });
 
@@ -166,18 +174,91 @@ export class Queue {
     }
 
     /**
-     * Destroys the queue
-     * @param {boolean} leaveOnStop
-     * @returns {void}
+     * Seeks the current playing Song
+     * @param {number} time
+     * @returns {boolean}
      */
-    destroy(leaveOnStop = this.options.leaveOnStop) {
-        if(this.destroyed) return;
-        if (this.connection)
-            this.connection.stop();
-        if (leaveOnStop)
-            this.connection?.leave();
-        this.destroyed = true;
-        this.player.deleteQueue(this.guild.id);
+    async seek(time: number) {
+        if(this.destroyed || !this.isPlaying || !this.nowPlaying)
+            return;
+        if(isNaN(time))
+            return;
+        if (time < 1)
+            time = 0;
+        if (time >= this.nowPlaying.millisecons)
+            return this.skip();
+
+        await this.play(this.nowPlaying, {
+            immediate: true,
+            seek: time
+        });
+
+        return true;
+    }
+
+    /**
+     * Skip the current Song
+     * @returs {?Song}
+     */
+    skip(): Song|undefined {
+        if(this.destroyed || !this.connection?.connection)
+            return;
+
+        let newSong = this.songs[1];
+        this.connection.stop();
+        return newSong;
+    }
+
+    /**
+     * Stops playing the Music and cleans the Queue
+     * @returs {void}
+     */
+    stop(): void {
+        if(this.destroyed || !this.connection?.connection)
+            return;
+
+        return this.destroy();
+    }
+
+    /**
+     * Shuffles the Queue
+     * @returns {Song[]}
+     */
+    shuffle(): Song[]|undefined {
+        if(this.destroyed || !this.connection?.connection)
+            return;
+
+        let currentSong = this.songs.shift();
+        this.songs = Utils.shuffle(this.songs);
+        this.songs.unshift(currentSong!);
+
+        return this.songs;
+    }
+
+    /**
+     * Pause/resume the current Song
+     * @returs {boolean}
+     */
+    setPaused(state: boolean): boolean|undefined {
+        if(this.destroyed || !this.connection?.connection)
+            return;
+
+        return this.connection.setPauseState(state);
+    }
+
+    /**
+     * Remove a Song from the Queue
+     * @param {number} index
+     * @returs {?Song}
+     */
+    remove(index: number): Song|undefined {
+        if(this.destroyed || !this.connection?.connection)
+            return;
+        let song = this.songs[index];
+        if (song)
+            this.songs = this.songs.filter((s) => s !== song);
+
+        return song;
     }
 
     /**
@@ -202,11 +283,37 @@ export class Queue {
     }
 
     /**
-     * Returns current track
+     * Returns current playing song
      * @type {Song}
      */
     get nowPlaying() {
         return this.connection.resource?.metadata ?? this.songs[0];
+    }
+
+    /**
+     * Clears the Queue
+     * @returns {void}
+     */
+    clearQueue() {
+        if(this.destroyed) return;
+        let currentlyPlaying = this.songs.shift();
+        this.songs = [ currentlyPlaying! ];
+    }
+
+    /**
+     * Sets Queue repeat mode
+     * @param  {RepeatMode} repeatMode
+     * @returns {boolean}
+     */
+    setRepeatMode(repeatMode: RepeatMode): boolean {
+        if (this.destroyed)
+            return false;
+        if (![RepeatMode.DISABLED, RepeatMode.QUEUE, RepeatMode.SONG].includes(repeatMode))
+            throw 'UnknownRepeatMode';
+        if (repeatMode === this.repeatMode)
+            return false;
+        this.repeatMode = repeatMode;
+        return true;
     }
 
     /**
@@ -216,6 +323,22 @@ export class Queue {
      */
     setData(data: any): void {
         this.data = data;
+    }
+
+    /**
+     * Destroys the queue
+     * @param {boolean} leaveOnStop
+     * @returns {void}
+     * @private
+     */
+    destroy(leaveOnStop = this.options.leaveOnStop) {
+        if(this.destroyed) return;
+        if (this.connection)
+            this.connection.stop();
+        if (leaveOnStop)
+            this.connection?.leave();
+        this.destroyed = true;
+        this.player.deleteQueue(this.guild.id);
     }
 
 }

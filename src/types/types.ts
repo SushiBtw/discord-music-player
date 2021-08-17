@@ -8,7 +8,7 @@ export interface PlayerOptions {
     timeout?: number,
     volume?: number,
     quality?: 'low'|'high',
-    localAdress?: string
+    localAddress?: string
 }
 
 export interface PlayOptions {
