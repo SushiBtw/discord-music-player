@@ -1,7 +1,7 @@
 {
   "name": "discord-music-player",
-  "version": "8.0.0-dev3",
-  "description": "Complete framework to facilitate music commands using discord.js v12",
+  "version": "8.0.0-dev4",
+  "description": "Complete framework to facilitate music commands using discord.js v13",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,10 +14,9 @@
     "bot",
     "framework",
     "discord",
-    "volume",
-    "queue",
     "youtube",
-    "spotify"
+    "spotify",
+    "v13"
   ],
   "repository": {
     "type": "git",
