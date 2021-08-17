@@ -17,9 +17,10 @@ import {
     VoiceConnectionStatus,
     VoiceConnectionDisconnectReason
 } from "@discordjs/voice";
-import { Song } from "../structures/Song";
+import { Song } from "../managers/Song";
 import {StageChannel, VoiceChannel} from "discord.js";
 import { promisify } from 'util';
+import { Readable } from "stream";
 const wait = promisify(setTimeout);
 
 export class StreamConnection extends EventEmitter {
@@ -73,7 +74,7 @@ export class StreamConnection extends EventEmitter {
             ) {
                 this.readyLock = true;
                 try {
-                    await entersState(this.connection, VoiceConnectionStatus.Ready, 20_000);
+                    await this._enterState();
                 } catch {
                     if (this.connection.state.status !== VoiceConnectionStatus.Destroyed) this.connection.destroy();
                 } finally {
@@ -104,6 +105,33 @@ export class StreamConnection extends EventEmitter {
         this.connection.subscribe(this.player);
     }
 
+    createAudioStream(stream: string | Readable , options: { inputType: StreamType, metadata?: any }): AudioResource<Song> {
+        this.resource = createAudioResource(stream, {
+            inputType: options.inputType,
+            inlineVolume: true,
+            metadata: options.metadata
+        });
+
+        return this.resource;
+    }
+
+    async _enterState() {
+        await entersState(this.connection, VoiceConnectionStatus.Ready, 20_000);
+    }
+
+    async playAudioStream(resource: AudioResource<Song>): Promise<this> {
+        if(!resource) throw 'ResourceNotReady';
+        if(!this.resource)
+            this.resource = resource;
+
+        if (this.connection.state.status !== VoiceConnectionStatus.Ready)
+            await this._enterState();
+
+        this.player.play(resource);
+
+        return this;
+    }
+
     /**
      * Stops and ends the connection
      * @returns {void}
@@ -127,7 +155,7 @@ export class StreamConnection extends EventEmitter {
     }
 
     /**
-     * The current volume
+     * Gets the current volume
      * @type {number}
      */
     get volume() {
@@ -135,6 +163,27 @@ export class StreamConnection extends EventEmitter {
         const currentVol = this.resource.volume.volume;
         return Math.round(Math.pow(currentVol, 1 / 1.661) * 100);
     }
+
+    /**
+     * Sets the current volume
+     * @param {number} volume
+     * @returns {boolean}
+     */
+    setVolume(volume: number) {
+        if (!this.resource || this._invalidVolume(volume))
+            return false;
+
+        this.resource.volume?.setVolumeLogarithmic(volume / 200);
+        return true;
+    }
+
+    _invalidVolume(volume: number) {
+        return (
+            isNaN(volume) ||
+            volume >= Infinity ||
+            volume < 0);
+    }
+
 }
 
 export declare interface StreamConnection {

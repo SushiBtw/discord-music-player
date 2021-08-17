@@ -1,6 +1,6 @@
 import { Client, Collection, Snowflake, VoiceState } from "discord.js";
 import EventEmitter from "events";
-import { Queue } from "./structures/Queue";
+import { Queue } from "./managers/Queue";
 import { PlayerOptions, DefaultPlayerOptions } from "./types/types";
 
 class Player extends EventEmitter {
@@ -117,10 +117,10 @@ class Player extends EventEmitter {
         if (!leaveOnEmpty || queue.connection.channel.members.size > 1) return;
         setTimeout(() => {
             if (queue!.connection.channel.members.size > 1) return;
-            queue!.destroy();
+            queue!.destroy(true);
             this.emit('channelEmpty', queue);
         }, timeout);
     }
 }
 
-export {Player};
+export { Player };
