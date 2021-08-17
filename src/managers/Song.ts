@@ -53,4 +53,8 @@ export class Song {
     _setFirst(first: boolean = true) {
         this.isFirst = first;
     }
+
+    toString(): string {
+        return `${this.name} | ${this.author}`;
+    }
 }
