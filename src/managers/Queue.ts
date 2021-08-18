@@ -126,17 +126,16 @@ export class Queue {
         if(!this.connection?.connection)
             throw 'NoVoiceConnection';
         let song = await Utils.best(search, options, this);
-        if(!options?.immediate) {
-            this.player.emit('songAdd', this, song);
-        }
 
         let songLength = this.songs.length;
         if(!options?.immediate && songLength !== 0) {
             this.songs.push(song);
+            this.player.emit('songAdd', this, song);
             return song;
         } else if(!options?.immediate) {
             song._setFirst();
             this.songs.push(song);
+            this.player.emit('songAdd', this, song);
         } else if(options.seek)
             this.songs[0].seekTime = options.seek;
 
