@@ -1,9 +1,9 @@
 import { Client, Collection, Snowflake, VoiceState } from "discord.js";
 import EventEmitter from "events";
 import { Queue } from "./managers/Queue";
-import { PlayerOptions, DefaultPlayerOptions } from "./types/types";
+import { PlayerOptions, DefaultPlayerOptions, PlayerEvents } from "./types/types";
 
-class Player extends EventEmitter {
+export class Player extends EventEmitter {
     public client: Client;
     public queues: Collection<Snowflake, Queue> = new Collection();
     public options: PlayerOptions = DefaultPlayerOptions;
@@ -123,4 +123,6 @@ class Player extends EventEmitter {
     }
 }
 
-export { Player };
+export declare interface Player {
+    on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+}

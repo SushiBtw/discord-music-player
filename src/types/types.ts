@@ -1,4 +1,6 @@
+import {AudioPlayerError, AudioResource } from "@discordjs/voice";
 import {User} from "discord.js";
+import { Song, Queue } from "..";
 
 export interface PlayerOptions {
     leaveOnEnd?: boolean,
@@ -55,4 +57,22 @@ export enum RepeatMode {
     DISABLED,
     SONG,
     QUEUE ,
+}
+
+export interface PlayerEvents {
+    channelEmpty: [queue: Queue];
+    songAdd: [queue: Queue, song: Song];
+    //playlistAdd: [queue: Queue, playlist: Playlist];
+    queueEnd: [queue: Queue];
+    songChanged: [queue: Queue, newSong: Song, oldSong: Song];
+    songFirst: [queue: Queue, song: Song];
+    error: [error: String, queue: Queue];
+    clientDisconnect: [queue: Queue];
+    clientUndeafen: [queue: Queue]
+}
+
+export interface StreamConnectionEvents {
+    start: [AudioResource<Song>];
+    end: [AudioResource<Song>];
+    error: [AudioPlayerError];
 }

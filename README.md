@@ -13,7 +13,7 @@ Package is maintained by [SushiBtw](https://github.com/SushiBtw), but is an earl
 
 ### Requirements:
 - [Discord.js v13](https://www.npmjs.com/package/discord.js),
-- [Node.JS v16](htthttps://nodejs.org/),
+- [Node.JS v16](https://nodejs.org/),
 
 # Installation
 *Node.JS v16 or newer is required to run this module.*
@@ -136,7 +136,7 @@ client.on('messageCreate', async (message) => {
 // Init the event listener only once (at the top of your code).
 client.player
     // Emitted when channel was empty.
-    .on('channelEmpty',  (message, queue) =>
+    .on('channelEmpty',  (queue) =>
         console.log(`The channel is empty, I have removed the music`))
     // Emitted when a song was added to the queue.
     .on('songAdd',  (queue, song) =>

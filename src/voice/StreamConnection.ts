@@ -17,10 +17,10 @@ import {
     VoiceConnectionStatus,
     VoiceConnectionDisconnectReason
 } from "@discordjs/voice";
-import { Song } from "../managers/Song";
 import {StageChannel, VoiceChannel} from "discord.js";
 import { promisify } from 'util';
 import { Readable } from "stream";
+import { StreamConnectionEvents, Song } from "..";
 const wait = promisify(setTimeout);
 
 export class StreamConnection extends EventEmitter {
@@ -203,10 +203,4 @@ export class StreamConnection extends EventEmitter {
 
 export declare interface StreamConnection {
     on<K extends keyof StreamConnectionEvents>(event: K, listener: (...args: StreamConnectionEvents[K]) => void): this;
-}
-
-export interface StreamConnectionEvents {
-    start: [AudioResource<Song>];
-    end: [AudioResource<Song>];
-    error: [AudioPlayerError];
 }
