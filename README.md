@@ -66,7 +66,19 @@ client.on('messageCreate', async (message) => {
     if(command === 'play') {
         let queue = client.player.createQueue(message.guild.id);
         await queue.join(message.member.voice.channel);
-        let song = await queue.play(args.join(' '));
+        let song = await queue.play(args.join(' ')).catch(_ => {
+            if(!guildQueue)
+                queue.stop();
+        });
+    }
+
+    if(command === 'playlist') {
+        let queue = client.player.createQueue(message.guild.id);
+        await queue.join(message.member.voice.channel);
+        let song = await queue.playlist(args.join(' ')).catch(_ => {
+            if(!guildQueue)
+                queue.stop();
+        });
     }
 
     if(command === 'skip') {
@@ -137,26 +149,28 @@ client.on('messageCreate', async (message) => {
 client.player
     // Emitted when channel was empty.
     .on('channelEmpty',  (queue) =>
-        console.log(`The channel is empty, I have removed the music`))
+        console.log(`Everyone left the Voice Channel, queue ended.`))
     // Emitted when a song was added to the queue.
     .on('songAdd',  (queue, song) =>
-        console.log(song.name+' has been added to the queue'))
+        console.log(`Song ${song} was added to the queue.`))
     // Emitted when a playlist was added to the queue.
+    .on('playlistAdd',  (queue, playlist) =>
+        console.log(`Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`))
     // Emitted when there was no more music to play.
     .on('queueEnd',  (queue) =>
-        console.log('The queue has ended!'))
+        console.log(`The queue has ended.`))
     // Emitted when a song changed.
     .on('songChanged', (queue, newSong, oldSong) =>
-        console.log(`${newSong} is now playing!`))
-    // Emitted when a first song in the queue started playing (after play method).
+        console.log(`${newSong} is now playing.`))
+    // Emitted when a first song in the queue started playing.
     .on('songFirst',  (queue, song) =>
-        console.log(`Started playing ${song}!`))
+        console.log(`Started playing ${song}.`))
     // Emitted when someone disconnected the bot from the channel.
     .on('clientDisconnect', (queue) =>
-        console.log('I was disconnected!'))
+        console.log(`I was kicked from the Voice Channel, queue ended.`))
     // Emitted when deafenOnJoin is true and the bot was undeafened
     .on('clientUndeafen', (queue) =>
-        console.log('I was undeafened!'))
+        console.log(`I got undefeanded.`))
     // Emitted when there was an error with NonAsync functions.
     .on('error', (error, queue) => {
         console.log(`Error: ${error} in ${queue.guild.name}`);
