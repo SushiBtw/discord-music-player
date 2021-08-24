@@ -1,13 +1,10 @@
 import {Guild, GuildChannelResolvable, Snowflake, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
-import {Song} from "./Song";
-import {DefaultPlayerOptions, PlayerOptions, PlayOptions, RepeatMode} from "../types/types";
-import { Player } from "../Player";
 import {AudioResource,
     createAudioResource,
     DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus } from "@discordjs/voice";
-import { Utils } from "../utils/Utils";
 import ytdl from "discord-ytdl-core";
+import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode } from "..";
 
 export class Queue {
     public player: Player;
@@ -85,7 +82,7 @@ export class Queue {
         this.connection
             .on('start', (resource) => {
                 this.isPlaying = true;
-                if (resource?.metadata?.isFirst && resource?.metadata?.seekTime !== 0)
+                if (resource?.metadata?.isFirst && resource?.metadata?.seekTime === 0)
                     this.player.emit('songFirst', this, this.nowPlaying);
             })
             .on('end', async (resource) => {
@@ -119,7 +116,7 @@ export class Queue {
      * Plays or Queues a song (in a VoiceChannel)
      * @param {Song | string} search
      * @param {PlayOptions} options
-     * @returns {Promise<Queue>}
+     * @returns {Promise<Song>}
      */
     async play(search: Song | string, options?: PlayOptions & { immediate?: boolean, seek?: number }): Promise<Song> {
         if(this.destroyed) throw 'QueueDestroyed';
@@ -138,8 +135,6 @@ export class Queue {
             this.player.emit('songAdd', this, song);
         } else if(options.seek)
             this.songs[0].seekTime = options.seek;
-
-        console.log(this);
 
         let quality = this.options.quality;
 
@@ -170,6 +165,29 @@ export class Queue {
         });
 
         return song;
+    }
+
+    /**
+     * Plays or Queues a playlist (in a VoiceChannel)
+     * @param {Playlist | string} search
+     * @param {PlaylistOptions} options
+     * @returns {Promise<Playlist>}
+     */
+    async playlist(search: Playlist | string, options?: PlaylistOptions): Promise<Playlist> {
+        if(this.destroyed) throw 'QueueDestroyed';
+        if(!this.connection?.connection)
+            throw 'NoVoiceConnection';
+        let playlist = await Utils.playlist(search, options, this);
+        let songLength = this.songs.length;
+        this.songs.push(...playlist.songs);
+        this.player.emit('playlistAdd', this, playlist);
+
+        if(songLength === 0) {
+            playlist.songs[0]._setFirst();
+            await this.play(playlist.songs[0], { immediate: true });
+        }
+
+        return playlist;
     }
 
     /**

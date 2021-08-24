@@ -1,5 +1,5 @@
 import { User } from 'discord.js';
-import {Player, Queue, RawSong } from '..';
+import { Player, Queue, RawSong, Utils } from '..';
 
 export class Song {
     public player: Player;
@@ -13,6 +13,7 @@ export class Song {
     public isLive: boolean;
     public isFirst: boolean;
     public seekTime: number;
+    public data?: any = null;
 
     constructor(raw: RawSong, queue: Queue, requestedBy?: User) {
 
@@ -37,6 +38,8 @@ export class Song {
         this.isFirst = false;
 
         this.seekTime = 0;
+
+        this.data = null;
     }
 
     /**
@@ -44,14 +47,24 @@ export class Song {
      * @returns {number}
      */
     get millisecons(): number {
-        return this.duration.split(':')
-            .reduceRight(
-                (prev, curr, i, arr) => prev + parseInt(curr) * 60**(arr.length-1-i), 0
-            ) * 1000;
+        return Utils.timeToMs(this.duration);
     }
 
+    /**
+     * @param first
+     * @private
+     */
     _setFirst(first: boolean = true) {
         this.isFirst = first;
+    }
+
+    /**
+     * Set's custom song data
+     * @param {any} data
+     * @returns {void}
+     */
+    setData(data: any): void {
+        this.data = data;
     }
 
     toString(): string {
