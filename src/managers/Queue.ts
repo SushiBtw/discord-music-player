@@ -17,6 +17,12 @@ export class Queue {
     public repeatMode: RepeatMode = RepeatMode.DISABLED;
     public destroyed: boolean = false;
 
+    /**
+     *
+     * @param {Player} player
+     * @param {Guild} guild
+     * @param {PlayerOptions} options
+     */
     constructor(player: Player, guild: Guild, options?: PlayerOptions) {
         /**
          * The guild of the queue

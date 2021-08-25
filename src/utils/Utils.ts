@@ -11,7 +11,10 @@ import {Client, Video as IVideo, VideoCompact} from "youtubei";
 const YouTube = new Client();
 
 export class Utils {
-    constructor() {}
+    /**
+     *
+     */
+    private constructor() {}
 
     static regexList = {
         YouTubeVideo: /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/,

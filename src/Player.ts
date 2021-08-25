@@ -8,6 +8,11 @@ export class Player extends EventEmitter {
     public queues: Collection<Snowflake, Queue> = new Collection();
     public options: PlayerOptions = DefaultPlayerOptions;
 
+    /**
+     *
+     * @param {Client} client
+     * @param {PlayerOptions} options
+     */
     constructor(client: Client, options: PlayerOptions = {}) {
         super();
 

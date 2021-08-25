@@ -15,6 +15,12 @@ export class Song {
     public seekTime: number;
     public data?: any = null;
 
+    /**
+     *
+     * @param {RawSong} raw
+     * @param {Queue} queue
+     * @param {?User} requestedBy
+     */
     constructor(raw: RawSong, queue: Queue, requestedBy?: User) {
 
         this.player = queue.player;
@@ -44,14 +50,14 @@ export class Song {
 
     /**
      * Converts duration (HH:MM:SS) to millisecons
-     * @returns {number}
+     * @type {number}
      */
     get millisecons(): number {
         return Utils.timeToMs(this.duration);
     }
 
     /**
-     * @param first
+     * @param {?boolean} first
      * @private
      */
     _setFirst(first: boolean = true) {
@@ -67,6 +73,10 @@ export class Song {
         this.data = data;
     }
 
+    /**
+     * Song name and author in string representation
+     * @returns {string}
+     */
     toString(): string {
         return `${this.name} | ${this.author}`;
     }

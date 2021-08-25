@@ -31,6 +31,11 @@ export class StreamConnection extends EventEmitter {
     public paused: boolean = false;
     private readyLock = false;
 
+    /**
+     *
+     * @param {VoiceConnection} connection
+     * @param {VoiceChannel|StageChannel} channel
+     */
     constructor(connection: VoiceConnection, channel: VoiceChannel | StageChannel) {
         super();
 
@@ -105,6 +110,12 @@ export class StreamConnection extends EventEmitter {
         this.connection.subscribe(this.player);
     }
 
+    /**
+     *
+     * @param {Readable | string} stream
+     * @param {{ inputType: StreamType, metadata: any|undefined }} options
+     * @returns {AudioResource<Song>}
+     */
     createAudioStream(stream: string | Readable , options: { inputType: StreamType, metadata?: any }): AudioResource<Song> {
         this.resource = createAudioResource(stream, {
             inputType: options.inputType,
@@ -115,10 +126,19 @@ export class StreamConnection extends EventEmitter {
         return this.resource;
     }
 
+    /**
+     * @returns {void}
+     * @private
+     */
     async _enterState() {
         await entersState(this.connection, VoiceConnectionStatus.Ready, 20_000);
     }
 
+    /**
+     *
+     * @param {AudioResource<Song>} resource
+     * @returns {Promise<StreamConnection>}
+     */
     async playAudioStream(resource: AudioResource<Song>): Promise<this> {
         if(!resource) throw 'ResourceNotReady';
         if(!this.resource)
@@ -192,13 +212,18 @@ export class StreamConnection extends EventEmitter {
         return true;
     }
 
+    /**
+     *
+     * @param {number} volume
+     * @returns {boolean}
+     * @private
+     */
     _invalidVolume(volume: number) {
         return (
             isNaN(volume) ||
             volume >= Infinity ||
             volume < 0);
     }
-
 }
 
 export declare interface StreamConnection {
