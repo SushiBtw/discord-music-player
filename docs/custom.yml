@@ -1,4 +1,4 @@
-- name: Discord Music Player
+- name: General
   files:
     - name: Welcome
       id: welcome
