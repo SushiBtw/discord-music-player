@@ -8,7 +8,7 @@
     "build": "tsc",
     "test": "jest test/test.js",
     "docs:pre": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml",
-    "docs:pub": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml --output docs/docs.json"
+    "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml --output docs/docs.json"
   },
   "keywords": [
     "music",
