@@ -119,3 +119,6 @@ dist
 
 # Idea files
 .idea
+
+# Docs files
+docs/docs.json

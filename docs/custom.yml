@@ -1,0 +1,5 @@
+- name: Discord Music Player
+  files:
+    - name: Welcome
+      id: welcome
+      path: ../../README.md
