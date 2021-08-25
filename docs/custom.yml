@@ -1,4 +1,4 @@
-- name: General
+- name: general
   files:
     - name: Welcome
       id: welcome
