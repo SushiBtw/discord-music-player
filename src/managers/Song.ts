@@ -16,12 +16,87 @@ export class Song {
     public data?: any = null;
 
     /**
-     *
+     * Song constructor
      * @param {RawSong} raw
      * @param {Queue} queue
      * @param {?User} requestedBy
      */
     constructor(raw: RawSong, queue: Queue, requestedBy?: User) {
+
+        /**
+         * Player instance
+         * @name Song#player
+         * @type {Player}
+         * @readonly
+         */
+
+        /**
+         * Queue instance
+         * @name Song#queue
+         * @type {Queue}
+         */
+
+        /**
+         * Song name
+         * @name Song#name
+         * @type {string}
+         */
+
+        /**
+         * Song author
+         * @name Song#author
+         * @type {string}
+         */
+
+        /**
+         * Song url
+         * @name Song#url
+         * @type {string}
+         */
+
+        /**
+         * Song thumbnail
+         * @name Song#thumbnail
+         * @type {string}
+         */
+
+        /**
+         * The User who requested the Song
+         * @name Song#requestedBy
+         * @type {string}
+         */
+
+        /**
+         * Song duration
+         * @name Song#duration
+         * @type {string}
+         */
+
+        /**
+         * If the song is a livestream
+         * @name Song#isLive
+         * @type {boolean}
+         */
+
+        /**
+         * If the song is first in the queue
+         * @name Song#isFirst
+         * @type {boolean}
+         * @readonly
+         */
+
+        /**
+         * Song seekTime
+         * @name Song#seekTime
+         * @type {number}
+         * @readonly
+         */
+
+        /**
+         * Song custom data
+         * @name Song#data
+         * @type {any}
+         */
 
         this.player = queue.player;
 

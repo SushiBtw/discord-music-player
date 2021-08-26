@@ -24,22 +24,71 @@ export class Queue {
      * @param {PlayerOptions} options
      */
     constructor(player: Player, guild: Guild, options?: PlayerOptions) {
-        /**
-         * The guild of the queue
-         * @type {Guild}
-         */
-        this.player = player;
 
         /**
-         * The guild of the queue
-         * @type {Guild}
+         * Player instance
+         * @name Queue#player
+         * @type {Player}
+         * @readonly
          */
-        this.guild = guild;
 
         /**
-         * The queue options
+         * Guild instance
+         * @name Queue#guild
+         * @type {Guild}
+         * @readonly
+         */
+
+        /**
+         * Queue connection
+         * @name Queue#connection
+         * @type {StreamConnection}
+         * @readonly
+         */
+
+        /**
+         * Queue songs
+         * @name Queue#songs
+         * @type {Song[]}
+         */
+
+        /**
+         * If Song is playing on the Queue
+         * @name Queue#isPlaying
+         * @type {boolean}
+         * @readonly
+         */
+
+        /**
+         * Queue custom data
+         * @name Queue#data
+         * @type {any}
+         */
+
+        /**
+         * Queue options
+         * @name Queue#options
          * @type {PlayerOptions}
          */
+
+        /**
+         * Queue repeat mode
+         * @name Queue#repeatMode
+         * @type {RepeatMode}
+         */
+
+        /**
+         * If the queue is destroyed
+         * @name Queue#destroyed
+         * @type {boolean}
+         * @readonly
+         */
+
+
+        this.player = player;
+
+        this.guild = guild;
+
         this.options = {};
 
         Object.assign(
@@ -260,9 +309,10 @@ export class Queue {
 
     /**
      * Pause/resume the current Song
+     * @param {boolean} [state=true] Pause state, if none it will pause the Song
      * @returs {boolean}
      */
-    setPaused(state: boolean): boolean|undefined {
+    setPaused(state: boolean = true): boolean|undefined {
         if(this.destroyed || !this.connection?.connection)
             return;
 
@@ -325,7 +375,7 @@ export class Queue {
 
     /**
      * Sets Queue repeat mode
-     * @param  {RepeatMode} repeatMode
+     * @param {RepeatMode} repeatMode
      * @returns {boolean}
      */
     setRepeatMode(repeatMode: RepeatMode): boolean {

@@ -9,7 +9,7 @@ export class Player extends EventEmitter {
     public options: PlayerOptions = DefaultPlayerOptions;
 
     /**
-     *
+     * Player constructor
      * @param {Client} client
      * @param {PlayerOptions} options
      */

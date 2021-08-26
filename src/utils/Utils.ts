@@ -247,6 +247,9 @@ export class Utils {
                     .filter((V: any) => V) as Song[]
             )
 
+            if(SOptions.shuffle)
+                SpotifyResult.songs = this.shuffle(SpotifyResult.songs);
+
             return new Playlist(SpotifyResult, Queue, SOptions.requestedBy);
         } else if(YouTubePlaylistLink) {
             let PlaylistID = this.parsePlaylist(Search);
@@ -280,6 +283,9 @@ export class Utils {
                 } as RawSong, Queue, SOptions.requestedBy);
             })
                 .filter((V: any) => V) as Song[];
+
+            if(SOptions.shuffle)
+                YouTubeResult.songs = this.shuffle(YouTubeResult.songs);
 
             return new Playlist(YouTubeResult, Queue, SOptions.requestedBy);
         }
