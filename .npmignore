@@ -8,3 +8,4 @@ tsconfig.json
 .eslintignore
 *.tgz
 docs
+jsdoc.json
