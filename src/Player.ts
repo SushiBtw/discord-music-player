@@ -18,30 +18,26 @@ export class Player extends EventEmitter {
 
         /**
          * Client object (discord.js)
-         * @name Player#client
          * @type {Client}
          * @readonly
          */
-
-        /**
-         * Player queues
-         * @name Player#queues
-         * @type {Collection<Snowflake, Queue>}
-         */
+        this.client = client;
 
         /**
          * Player options
-         * @name Player#options
          * @type {PlayerOptions}
          */
-
-        this.client = client;
-
         this.options = Object.assign(
             {} as PlayerOptions,
             this.options,
             options
         );
+
+        /**
+         * Player queues
+         * @type {Collection<Snowflake, Queue>}
+         */
+        this.queues = new Collection<Snowflake, Queue>();
 
         this.client.on('voiceStateUpdate',
             (oldState, newState) =>
