@@ -18,7 +18,7 @@ export class Player extends EventEmitter {
 
         /**
          * Client object (discord.js)
-         * @type {Client}
+         * @type {object}
          * @readonly
          */
         this.client = client;
