@@ -137,9 +137,9 @@ export interface RawPlaylist {
 /**
  * The queue repeat mode.
  * Following modes exists:
- * - OFF (0)
- * - SONG (1)
- * - QUEUE (2)
+ * - `OFF` = 0
+ * - `SONG  = 1
+ * - `QUEUE` = 2
  * @typedef {number} RepeatMode
  */
 export enum RepeatMode {
