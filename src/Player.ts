@@ -18,14 +18,25 @@ export class Player extends EventEmitter {
 
         /**
          * Client object (discord.js)
+         * @name Player#client
          * @type {Client}
+         * @readonly
          */
-        this.client = client;
 
         /**
-         * The player options
+         * Player queues
+         * @name Player#queues
+         * @type {Collection<Snowflake, Queue>}
+         */
+
+        /**
+         * Player options
+         * @name Player#options
          * @type {PlayerOptions}
          */
+
+        this.client = client;
+
         this.options = Object.assign(
             {} as PlayerOptions,
             this.options,
