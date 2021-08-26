@@ -118,7 +118,7 @@ export class Song {
 
         this.isFirst = false;
 
-        this.seekTime = 0;
+        this.seekTime = raw.seekTime ?? 0;
 
         this.data = null;
     }

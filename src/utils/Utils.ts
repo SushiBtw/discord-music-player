@@ -17,7 +17,7 @@ export class Utils {
     private constructor() {}
 
     static regexList = {
-        YouTubeVideo: /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(\S+)?$/,
+        YouTubeVideo: /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))((?!channel)(?!user)\/(?:[\w\-]+\?v=|embed\/|v\/)?)((?!channel)(?!user)[\w\-]+)(((.*(\?|\&)t=(\d+))(\D?|\S+?))|\D?|\S+?)$/,
         YouTubeVideoID: /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/,
         YouTubePlaylist: /^((?:https?:)\/\/)?((?:www|m)\.)?((?:youtube\.com)).*(youtu.be\/|list=)([^#&?]*).*/,
         YouTubePlaylistID: /[&?]list=([^&]+)/,
@@ -33,6 +33,16 @@ export class Utils {
     static parseVideo(url: string): string|null {
         const match = url.match(this.regexList.YouTubeVideoID);
         return match ? match[7] : null;
+    }
+
+    /**
+     * Get timecode from YouTube link
+     * @param {string} url
+     * @returns {?string}
+     */
+    static parseVideoTimecode(url: string): string|null {
+        const match = url.match(this.regexList.YouTubeVideo);
+        return match ? match[10] : null;
     }
 
     /**
@@ -158,6 +168,7 @@ export class Utils {
             YouTube.options.httpOptions.localAddress = SOptions.localAddress;
             let VideoResult = await YouTube.getVideo(VideoID) as IVideo;
             if(!VideoResult) throw 'SearchIsNull';
+            let VideoTimecode = this.parseVideoTimecode(Search);
 
             return new Song({
                 name: VideoResult.title,
@@ -166,6 +177,7 @@ export class Utils {
                 author: VideoResult.channel.name,
                 isLive: VideoResult.isLiveContent,
                 thumbnail: VideoResult.thumbnails.best,
+                seekTime: SOptions.timecode && VideoTimecode ? Number(VideoTimecode) * 1000 : null,
             } as RawSong, Queue, SOptions.requestedBy);
         } else return null;
     }
@@ -272,10 +284,7 @@ export class Utils {
             if(YouTubeResultData.videoCount > 100 && (Limit === -1 || Limit > 100))
                 await YouTubeResultData.next(Math.floor((Limit === -1 || Limit > YouTubeResultData.videoCount ? YouTubeResultData.videoCount : Limit - 1) / 100));
 
-            console.log(YouTubeResultData.videos.length);
-
             YouTubeResult.songs = YouTubeResultData.videos.map((video: VideoCompact, index: number) => {
-                console.log(index, Limit !== -1 && index >= Limit);
                 if (Limit !== -1 && index >= Limit)
                     return null;
                 return new Song({

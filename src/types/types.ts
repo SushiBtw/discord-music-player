@@ -31,6 +31,7 @@ export interface PlayerOptions {
  * @param {string} [uploadDate] Search sort by Upload date
  * @param {string} [duration] Search sort by Duration
  * @param {string} [sortBy=relevance] Search sort by Sort by
+ * @param {boolean} [timecode=false] If url with timecode (?t=) provided, will play from that moment
  * @param {User} [requestedBy] The User who requested the Song
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
@@ -38,6 +39,7 @@ export interface PlayOptions {
     uploadDate?: 'hour'|'today'|'week'|'month'|'year',
     duration?: 'short'|'long',
     sortBy?: 'relevance'|'date'|'view count'|'rating',
+    timecode?: boolean,
     requestedBy?: User,
     localAddress?: string
 };
@@ -85,6 +87,7 @@ export const DefaultPlayerOptions: PlayerOptions = {
  */
 export const DefaultPlayOptions: PlayOptions = {
     sortBy: 'relevance',
+    timecode: false
 };
 
 /**
@@ -115,6 +118,7 @@ export interface RawSong {
     thumbnail: string,
     duration: string,
     isLive: boolean
+    seekTime?: number;
 }
 
 /**

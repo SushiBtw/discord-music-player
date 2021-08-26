@@ -186,6 +186,8 @@ export class Queue {
         if(!this.connection?.connection)
             throw 'NoVoiceConnection';
         let song = await Utils.best(search, options, this);
+        if(!options)
+            options = {};
 
         let songLength = this.songs.length;
         if(!options?.immediate && songLength !== 0) {
@@ -200,6 +202,8 @@ export class Queue {
             this.songs[0].seekTime = options.seek;
 
         let quality = this.options.quality;
+        if(song.seekTime)
+            options.seek = song.seekTime;
 
         let stream = ytdl(song.url, {
             opusEncoded: false,
