@@ -272,11 +272,10 @@ export class Utils {
             YouTubeResult.songs = YouTubeResultData.videos.map((video: VideoCompact, index: number) => {
                 if (Limit !== -1 && index >= Limit)
                     return null;
-
                 return new Song({
                     name: video.title,
                     url: `https://youtube.com/watch?v=${video.id}`,
-                    duration: this.msToTime(video.duration ?? 0 * 1000),
+                    duration: this.msToTime((video.duration ?? 0) * 1000),
                     author: video.channel!.name,
                     isLive: video.isLive,
                     thumbnail: video.thumbnails.best,

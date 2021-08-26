@@ -144,8 +144,14 @@ export class Queue {
                 this.isPlaying = false;
                 let oldSong = this.songs.shift();
                 if (this.songs.length === 0 && this.repeatMode === RepeatMode.DISABLED) {
-                    this.destroy();
-                    return this.player.emit('queueEnd', this);
+
+                    this.player.emit('queueEnd', this);
+                    if(this.options.leaveOnEnd)
+                        setTimeout(() => {
+                            if(!this.isPlaying)
+                                this.destroy();
+                        }, this.options.timeout)
+                    return;
                 } else {
                     if (this.repeatMode === RepeatMode.SONG) {
                         this.songs.unshift(oldSong!);
