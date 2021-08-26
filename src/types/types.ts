@@ -205,7 +205,7 @@ export enum RepeatMode {
  * Emitted when there was an error with the Player
  * @event Player#error
  * @param {string} error Error string
- * @param {queue} Queue Queue
+ * @param {Queue} queue Queue
  */
 
 export interface PlayerEvents {

@@ -19,7 +19,7 @@ export class Song {
      * Song constructor
      * @param {RawSong} raw
      * @param {Queue} queue
-     * @param {?User} requestedBy
+     * @param {User} [requestedBy]
      */
     constructor(raw: RawSong, queue: Queue, requestedBy?: User) {
 

@@ -11,7 +11,7 @@ export class Player extends EventEmitter {
     /**
      * Player constructor
      * @param {Client} client
-     * @param {PlayerOptions} options
+     * @param {PlayerOptions} [options={}]
      */
     constructor(client: Client, options: PlayerOptions = {}) {
         super();
