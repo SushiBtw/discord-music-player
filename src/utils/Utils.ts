@@ -206,14 +206,14 @@ export class Utils {
      * @param {string} Search
      * @param {PlaylistOptions} SOptions
      * @param {Queue} Queue
-     * @param {number} Limit
      * @return {Promise<Playlist>}
      */
-    static async playlist(Search: Playlist|string, SOptions: PlaylistOptions = DefaultPlaylistOptions, Queue: Queue, Limit= -1): Promise<Playlist> {
+    static async playlist(Search: Playlist|string, SOptions: PlaylistOptions = DefaultPlaylistOptions, Queue: Queue): Promise<Playlist> {
 
         if(Search instanceof Playlist)
             return Search as Playlist;
 
+        let Limit = SOptions.maxSongs ?? -1;
         let SpotifyPlaylistLink =
             this.regexList.SpotifyPlaylist.test(Search);
         let YouTubePlaylistLink =
@@ -269,7 +269,13 @@ export class Utils {
                 type: 'playlist'
             }
 
+            if(YouTubeResultData.videoCount > 100 && (Limit === -1 || Limit > 100))
+                await YouTubeResultData.next(Math.floor((Limit === -1 || Limit > YouTubeResultData.videoCount ? YouTubeResultData.videoCount : Limit - 1) / 100));
+
+            console.log(YouTubeResultData.videos.length);
+
             YouTubeResult.songs = YouTubeResultData.videos.map((video: VideoCompact, index: number) => {
+                console.log(index, Limit !== -1 && index >= Limit);
                 if (Limit !== -1 && index >= Limit)
                     return null;
                 return new Song({

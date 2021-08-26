@@ -141,6 +141,8 @@ export class Queue {
                     this.player.emit('songFirst', this, this.nowPlaying);
             })
             .on('end', async (resource) => {
+                if(this.destroyed)
+                    return;
                 this.isPlaying = false;
                 let oldSong = this.songs.shift();
                 if (this.songs.length === 0 && this.repeatMode === RepeatMode.DISABLED) {
@@ -412,11 +414,11 @@ export class Queue {
      */
     destroy(leaveOnStop = this.options.leaveOnStop) {
         if(this.destroyed) return;
+        this.destroyed = true;
         if (this.connection)
             this.connection.stop();
         if (leaveOnStop)
             this.connection?.leave();
-        this.destroyed = true;
         this.player.deleteQueue(this.guild.id);
     }
 
