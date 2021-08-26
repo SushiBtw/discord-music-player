@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "8.0.0-dev8",
+  "version": "8.0.0-dev9",
   "description": "Complete framework to facilitate music commands using discord.js v13",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,6 +27,7 @@
   "bugs": {
     "url": "https://github.com/SushiBtw/discord-music-player/issues"
   },
+  "homepage": "https://discord-music-player.js.org/",
   "author": "SushiBtw",
   "license": "MIT",
   "dependencies": {

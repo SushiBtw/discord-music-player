@@ -26,6 +26,9 @@ npm install --save @discordjs/opus
 ```
 **Install [FFMPEG](https://www.ffmpeg.org/download.html)!**
 
+# Documentation
+**Discord Music Player documentation: [https://discord-music-player.js.org/](https://discord-music-player.js.org/)**
+
 # Getting Started
 **The code bellow, will show you how to use DMP in your code.**
 *Please define your **Player** after the **client/bot** definition.*
