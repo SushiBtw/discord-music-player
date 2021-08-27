@@ -1,5 +1,6 @@
 import { Client, Collection, Snowflake, VoiceState } from "discord.js";
 import EventEmitter from "events";
+import { DMPError, DMPErrors } from ".";
 import { Queue } from "./managers/Queue";
 import { PlayerOptions, DefaultPlayerOptions, PlayerEvents } from "./types/types";
 
@@ -60,7 +61,7 @@ export class Player extends EventEmitter {
 
         let guild = this.client.guilds.resolve(guildId);
         if(!guild)
-            throw 'InvalidGuild';
+            throw new DMPError(DMPErrors.INVALID_GUILD);
         if(this.hasQueue(guildId))
             return this.getQueue(guildId) as Queue;
 

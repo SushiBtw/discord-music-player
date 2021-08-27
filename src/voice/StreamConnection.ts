@@ -20,7 +20,7 @@ import {
 import {StageChannel, VoiceChannel} from "discord.js";
 import { promisify } from 'util';
 import { Readable } from "stream";
-import { StreamConnectionEvents, Song } from "..";
+import { StreamConnectionEvents, Song, DMPError, DMPErrors } from "..";
 const wait = promisify(setTimeout);
 
 export class StreamConnection extends EventEmitter {
@@ -32,7 +32,7 @@ export class StreamConnection extends EventEmitter {
     private readyLock = false;
 
     /**
-     *
+     * StreamConnection constructor
      * @param {VoiceConnection} connection
      * @param {VoiceChannel|StageChannel} channel
      */
@@ -140,7 +140,8 @@ export class StreamConnection extends EventEmitter {
      * @returns {Promise<StreamConnection>}
      */
     async playAudioStream(resource: AudioResource<Song>): Promise<this> {
-        if(!resource) throw 'ResourceNotReady';
+        if(!resource)
+            throw new DMPError(DMPErrors.RESOURCE_NOT_READY);
         if(!this.resource)
             this.resource = resource;
 
@@ -197,6 +198,15 @@ export class StreamConnection extends EventEmitter {
         if (!this.resource?.volume) return 100;
         const currentVol = this.resource.volume.volume;
         return Math.round(Math.pow(currentVol, 1 / 1.661) * 100);
+    }
+
+    /**
+     * Gets the stream time
+     * @type {number}
+     */
+    get time() {
+        if (!this.resource) return 0;
+        return this.resource.playbackDuration;
     }
 
     /**

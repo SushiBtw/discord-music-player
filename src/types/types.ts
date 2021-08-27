@@ -60,6 +60,20 @@ export interface PlaylistOptions {
 };
 
 /**
+ * @typedef {object} ProgressBarOptions
+ * @property {boolean} [time=true] If it should add time near the ProgressBar
+ * @property {number} [size=20] Bar size
+ * @property {string} [block==] Bar block
+ * @property {string} [arrow=>] Bar ending
+ */
+export interface ProgressBarOptions {
+    time?: boolean;
+    size?: number;
+    block?: string;
+    arrow?: string;
+}
+
+/**
  * Default player options object
  * @typedef {PlayerOptions}
  * @param {boolean} [leaveOnEnd=true] If it should leave on end
@@ -100,6 +114,21 @@ export const DefaultPlaylistOptions: PlaylistOptions = {
     maxSongs: -1,
     shuffle: false,
 };
+
+/**
+ * Default progress bar options object
+ * @typedef {ProgressBarOptions}
+ * @param {boolean} [time=true] If it should add time near the ProgressBar
+ * @param {number} [size=20] Bar size
+ * @param {string} [block==] Bar block
+ * @param {string} [arrow=>] Bar ending
+ */
+export const DefaultProgressBarOptions: ProgressBarOptions = {
+    time: true,
+    size: 20,
+    block: '=',
+    arrow: '>'
+}
 
 /**
  * Raw Song object
