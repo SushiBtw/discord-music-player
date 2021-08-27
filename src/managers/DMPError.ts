@@ -54,8 +54,8 @@ class DMPError extends Error {
  * - UNKNOWN_REPEAT_MODE = 'UnknownRepeatMode',
  * - RESOURCE_NOT_READY = 'ResourceNotReady',
  * - INVALID_GUILD = 'InvalidGuild'
- * - SEARCH_NULL = 'SearchIsNull',
  * - INVALID_GUILD = 'InvalidGuild',
+ * - SEARCH_NULL = 'SearchIsNull',
  * - INVALID_PLAYLIST = 'InvalidPlaylist',
  * - INVALID_SPOTIFY = 'InvalidSpotify'
  * @typedef {string} DMPErrors
@@ -86,7 +86,10 @@ export enum DMPErrors {
  * - NoVoiceConnection: `There is no Queue#connection [you should use Queue#join()] first.`,
  * - UnknownRepeatMode: `The provided RepeatMode was not valid.`,
  * - ResourceNotReady: `The AudioResource was not ready.`,
- * - InvalidGuild: `The provided Guild was invalid.`
+ * - InvalidGuild: `The provided Guild was invalid.`,
+ * - SearchIsNull: `The was no YouTube song found by that query.`,
+ * - InvalidSpotify: `The was no Spotify song found with that link.`,
+ * - InvalidPlaylist: `There was no Playlist found with that link.`
  * @typedef {DMPErrorMessages}
  */
 export const DMPErrorMessages = {
