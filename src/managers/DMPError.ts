@@ -80,6 +80,7 @@ export enum DMPErrors {
  * - UnknownRepeatMode: `The provided RepeatMode was not valid.`,
  * - ResourceNotReady: `The AudioResource was not ready.`,
  * - InvalidGuild: `The provided Guild was invalid.`
+ * @typedef {DMPErrorMessages}
  */
 export const DMPErrorMessages = {
     Unknown: 'There was an Unknown Error.',
