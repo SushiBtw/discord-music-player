@@ -9,6 +9,18 @@ class DMPError extends Error {
     constructor(code: DMPErrors = DMPErrors.UNKNOWN) {
         super();
 
+        /**
+         * DMPError short name (code)
+         * @name DMPError#name
+         * @type {string}
+         */
+
+        /**
+         * DMPError long message
+         * @name DMPError#message
+         * @type {string}
+         */
+
         this.name = code;
         this.message = DMPErrorMessages[code] ?? DMPErrorMessages[DMPErrors.UNKNOWN];
     }
@@ -68,7 +80,6 @@ export enum DMPErrors {
  * - UnknownRepeatMode: `The provided RepeatMode was not valid.`,
  * - ResourceNotReady: `The AudioResource was not ready.`,
  * - InvalidGuild: `The provided Guild was invalid.`
- * @typedef {DMPErrorMessages}
  */
 export const DMPErrorMessages = {
     Unknown: 'There was an Unknown Error.',
