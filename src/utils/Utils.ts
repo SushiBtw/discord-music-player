@@ -1,6 +1,6 @@
 import {
     Song, Queue, Playlist,
-    PlayerOptions, PlayOptions, PlaylistOptions,
+    PlayerOptions, PlayOptions, PlaylistOptions, DMPErrors,
     DefaultPlayerOptions, DefaultPlayOptions, DefaultPlaylistOptions,
     RawSong, RawPlaylist,
 } from "..";
@@ -130,7 +130,7 @@ export class Utils {
             return songs as Song[];
         }
         catch (e) {
-            throw 'SearchIsNull';
+            throw DMPErrors.SEARCH_NULL;
         }
     }
 
@@ -159,15 +159,15 @@ export class Utils {
                 return SearchResult[0];
             }
             catch(e) {
-                throw 'InvalidSpotify';
+                throw DMPErrors.INVALID_SPOTIFY;
             }
         } else if(YouTubeLink) {
             let VideoID = this.parseVideo(Search);
-            if (!VideoID) throw 'SearchIsNull';
+            if (!VideoID) throw DMPErrors.SEARCH_NULL;
 
             YouTube.options.httpOptions.localAddress = SOptions.localAddress;
             let VideoResult = await YouTube.getVideo(VideoID) as IVideo;
-            if(!VideoResult) throw 'SearchIsNull';
+            if(!VideoResult) throw DMPErrors.SEARCH_NULL;
             let VideoTimecode = this.parseVideoTimecode(Search);
 
             return new Song({
@@ -187,10 +187,9 @@ export class Utils {
      * @param {Song|string} Search
      * @param {PlayOptions} SOptions
      * @param {Queue} Queue
-     * @param {Number} Limit
      * @return {Promise<Song>}
      */
-    static async best(Search: Song|string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue, Limit: number = 1): Promise<Song> {
+    static async best(Search: Song|string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue): Promise<Song> {
         let _Song;
 
         if(Search instanceof Song)
@@ -206,8 +205,7 @@ export class Utils {
             _Song = (await this.search(
                 Search,
                 SOptions,
-                Queue,
-                Limit
+                Queue
             ))[0];
 
         return _Song;
@@ -234,7 +232,7 @@ export class Utils {
         if(SpotifyPlaylistLink) {
             let SpotifyResultData = await getData(Search).catch(() => null);
             if(!SpotifyResultData || !['playlist', 'album'].includes(SpotifyResultData.type))
-                throw 'InvalidPlaylist';
+                throw DMPErrors.INVALID_PLAYLIST;
 
             let SpotifyResult: RawPlaylist = {
                 name: SpotifyResultData.name,
@@ -266,12 +264,12 @@ export class Utils {
         } else if(YouTubePlaylistLink) {
             let PlaylistID = this.parsePlaylist(Search);
             if (!PlaylistID)
-                throw 'InvalidPlaylist';
+                throw DMPErrors.INVALID_PLAYLIST;
 
             YouTube.options.httpOptions.localAddress = SOptions.localAddress;
             let YouTubeResultData = await YouTube.getPlaylist(PlaylistID);
             if (!YouTubeResultData || Object.keys(YouTubeResultData).length === 0)
-                throw 'InvalidPlaylist';
+                throw DMPErrors.INVALID_PLAYLIST;
 
             let YouTubeResult: RawPlaylist = {
                 name: YouTubeResultData.title,
@@ -304,7 +302,7 @@ export class Utils {
             return new Playlist(YouTubeResult, Queue, SOptions.requestedBy);
         }
 
-        throw 'InvalidPlaylist';
+        throw DMPErrors.INVALID_PLAYLIST;
     }
 
     /**

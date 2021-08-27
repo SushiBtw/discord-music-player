@@ -3,3 +3,7 @@
     - name: Welcome
       id: welcome
       path: ../../README.md
+- name: migrating
+  files:
+    - name: Migrating from v7 to v8
+      path: migrating.md

@@ -184,7 +184,10 @@ export class Queue {
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if(!this.connection?.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
-        let song = await Utils.best(search, options, this);
+        let song = await Utils.best(search, options, this)
+            .catch(error => {
+                throw new DMPError(error);
+            });
         if(!options)
             options = {};
 

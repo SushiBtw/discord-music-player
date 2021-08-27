@@ -3,7 +3,7 @@
 ![npm](https://img.shields.io/npm/v/discord-music-player?style=for-the-badge)
 ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/SushiBtw/discord-music-player?color=%2348aaf1&style=for-the-badge)
 
-### Note: This is the __DEVELOPMENT__ version of Discord Music Player for Discord.JS v13!
+### Note: This is the v8 version of Discord Music Player for Discord.JS v13!
 
 Discord Music Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands.
 **Everything** is customizable, and everything can be done using this package - **there are no limitations!**
@@ -18,7 +18,7 @@ Package is maintained by [SushiBtw](https://github.com/SushiBtw), but is an earl
 # Installation
 *Node.JS v16 or newer is required to run this module.*
 ```sh
-npm install --save discord-music-player@dev
+npm install --save discord-music-player
 ```
 Install **@discordjs/opus**:
 ```sh
@@ -42,7 +42,7 @@ const settings = {
     token: 'YourBotTokenHere'
 };
 
-const { Player } = require("discord-music-player@8.0.0-dev2");
+const { Player } = require("discord-music-player");
 const player = new Player(client, {
     leaveOnEmpty: false, // This options are optional.
 });
@@ -57,7 +57,6 @@ client.login(settings.token);
 ```
 
 # Example Usage
-*WARNING: This page is being designed, all working functions can be found bellow.*
 ```js
 const { RepeatMode } = require('discord-music-player');
 
@@ -143,6 +142,13 @@ client.on('messageCreate', async (message) => {
     if(command === 'remove') {
         guildQueue.remove(parseInt(args[0]));
     }
+
+    if(command === 'createProgressBar') {
+        const ProgressBar = guildQueue.createProgressBar();
+        
+        // [======>              ][00:35/2:20]
+        console.log(ProgressBar.prettier);
+    }
 })
 ```
 
@@ -181,6 +187,8 @@ client.player
 ```
 
 # Passing custom data
+
+### Queue
 While running the `Queue#createQueue()` method you can pass a `options#data` object to hold custom data.
 This can be made in two ways:
 ```js
@@ -201,4 +209,21 @@ queue.setData({
 let queue = player.getQueue(message.guild.id);
 let initMessage = queue.data.queueInitMessage;
 await initMessage.channel.send(`This message object is hold in Queue :D`);
+```
+
+### Song
+While running the `Queue#play()` method you can pass a `options#data` object to hold custom data.
+This can be made in only one way:
+```js
+// Play the song
+let song = await queue.play('Born in the USA!');
+// Set song data
+song.setData({
+    initMessage: message
+});
+
+// Access custom data
+let queue = player.getQueue(message.guild.id);
+let { initMessage } = queue.nowPlaying.data;
+await initMessage.channel.send(`This message object is hold in Song :D`);
 ```
