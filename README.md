@@ -180,7 +180,7 @@ client.player
     // Emitted when deafenOnJoin is true and the bot was undeafened
     .on('clientUndeafen', (queue) =>
         console.log(`I got undefeanded.`))
-    // Emitted when there was an error with NonAsync functions.
+    // Emitted when there was an error in runtime
     .on('error', (error, queue) => {
         console.log(`Error: ${error} in ${queue.guild.name}`);
     });
