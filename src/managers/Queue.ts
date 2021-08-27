@@ -13,7 +13,7 @@ export class Queue {
     public songs: Song[] = [];
     public isPlaying: boolean = false;
     public data?: any = null;
-    public options: PlayerOptions;
+    public options: PlayerOptions = DefaultPlayerOptions;
     public repeatMode: RepeatMode = RepeatMode.DISABLED;
     public destroyed: boolean = false;
 
@@ -84,16 +84,12 @@ export class Queue {
          * @readonly
          */
 
-
         this.player = player;
 
         this.guild = guild;
 
-        this.options = {};
-
-        Object.assign(
-            this.options,
-            DefaultPlayerOptions,
+        this.options = Object.assign(
+            {} as PlayerOptions,
             options
         );
     }

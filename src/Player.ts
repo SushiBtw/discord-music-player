@@ -52,6 +52,12 @@ export class Player extends EventEmitter {
      * @returns {Queue}
      */
     createQueue(guildId: Snowflake, options: PlayerOptions & { data?: any } = this.options): Queue {
+        options = Object.assign(
+            {} as PlayerOptions,
+            this.options,
+            options
+        )
+
         let guild = this.client.guilds.resolve(guildId);
         if(!guild)
             throw 'InvalidGuild';
