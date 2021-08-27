@@ -1,31 +1,11 @@
-export enum DMPErrors {
-    UNKNOWN = 'Unknown',
-    QUEUE_DESTROYED = 'QueueDestroyed',
-    UNKNOWN_VOICE = 'UnknownVoice',
-    CHANNEL_TYPE_INVALID = 'ChannelTypeInvalid',
-    VOICE_CONNECTION_ERROR = 'VoiceConnectionError',
-    NO_VOICE_CONNECTION = 'NoVoiceConnection',
-    UNKNOWN_REPEAT_MODE = 'UnknownRepeatMode',
-    RESOURCE_NOT_READY = 'ResourceNotReady',
-    INVALID_GUILD = 'InvalidGuild'
-}
-
-export const DMPErrorMessages = {
-    Unknown: 'There was an Unknown Error.',
-    QueueDestroyed: 'The Queue was destroyed.',
-    UnknownVoice: 'The provided Member is not in a Voice Channel.',
-    ChannelTypeInvalid: 'The provided Channel is not a Voice Channel.',
-    VoiceConnectionError: 'There was an Error while starting the Voice Stream',
-    NoVoiceConnection: 'There is no Queue#connection [you should use Queue#join()] first.',
-    UnknownRepeatMode: 'The provided RepeatMode was not valid.',
-    ResourceNotReady: 'The AudioResource was not ready.',
-    InvalidGuild: 'The provided Guild was invalid.'
-}
-
 class DMPError extends Error {
     name: string;
     message: string;
 
+    /**
+     * DMPError constructor
+     * @param {DMPErrors} code
+     */
     constructor(code: DMPErrors = DMPErrors.UNKNOWN) {
         super();
 
@@ -48,6 +28,58 @@ class DMPError extends Error {
     toString() {
         return this.message;
     }
+}
+
+/**
+ * The DMPErrors short messages.
+ * Following modes exists:
+ * - UNKNOWN = 'Unknown',
+ * - QUEUE_DESTROYED = 'QueueDestroyed',
+ * - UNKNOWN_VOICE = 'UnknownVoice',
+ * - CHANNEL_TYPE_INVALID = 'ChannelTypeInvalid',
+ * - VOICE_CONNECTION_ERROR = 'VoiceConnectionError',
+ * - NO_VOICE_CONNECTION = 'NoVoiceConnection',
+ * - UNKNOWN_REPEAT_MODE = 'UnknownRepeatMode',
+ * - RESOURCE_NOT_READY = 'ResourceNotReady',
+ * - INVALID_GUILD = 'InvalidGuild'
+ * @typedef {string} DMPErrors
+ */
+export enum DMPErrors {
+    UNKNOWN = 'Unknown',
+    QUEUE_DESTROYED = 'QueueDestroyed',
+    UNKNOWN_VOICE = 'UnknownVoice',
+    CHANNEL_TYPE_INVALID = 'ChannelTypeInvalid',
+    VOICE_CONNECTION_ERROR = 'VoiceConnectionError',
+    NO_VOICE_CONNECTION = 'NoVoiceConnection',
+    UNKNOWN_REPEAT_MODE = 'UnknownRepeatMode',
+    RESOURCE_NOT_READY = 'ResourceNotReady',
+    INVALID_GUILD = 'InvalidGuild'
+}
+
+/**
+ * The DMPErrors short messages.
+ * Following modes exists:
+ * - Unknown: `There was an Unknown Error.`,
+ * - QueueDestroyed: `The Queue was destroyed.`,
+ * - UnknownVoice: `The provided Member is not in a Voice Channel.`,
+ * - ChannelTypeInvalid: `The provided Channel is not a Voice Channel.`,
+ * - VoiceConnectionError: `There was an Error while starting the Voice Stream`,
+ * - NoVoiceConnection: `There is no Queue#connection [you should use Queue#join()] first.`,
+ * - UnknownRepeatMode: `The provided RepeatMode was not valid.`,
+ * - ResourceNotReady: `The AudioResource was not ready.`,
+ * - InvalidGuild: `The provided Guild was invalid.`
+ * @typedef {DMPErrorMessages}
+ */
+export const DMPErrorMessages = {
+    Unknown: 'There was an Unknown Error.',
+    QueueDestroyed: 'The Queue was destroyed.',
+    UnknownVoice: 'The provided Member is not in a Voice Channel.',
+    ChannelTypeInvalid: 'The provided Channel is not a Voice Channel.',
+    VoiceConnectionError: 'There was an Error while starting the Voice Stream',
+    NoVoiceConnection: 'There is no Queue#connection [you should use Queue#join()] first.',
+    UnknownRepeatMode: 'The provided RepeatMode was not valid.',
+    ResourceNotReady: 'The AudioResource was not ready.',
+    InvalidGuild: 'The provided Guild was invalid.'
 }
 
 export { DMPError };
