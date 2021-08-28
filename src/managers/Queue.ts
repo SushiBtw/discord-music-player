@@ -303,7 +303,7 @@ export class Queue {
 
     /**
      * Skip the current Song and returns it
-     * @returs {Song}
+     * @returns {Song}
      */
     skip(): Song {
         if(this.destroyed)
@@ -316,7 +316,7 @@ export class Queue {
 
     /**
      * Stops playing the Music and cleans the Queue
-     * @returs {void}
+     * @returns {void}
      */
     stop(): void {
         if(this.destroyed)
@@ -343,7 +343,7 @@ export class Queue {
     /**
      * Pause/resume the current Song
      * @param {boolean} [state=true] Pause state, if none it will pause the Song
-     * @returs {boolean}
+     * @returns {boolean}
      */
     setPaused(state: boolean = true): boolean|undefined {
         if(this.destroyed)
@@ -357,7 +357,7 @@ export class Queue {
     /**
      * Remove a Song from the Queue
      * @param {number} index
-     * @returs {Song}
+     * @returns {Song|undefined}
      */
     remove(index: number): Song|undefined {
         if(this.destroyed)
