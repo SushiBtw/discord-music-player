@@ -303,9 +303,9 @@ export class Queue {
 
     /**
      * Skip the current Song and returns it
-     * @returs {Song|undefined}
+     * @returs {Song}
      */
-    skip(): Song|undefined {
+    skip(): Song {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
