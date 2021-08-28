@@ -218,8 +218,7 @@ export class Utils {
      * @param {Queue} Queue
      * @return {Promise<Playlist>}
      */
-    static async playlist(Search: Playlist|string, SOptions: PlaylistOptions = DefaultPlaylistOptions, Queue: Queue): Promise<Playlist> {
-
+    static async playlist(Search: Playlist|string, SOptions: PlaylistOptions & { data?: any } = DefaultPlaylistOptions, Queue: Queue): Promise<Playlist> {
         if(Search instanceof Playlist)
             return Search as Playlist;
 
@@ -252,7 +251,10 @@ export class Utils {
                         SOptions as PlayOptions,
                         Queue
                     ).catch(() => null);
-                    return Result ? Result[0] : null;
+                    if(Result) {
+                        Result[0].data = SOptions.data;
+                        return Result[0];
+                    } else return null;
                 })
                     .filter((V: any) => V) as Song[]
             )
@@ -285,7 +287,7 @@ export class Utils {
             YouTubeResult.songs = YouTubeResultData.videos.map((video: VideoCompact, index: number) => {
                 if (Limit !== -1 && index >= Limit)
                     return null;
-                return new Song({
+                let song = new Song({
                     name: video.title,
                     url: `https://youtube.com/watch?v=${video.id}`,
                     duration: this.msToTime((video.duration ?? 0) * 1000),
@@ -293,6 +295,8 @@ export class Utils {
                     isLive: video.isLive,
                     thumbnail: video.thumbnails.best,
                 } as RawSong, Queue, SOptions.requestedBy);
+                song.data = SOptions.data;
+                return song;
             })
                 .filter((V: any) => V) as Song[];
 

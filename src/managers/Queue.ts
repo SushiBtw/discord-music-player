@@ -195,7 +195,8 @@ export class Queue {
             .catch(error => {
                 throw new DMPError(error);
             });
-        song.data = data;
+        if(!options.immediate)
+            song.data = data;
 
         let songLength = this.songs.length;
         if(!options?.immediate && songLength !== 0) {
@@ -248,13 +249,13 @@ export class Queue {
      * @param {PlaylistOptions} [options=DefaultPlaylistOptions]
      * @returns {Promise<Playlist>}
      */
-    async playlist(search: Playlist | string, options: PlaylistOptions = DefaultPlaylistOptions): Promise<Playlist> {
+    async playlist(search: Playlist | string, options: PlaylistOptions & { data?: any } = DefaultPlaylistOptions): Promise<Playlist> {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if(!this.connection?.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         options = Object.assign(
-            {} as PlaylistOptions,
+            {} as PlaylistOptions & { data?: any },
             DefaultPlaylistOptions,
             options
         );
@@ -280,8 +281,10 @@ export class Queue {
      * @returns {boolean}
      */
     async seek(time: number) {
-        if(this.destroyed || !this.isPlaying)
+        if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.isPlaying)
+            throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
         if(isNaN(time))
             return;
@@ -299,16 +302,16 @@ export class Queue {
     }
 
     /**
-     * Skip the current Song
-     * @returs {?Song}
+     * Skip the current Song and returns it
+     * @returs {Song|undefined}
      */
     skip(): Song|undefined {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-        let newSong = this.songs[1];
+        let skippedSong = this.songs[0];
         this.connection.stop();
-        return newSong;
+        return skippedSong;
     }
 
     /**
@@ -343,8 +346,10 @@ export class Queue {
      * @returs {boolean}
      */
     setPaused(state: boolean = true): boolean|undefined {
-        if(this.destroyed || !this.isPlaying)
+        if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.isPlaying)
+            throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
         return this.connection.setPauseState(state);
     }
@@ -352,7 +357,7 @@ export class Queue {
     /**
      * Remove a Song from the Queue
      * @param {number} index
-     * @returs {?Song}
+     * @returs {Song|undefined}
      */
     remove(index: number): Song|undefined {
         if(this.destroyed)
@@ -431,8 +436,10 @@ export class Queue {
      * @returns {ProgressBar}
      */
     createProgressBar(options?: ProgressBarOptions): ProgressBar {
-        if(this.destroyed || !this.isPlaying)
+        if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.isPlaying)
+            throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
         return new ProgressBar(this, options);
     }

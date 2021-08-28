@@ -47,6 +47,7 @@ class DMPError extends Error {
  * Following modes exists:
  * - UNKNOWN = 'Unknown',
  * - QUEUE_DESTROYED = 'QueueDestroyed',
+ * - NOTHING_PLAYING = 'NothingPlaying',
  * - UNKNOWN_VOICE = 'UnknownVoice',
  * - CHANNEL_TYPE_INVALID = 'ChannelTypeInvalid',
  * - VOICE_CONNECTION_ERROR = 'VoiceConnectionError',
@@ -63,6 +64,7 @@ class DMPError extends Error {
 export enum DMPErrors {
     UNKNOWN = 'Unknown',
     QUEUE_DESTROYED = 'QueueDestroyed',
+    NOTHING_PLAYING = 'NothingPlaying',
     UNKNOWN_VOICE = 'UnknownVoice',
     CHANNEL_TYPE_INVALID = 'ChannelTypeInvalid',
     VOICE_CONNECTION_ERROR = 'VoiceConnectionError',
@@ -80,6 +82,7 @@ export enum DMPErrors {
  * Following modes exists:
  * - Unknown: `There was an Unknown Error.`,
  * - QueueDestroyed: `The Queue was destroyed.`,
+ * - NothingPlaying: `There is currently no Song playing in the Voice Channel.`,
  * - UnknownVoice: `The provided Member is not in a Voice Channel.`,
  * - ChannelTypeInvalid: `The provided Channel is not a Voice Channel.`,
  * - VoiceConnectionError: `There was an Error while starting the Voice Stream`,
@@ -95,6 +98,7 @@ export enum DMPErrors {
 export const DMPErrorMessages = {
     Unknown: 'There was an Unknown Error.',
     QueueDestroyed: 'The Queue was destroyed.',
+    NothingPlaying: 'There is currently no Song playing in the Voice Channel.',
     UnknownVoice: 'The provided Member is not in a Voice Channel.',
     ChannelTypeInvalid: 'The provided Channel is not a Voice Channel.',
     VoiceConnectionError: 'There was an Error while starting the Voice Stream',
