@@ -357,7 +357,7 @@ export class Queue {
     /**
      * Remove a Song from the Queue
      * @param {number} index
-     * @returs {Song|undefined}
+     * @returs {Song}
      */
     remove(index: number): Song|undefined {
         if(this.destroyed)
