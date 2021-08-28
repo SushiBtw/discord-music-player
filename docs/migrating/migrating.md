@@ -25,12 +25,17 @@ Instead of the `message` object, you can pass custom `<Queue>.data` or `<Song>.d
 ```js
 let queue = player.createQueue(interaction.guild.id, {
     data: interaction
-})
+});
+await queue.join(message.member.voice.channel);
+await queue.play('F1 music', {
+    data: { custom: 'fields' }
+});
 ```
 The `data` object will be always accessible for you under the `<Queue>.data` prop.
 ```js
 player.on('songAdd', (queue, song) => {
-    queue.data.channel.send(`**${song}** started playing.`);
+    queue.data.channel.send(`**${song}** has been added to the queue.`);
+    console.log(`Song custom data: ${song.data}`); // { custom: 'fields' }
 })
 player.on('queueEnd', (queue) => {
     queue.data.channel.send(`Queue ended, there is nothing to play.`);

@@ -211,13 +211,20 @@ let initMessage = queue.data.queueInitMessage;
 await initMessage.channel.send(`This message object is hold in Queue :D`);
 ```
 
-### Song
-While running the `Queue#play()` method you can pass a `options#data` object to hold custom data.
-This can be made in only one way:
+### Song or Playlist
+While running the `Queue#play()`/Queue#playlist() method you can pass a `options#data` object to hold custom data.
+This can be made in two ways:
 ```js
 // Play the song
 let song = await queue.play('Born in the USA!');
 // Set song data
+song.setData({
+    initMessage: message
+});
+
+// Play the playlist
+let playlist = await queue.playlist('https://www.youtube.com/playlist?list=PLDLGxnP4y2mGKGEqwxWTRkd3HtrrVTMdU');
+// Set playlist data (will set data for each song in the playlist)
 song.setData({
     initMessage: message
 });
