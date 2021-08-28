@@ -4,7 +4,7 @@ import {AudioResource,
     createAudioResource,
     DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus } from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
-import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar, DMPError, DMPErrors } from "..";
+import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar, DMPError, DMPErrors, DefaultPlayOptions, DefaultPlaylistOptions } from "..";
 
 export class Queue {
     public player: Player;
@@ -176,20 +176,26 @@ export class Queue {
     /**
      * Plays or Queues a song (in a VoiceChannel)
      * @param {Song | string} search
-     * @param {PlayOptions} options
+     * @param {PlayOptions} [options=DefaultPlayOptions]
      * @returns {Promise<Song>}
      */
-    async play(search: Song | string, options?: PlayOptions & { immediate?: boolean, seek?: number }): Promise<Song> {
+    async play(search: Song | string, options: PlayOptions & { immediate?: boolean, seek?: number, data?: any } = DefaultPlayOptions): Promise<Song> {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if(!this.connection?.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
+        options = Object.assign(
+            {} as PlayOptions,
+            DefaultPlayOptions,
+            options
+        );
+        let { data } = options;
+        delete options.data;
         let song = await Utils.best(search, options, this)
             .catch(error => {
                 throw new DMPError(error);
             });
-        if(!options)
-            options = {};
+        song.data = data;
 
         let songLength = this.songs.length;
         if(!options?.immediate && songLength !== 0) {
@@ -239,15 +245,23 @@ export class Queue {
     /**
      * Plays or Queues a playlist (in a VoiceChannel)
      * @param {Playlist | string} search
-     * @param {PlaylistOptions} options
+     * @param {PlaylistOptions} [options=DefaultPlaylistOptions]
      * @returns {Promise<Playlist>}
      */
-    async playlist(search: Playlist | string, options?: PlaylistOptions): Promise<Playlist> {
+    async playlist(search: Playlist | string, options: PlaylistOptions = DefaultPlaylistOptions): Promise<Playlist> {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if(!this.connection?.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
-        let playlist = await Utils.playlist(search, options, this);
+        options = Object.assign(
+            {} as PlaylistOptions,
+            DefaultPlaylistOptions,
+            options
+        );
+        let playlist = await Utils.playlist(search, options, this)
+            .catch(error => {
+                throw new DMPError(error);
+            });
         let songLength = this.songs.length;
         this.songs.push(...playlist.songs);
         this.player.emit('playlistAdd', this, playlist);
@@ -289,7 +303,7 @@ export class Queue {
      * @returs {?Song}
      */
     skip(): Song|undefined {
-        if(this.destroyed || !this.isPlaying)
+        if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
         let newSong = this.songs[1];

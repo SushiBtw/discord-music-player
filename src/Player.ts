@@ -49,7 +49,7 @@ export class Player extends EventEmitter {
     /**
      * Creates the guild queue.
      * @param {Snowflake} guildId
-     * @param {PlayerOptions} options
+     * @param {PlayerOptions} [options=this.options]
      * @returns {Queue}
      */
     createQueue(guildId: Snowflake, options: PlayerOptions & { data?: any } = this.options): Queue {
