@@ -58,9 +58,9 @@ export class Utils {
     /**
      * Search for Songs
      * @param {string} Search
-     * @param {PlayOptions} SOptions
+     * @param {PlayOptions} [SOptions=DefaultPlayOptions]
      * @param {Queue} Queue
-     * @param {number} Limit
+     * @param {number} [Limit=1]
      * @return {Promise<Song[]>}
      */
     static async search(Search: string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue, Limit: number = 1): Promise<Song[]> {
