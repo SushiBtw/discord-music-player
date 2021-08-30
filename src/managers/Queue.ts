@@ -200,15 +200,15 @@ export class Queue {
 
         let songLength = this.songs.length;
         if(!options?.immediate && songLength !== 0) {
-            if(options.index && options.index >= 0 && ++options.index <= this.songs.length)
-                this.songs.splice(options.index, 0, song);
+            if(options?.index! >= 0 && ++options.index! <= songLength)
+                this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
             return song;
         } else if(!options?.immediate) {
             song._setFirst();
-            if(options?.index && options.index >= 0 && ++options.index <= this.songs.length)
-                this.songs.splice(options.index, 0, song);
+            if(options?.index! >= 0 && ++options.index! <= songLength)
+                this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
         } else if(options.seek)
