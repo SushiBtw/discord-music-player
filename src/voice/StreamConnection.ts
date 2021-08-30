@@ -197,7 +197,7 @@ export class StreamConnection extends EventEmitter {
     get volume() {
         if (!this.resource?.volume) return 100;
         const currentVol = this.resource.volume.volume;
-        return Math.round(Math.pow(currentVol, 1 / 1.661) * 100);
+        return Math.round(Math.pow(currentVol, 1 / 1.661) * 200);
     }
 
     /**
