@@ -1,7 +1,7 @@
 ---
 name: Bug Reporting
 about: Create a Bug Report
-title: "[BUG]"
+title: "[BUG] Short bug description"
 labels: Bug
 assignees: SushiBtw
 
@@ -23,7 +23,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Versioning:**
 - OS: [e.g. Ubuntu 18.04]
-- NPM Version [e.g. v6.14.9]
+- Node Version [e.g. v16.6.0]
 - Module Version [e.g v6.2.0]
 
 **Additional Comments**
