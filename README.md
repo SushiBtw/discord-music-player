@@ -96,11 +96,11 @@ client.on('messageCreate', async (message) => {
     }
 
     if(command === 'toggleLoop') {
-        guildQueue.setRepeatMode(RepeatMode.SONG); // or 1 instead of RepeatMode.DISABLED
+        guildQueue.setRepeatMode(RepeatMode.SONG); // or 1 instead of RepeatMode.SONG
     }
 
     if(command === 'toggleQueueLoop') {
-        guildQueue.setRepeatMode(RepeatMode.QUEUE); // or 2 instead of RepeatMode.DISABLED
+        guildQueue.setRepeatMode(RepeatMode.QUEUE); // or 2 instead of RepeatMode.QUEUE
     }
 
     if(command === 'setVolume') {
