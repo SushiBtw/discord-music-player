@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "8.0.2",
+  "version": "8.1.0-dev",
   "description": "Complete framework to facilitate music commands using discord.js v13",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,14 +31,13 @@
   "author": "SushiBtw",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/opus": "^0.5.3",
+    "@discordjs/opus": "^0.6.0",
     "@discordjs/voice": "^0.6.0",
     "discord-ytdl-core": "^5.0.4",
     "ffmpeg-static": "^4.4.0",
-    "html-entities": "^2.3.2",
-    "libsodium-wrappers": "^0.7.9",
     "spotify-url-info": "^2.2.3",
-    "youtubei": "^0.0.1-rc.20",
+    "youtubei": "^0.0.1-rc.24",
+    "libsodium-wrappers": "^0.7.9",
     "ytdl-core": "^4.9.1",
     "ytsr": "^3.5.3"
   },

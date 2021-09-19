@@ -200,15 +200,15 @@ export class Queue {
 
         let songLength = this.songs.length;
         if(!options?.immediate && songLength !== 0) {
-            if(options.index && options.index >= 0 && ++options.index <= this.songs.length)
-                this.songs.splice(options.index, 0, song);
+            if(options?.index! >= 0 && ++options.index! <= songLength)
+                this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
             return song;
         } else if(!options?.immediate) {
             song._setFirst();
-            if(options?.index && options.index >= 0 && ++options.index <= this.songs.length)
-                this.songs.splice(options.index, 0, song);
+            if(options?.index! >= 0 && ++options.index! <= songLength)
+                this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
         } else if(options.seek)
@@ -219,7 +219,14 @@ export class Queue {
         if(song.seekTime)
             options.seek = song.seekTime;
 
+        let requestOptions = this.player.options.ytdlCookie ? {
+                headers: {
+                    cookie: this.player.options.ytdlCookie
+                }
+            } : {};
+
         let stream = ytdl(song.url, {
+            requestOptions,
             opusEncoded: false,
             seek: options?.seek ? options.seek / 1000 : 0,
             fmt: 's16le',
