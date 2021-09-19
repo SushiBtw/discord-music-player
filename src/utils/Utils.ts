@@ -7,7 +7,7 @@ import {
 import { User } from "discord.js";
 import YTSR, { Video } from 'ytsr';
 import {getData, getPreview } from "spotify-url-info";
-import {Client, Video as IVideo, VideoCompact} from "youtubei";
+import {Client, Video as IVideo, VideoCompact, Playlist as IPlaylist} from "youtubei";
 const YouTube = new Client();
 
 export class Utils {
@@ -275,13 +275,13 @@ export class Utils {
 
             let YouTubeResult: RawPlaylist = {
                 name: YouTubeResultData.title,
-                author: YouTubeResultData.channel!.name,
+                author: YouTubeResultData instanceof IPlaylist ? YouTubeResultData.channel!.name : 'YouTube Mix',
                 url: Search,
                 songs: [],
                 type: 'playlist'
             }
 
-            if(YouTubeResultData.videoCount > 100 && (Limit === -1 || Limit > 100))
+            if(YouTubeResultData instanceof IPlaylist && YouTubeResultData.videoCount > 100 && (Limit === -1 || Limit > 100))
                 await YouTubeResultData.next(Math.floor((Limit === -1 || Limit > YouTubeResultData.videoCount ? YouTubeResultData.videoCount : Limit - 1) / 100));
 
             YouTubeResult.songs = YouTubeResultData.videos.map((video: VideoCompact, index: number) => {
