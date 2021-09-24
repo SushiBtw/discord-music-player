@@ -31,7 +31,10 @@ npm install --save @discordjs/opus
 
 # Getting Started
 **The code bellow, will show you how to use DMP in your code.**
+
 *Please define your **Player** after the **client/bot** definition.*
+
+[!] Remember to include the related voice **Intents** at the client options. [!]
 ```js
 const Discord = require("discord.js");
 const client = new Discord.Client({
