@@ -169,7 +169,7 @@ export class Queue {
                     return this.play(this.songs[0] as Song, { immediate: true });
                 }
             })
-            .on('error', (err) => this.player.emit('error', this, err.message));
+            .on('error', (err) => this.player.emit('error', err.message, this));
         return this;
     }
 
