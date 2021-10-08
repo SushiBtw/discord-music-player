@@ -74,7 +74,8 @@ export enum DMPErrors {
     INVALID_GUILD = 'InvalidGuild',
     SEARCH_NULL = 'SearchIsNull',
     INVALID_PLAYLIST = 'InvalidPlaylist',
-    INVALID_SPOTIFY = 'InvalidSpotify'
+    INVALID_SPOTIFY = 'InvalidSpotify',
+    INVALID_APPLE = 'InvalidApple'
 }
 
 /**
@@ -108,7 +109,8 @@ export const DMPErrorMessages = {
     InvalidGuild: 'The provided Guild was invalid.',
     SearchIsNull: 'The was no YouTube song found by that query.',
     InvalidSpotify: 'The was no Spotify song found with that link.',
-    InvalidPlaylist: 'There was no Playlist found with that link.'
+    InvalidPlaylist: 'There was no Playlist found with that link.',
+    InvalidApple: 'There was no Apple music song with that link'
 }
 
 export { DMPError };

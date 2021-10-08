@@ -7,6 +7,7 @@ import {
 import { User } from "discord.js";
 import YTSR, { Video } from 'ytsr';
 import {getData, getPreview } from "spotify-url-info";
+import { getSong, getPlaylist } from "./appleSongData";
 import {Client, Video as IVideo, VideoCompact, Playlist as IPlaylist} from "youtubei";
 const YouTube = new Client();
 
@@ -23,6 +24,8 @@ export class Utils {
         YouTubePlaylistID: /[&?]list=([^&]+)/,
         Spotify: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
         SpotifyPlaylist: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
+        Apple: /https?:\/\/music\.apple\.com\/.+?\/album\/.+?\/.*/,
+        ApplePlaylist: /https?:\/\/music\.apple\.com\/.+?\/playlist\/.+?\/.*/g,
     }
 
     /**
@@ -147,6 +150,23 @@ export class Utils {
             this.regexList.Spotify.test(Search);
         let YouTubeLink =
             this.regexList.YouTubeVideo.test(Search);
+        let AppleLink =
+            this.regexList.Apple.test(Search);
+
+        if (AppleLink) {
+            try {
+                let AppleResult = await getSong(Search);
+                let SearchResult = await this.search(
+                    `${AppleResult.artist} - ${AppleResult.title}`,
+                    SOptions,
+                    Queue
+                );
+                return SearchResult[0];
+            }
+            catch(e) {
+                throw DMPErrors.INVALID_APPLE;
+            }
+        }
 
         if(SpotifyLink) {
             try {
