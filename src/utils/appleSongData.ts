@@ -3,10 +3,12 @@ import axios from "axios";
 import { DomUtils, parseDocument } from 'htmlparser2';
 import axiosRetry from 'axios-retry';
 
+// apple will somtimes reject request due to overload this will retry each request up to 5 times
 axiosRetry(axios, { retries: 5 });
 
-
-function findJSONLD( document: Document ) {
+//scraps apple webapge to get metatdat
+// for each song in a playlist has to got song song url to get author
+async function findJSONLD( document: Document ) {
     // Find JSON-LD scripts
     const scripts = DomUtils.findAll(element => {
         if (element.type !== 'script') {
@@ -28,15 +30,20 @@ function findJSONLD( document: Document ) {
             const author = data.byArtist.name;
             return author;
             }
+        
             
         if (data['@type'] === 'MusicPlaylist') {
             
-            return Promise.all(
+            let setData: any = []
+            setData.type = 'playlist'
+            setData.name = data.name
+            setData.author = data.author.name
+            setData.tracks = await Promise.all(
                 data.track.map((songData: any) => getSong(songData.url))
-            ).catch((err) => {
-                console.log(err)
-            })
-
+                ).catch((err) => {
+                    console.log(err)
+                })
+            return setData            
         }
     }
 }
@@ -50,7 +57,7 @@ export async function getSong(
     const res = await axios.get<string>(url);
     const document = parseDocument(res.data);
     let song: any | undefined = []
-    song.artist = findJSONLD( document );
+    song.artist = await findJSONLD( document );
     const regexName = new RegExp(/https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//g);
     const title: any | undefined = regexName.exec(url);
     song.title = title[1]
@@ -63,14 +70,8 @@ export async function getSong(
 export async function getPlaylist(url: string) {
     const res = await axios.get<string>(url);
     const document = parseDocument(res.data);
-    const regexName = new RegExp(/https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//g);
-    const name: any | undefined = regexName.exec(url);
-    let setData: any = []
-    setData.songs = await findJSONLD( document );
-    setData.name = name[1]
-    console.log(setData)
+    return await findJSONLD( document );
 }
-
 
 
 

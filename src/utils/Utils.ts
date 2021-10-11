@@ -247,6 +247,62 @@ export class Utils {
             this.regexList.SpotifyPlaylist.test(Search);
         let YouTubePlaylistLink =
             this.regexList.YouTubePlaylist.test(Search);
+        let ApplePlaylistLink =
+            this.regexList.ApplePlaylist.test(Search);
+
+        if (ApplePlaylistLink) {
+
+            interface AppleData {
+                name: string
+                type: 'playlist'|'album'
+                author: string
+                tracks: []
+            }
+
+            let AppleResultData: AppleData = await getPlaylist(Search).catch(() => null);
+            if (!AppleResultData) {
+                throw DMPErrors.INVALID_PLAYLIST;
+            }
+            
+            let AppleResult: RawPlaylist = {
+                name: AppleResultData.name,
+                author: AppleResultData.author,
+                url: Search,
+                songs: [],
+                type: AppleResultData.type
+            }
+
+            interface track {
+                artist: string
+                title: string
+            }
+            let Result: any;
+
+            AppleResult.songs = await Promise.all(
+                AppleResultData.tracks.map(
+                async (
+                    track: track, 
+                    index: number
+                ) => {
+                    if (Limit !== -1 && index >= Limit)
+                    Result = await this.search(
+                        `${track.artist} - ${track.title}`,
+                        SOptions as PlayOptions,
+                        Queue
+                        ).catch(() => null);
+
+                    if(Result) {
+                        Result[0].data = SOptions.data;
+                        return Result[0];
+                    } else return null;
+                })
+            )
+            console.log(AppleResult.songs)
+            if(SOptions.shuffle)
+                AppleResult.songs = this.shuffle(AppleResult.songs);
+
+            return new Playlist(AppleResult, Queue, SOptions.requestedBy);
+        }
 
         if(SpotifyPlaylistLink) {
             let SpotifyResultData = await getData(Search).catch(() => null);
@@ -260,6 +316,7 @@ export class Utils {
                 songs: [],
                 type: SpotifyResultData.type
             }
+
 
             SpotifyResult.songs = await Promise.all((SpotifyResultData.tracks ? SpotifyResultData.tracks.items : []).map(async (track: any, index: number) => {
                     if (Limit !== -1 && index >= Limit)
