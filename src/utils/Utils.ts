@@ -7,9 +7,9 @@ import {
 import { User } from "discord.js";
 import YTSR, { Video } from 'ytsr';
 import {getData, getPreview } from "spotify-url-info";
-import { getSong, getPlaylist } from "./appleSongData";
+import { getSong, getPlaylist } from "./AppleUtils";
 import {Client, Video as IVideo, VideoCompact, Playlist as IPlaylist} from "youtubei";
-const YouTube = new Client();
+let YouTube = new Client();
 
 export class Utils {
     /**
@@ -24,8 +24,8 @@ export class Utils {
         YouTubePlaylistID: /[&?]list=([^&]+)/,
         Spotify: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
         SpotifyPlaylist: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
-        Apple: /https?:\/\/music\.apple\.com\/.+?\/album\/.+?\/.*/,
-        ApplePlaylist: /https?:\/\/music\.apple\.com\/.+?\/playlist\/.+?\/.*/g,
+        Apple: /https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//,
+        ApplePlaylist: /https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//,
     }
 
     /**
@@ -166,9 +166,7 @@ export class Utils {
             catch(e) {
                 throw DMPErrors.INVALID_APPLE;
             }
-        }
-
-        if(SpotifyLink) {
+        } else if(SpotifyLink) {
             try {
                 let SpotifyResult = await getPreview(Search);
                 let SearchResult = await this.search(
@@ -184,8 +182,11 @@ export class Utils {
         } else if(YouTubeLink) {
             let VideoID = this.parseVideo(Search);
             if (!VideoID) throw DMPErrors.SEARCH_NULL;
-
-            YouTube.options.httpOptions.localAddress = SOptions.localAddress;
+            YouTube = new Client({
+                requestOptions: {
+                    localAddress: SOptions.localAddress
+                }
+            });
             let VideoResult = await YouTube.getVideo(VideoID) as IVideo;
             if(!VideoResult) throw DMPErrors.SEARCH_NULL;
             let VideoTimecode = this.parseVideoTimecode(Search);
@@ -252,18 +253,10 @@ export class Utils {
 
         if (ApplePlaylistLink) {
 
-            interface AppleData {
-                name: string
-                type: 'playlist'|'album'
-                author: string
-                tracks: []
-            }
-
-            let AppleResultData: AppleData = await getPlaylist(Search).catch(() => null);
-            if (!AppleResultData) {
+            let AppleResultData = await getPlaylist(Search).catch(() => null);
+            if (!AppleResultData)
                 throw DMPErrors.INVALID_PLAYLIST;
-            }
-            
+
             let AppleResult: RawPlaylist = {
                 name: AppleResultData.name,
                 author: AppleResultData.author,
@@ -272,32 +265,25 @@ export class Utils {
                 type: AppleResultData.type
             }
 
-            interface track {
-                artist: string
-                title: string
-            }
-            let Result: any;
-
-            AppleResult.songs = await Promise.all(
-                AppleResultData.tracks.map(
-                async (
-                    track: track, 
-                    index: number
-                ) => {
+            AppleResult.songs = await Promise.all((AppleResultData.tracks).map(async (track: { artist: any; title: any; }, index: number) => {
                     if (Limit !== -1 && index >= Limit)
-                    Result = await this.search(
+                        return null;
+                    let Result = await this.search(
                         `${track.artist} - ${track.title}`,
                         SOptions as PlayOptions,
                         Queue
-                        ).catch(() => null);
-
-                    if(Result) {
+                    ).catch(() => null);
+                    if (Result && Result[0]) {
                         Result[0].data = SOptions.data;
                         return Result[0];
                     } else return null;
                 })
+                    .filter((V: any) => V) as unknown as Song[]
             )
-            console.log(AppleResult.songs)
+
+            if (AppleResult.songs.length === 0)
+                throw DMPErrors.INVALID_PLAYLIST;
+
             if(SOptions.shuffle)
                 AppleResult.songs = this.shuffle(AppleResult.songs);
 
@@ -336,6 +322,9 @@ export class Utils {
                     .filter((V: any) => V) as Song[]
             )
 
+            if (SpotifyResult.songs.length === 0)
+                throw DMPErrors.INVALID_PLAYLIST;
+
             if(SOptions.shuffle)
                 SpotifyResult.songs = this.shuffle(SpotifyResult.songs);
 
@@ -345,7 +334,11 @@ export class Utils {
             if (!PlaylistID)
                 throw DMPErrors.INVALID_PLAYLIST;
 
-            YouTube.options.httpOptions.localAddress = SOptions.localAddress;
+            YouTube = new Client({
+                requestOptions: {
+                    localAddress: SOptions.localAddress
+                }
+            });
             let YouTubeResultData = await YouTube.getPlaylist(PlaylistID);
             if (!YouTubeResultData || Object.keys(YouTubeResultData).length === 0)
                 throw DMPErrors.INVALID_PLAYLIST;
@@ -377,6 +370,9 @@ export class Utils {
             })
                 .filter((V: any) => V) as Song[];
 
+            if (YouTubeResult.songs.length === 0)
+                throw DMPErrors.INVALID_PLAYLIST;
+
             if(SOptions.shuffle)
                 YouTubeResult.songs = this.shuffle(YouTubeResult.songs);
 
@@ -388,7 +384,7 @@ export class Utils {
 
     /**
      * Shuffles an array
-     * @param {any[]}
+     * @param {any[]} array
      * @returns {any[]}
      */
     static shuffle(array: any[]): any[] {
