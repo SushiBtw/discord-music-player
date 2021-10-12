@@ -281,3 +281,10 @@ export interface StreamConnectionEvents {
     end: [AudioResource<Song>];
     error: [AudioPlayerError];
 }
+
+export interface RawApplePlaylist {
+    name: string
+    type: 'playlist'|'album'
+    author: string
+    tracks: { artist: string, title: string }[]
+}
