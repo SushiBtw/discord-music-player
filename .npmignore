@@ -9,3 +9,4 @@ tsconfig.json
 *.tgz
 docs
 jsdoc.json
+dmp-ts.iml
