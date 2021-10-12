@@ -404,7 +404,7 @@ export class Utils {
     }
 
     /**
-     * Converts duration (HH:MM:SS) to millisecons
+     * Converts milliseconds to duration (HH:MM:SS)
      * @returns {string}
      */
     static msToTime(duration: number): string {
@@ -419,7 +419,7 @@ export class Utils {
     }
 
     /**
-     * Converts millisecons to duration (HH:MM:SS)
+     * Converts duration (HH:MM:SS) to milliseconds
      * @returns {number}
      */
     static timeToMs(duration: string): number {
