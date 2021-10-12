@@ -63,13 +63,13 @@ export class StreamConnection extends EventEmitter {
                     try {
                         await entersState(this.connection, VoiceConnectionStatus.Connecting, 5_000);
                     } catch {
-                        this.connection.destroy();
+                        this.leave();
                     }
                 } else if (this.connection.rejoinAttempts < 5) {
                     await wait((this.connection.rejoinAttempts + 1) * 5_000);
                     this.connection.rejoin();
                 } else {
-                    this.connection.destroy();
+                    this.leave();
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
                 this.stop();
@@ -81,7 +81,8 @@ export class StreamConnection extends EventEmitter {
                 try {
                     await this._enterState();
                 } catch {
-                    if (this.connection.state.status !== VoiceConnectionStatus.Destroyed) this.connection.destroy();
+                    if (this.connection.state.status !== VoiceConnectionStatus.Destroyed)
+                        this.leave();
                 } finally {
                     this.readyLock = false;
                 }
