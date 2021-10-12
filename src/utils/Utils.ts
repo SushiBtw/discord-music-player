@@ -7,6 +7,7 @@ import {
 import { User } from "discord.js";
 import YTSR, { Video } from 'ytsr';
 import {getData, getPreview } from "spotify-url-info";
+import { getSong, getPlaylist } from "./appleSongData";
 import {Client, Video as IVideo, VideoCompact, Playlist as IPlaylist} from "youtubei";
 const YouTube = new Client();
 
@@ -23,6 +24,8 @@ export class Utils {
         YouTubePlaylistID: /[&?]list=([^&]+)/,
         Spotify: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
         SpotifyPlaylist: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
+        Apple: /https?:\/\/music\.apple\.com\/.+?\/album\/.+?\/.*/,
+        ApplePlaylist: /https?:\/\/music\.apple\.com\/.+?\/playlist\/.+?\/.*/g,
     }
 
     /**
@@ -147,6 +150,23 @@ export class Utils {
             this.regexList.Spotify.test(Search);
         let YouTubeLink =
             this.regexList.YouTubeVideo.test(Search);
+        let AppleLink =
+            this.regexList.Apple.test(Search);
+
+        if (AppleLink) {
+            try {
+                let AppleResult = await getSong(Search);
+                let SearchResult = await this.search(
+                    `${AppleResult.artist} - ${AppleResult.title}`,
+                    SOptions,
+                    Queue
+                );
+                return SearchResult[0];
+            }
+            catch(e) {
+                throw DMPErrors.INVALID_APPLE;
+            }
+        }
 
         if(SpotifyLink) {
             try {
@@ -227,6 +247,62 @@ export class Utils {
             this.regexList.SpotifyPlaylist.test(Search);
         let YouTubePlaylistLink =
             this.regexList.YouTubePlaylist.test(Search);
+        let ApplePlaylistLink =
+            this.regexList.ApplePlaylist.test(Search);
+
+        if (ApplePlaylistLink) {
+
+            interface AppleData {
+                name: string
+                type: 'playlist'|'album'
+                author: string
+                tracks: []
+            }
+
+            let AppleResultData: AppleData = await getPlaylist(Search).catch(() => null);
+            if (!AppleResultData) {
+                throw DMPErrors.INVALID_PLAYLIST;
+            }
+            
+            let AppleResult: RawPlaylist = {
+                name: AppleResultData.name,
+                author: AppleResultData.author,
+                url: Search,
+                songs: [],
+                type: AppleResultData.type
+            }
+
+            interface track {
+                artist: string
+                title: string
+            }
+            let Result: any;
+
+            AppleResult.songs = await Promise.all(
+                AppleResultData.tracks.map(
+                async (
+                    track: track, 
+                    index: number
+                ) => {
+                    if (Limit !== -1 && index >= Limit)
+                    Result = await this.search(
+                        `${track.artist} - ${track.title}`,
+                        SOptions as PlayOptions,
+                        Queue
+                        ).catch(() => null);
+
+                    if(Result) {
+                        Result[0].data = SOptions.data;
+                        return Result[0];
+                    } else return null;
+                })
+            )
+            console.log(AppleResult.songs)
+            if(SOptions.shuffle)
+                AppleResult.songs = this.shuffle(AppleResult.songs);
+
+            return new Playlist(AppleResult, Queue, SOptions.requestedBy);
+        }
 
         if(SpotifyPlaylistLink) {
             let SpotifyResultData = await getData(Search).catch(() => null);
@@ -240,6 +316,7 @@ export class Utils {
                 songs: [],
                 type: SpotifyResultData.type
             }
+
 
             SpotifyResult.songs = await Promise.all((SpotifyResultData.tracks ? SpotifyResultData.tracks.items : []).map(async (track: any, index: number) => {
                     if (Limit !== -1 && index >= Limit)
