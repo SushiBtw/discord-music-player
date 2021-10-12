@@ -13,7 +13,7 @@ import { Song, Queue, Playlist } from "..";
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
  * @param {string} [localAddress] Custom ipv4/ipv6 address
- * @param {string} [ytdlCookie] Custom YouTube cookie to avoid erros and bypass some features
+ * @param {string} [ytdlRequestOptions] Custom YouTube cookie to avoid erros and bypass some features
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean,
@@ -24,7 +24,7 @@ export interface PlayerOptions {
     volume?: number,
     quality?: 'low'|'high',
     localAddress?: string,
-    ytdlCookie?: string,
+    ytdlRequestOptions?: object,
 }
 
 /**

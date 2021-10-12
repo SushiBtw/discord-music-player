@@ -219,14 +219,8 @@ export class Queue {
         if(song.seekTime)
             options.seek = song.seekTime;
 
-        let requestOptions = this.player.options.ytdlCookie ? {
-                headers: {
-                    cookie: this.player.options.ytdlCookie
-                }
-            } : {};
-
         let stream = ytdl(song.url, {
-            requestOptions,
+            requestOptions: this.player.options.ytdlRequestOptions ?? {},
             opusEncoded: false,
             seek: options?.seek ? options.seek / 1000 : 0,
             fmt: 's16le',
