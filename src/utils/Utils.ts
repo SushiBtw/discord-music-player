@@ -265,7 +265,7 @@ export class Utils {
                 type: AppleResultData.type
             }
 
-            AppleResult.songs = await Promise.all((AppleResultData.tracks).map(async (track, index: number) => {
+            AppleResult.songs = await Promise.all((AppleResultData.tracks).map(async (track: { artist: any; title: any; }, index: number) => {
                     if (Limit !== -1 && index >= Limit)
                         return null;
                     let Result = await this.search(
