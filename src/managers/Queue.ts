@@ -393,6 +393,19 @@ export class Queue {
     }
 
     /**
+     * Gets the paused state of the player
+     * @type {boolean}
+     */
+    get paused(): boolean {
+        if(this.destroyed)
+            throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.isPlaying)
+            throw new DMPError(DMPErrors.NOTHING_PLAYING);
+
+        return this.connection.paused;
+    }
+
+    /**
      * Sets the current volume
      * @param {number} volume
      * @returns {boolean}
