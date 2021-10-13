@@ -124,10 +124,10 @@ export class Song {
     }
 
     /**
-     * Converts duration (HH:MM:SS) to millisecons
+     * Converts duration (HH:MM:SS) to milliseconds
      * @type {number}
      */
-    get millisecons(): number {
+    get milliseconds(): number {
         return Utils.timeToMs(this.duration);
     }
 
