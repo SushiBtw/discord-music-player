@@ -1,5 +1,5 @@
-import {AudioPlayerError, AudioResource } from "@discordjs/voice";
-import {User} from "discord.js";
+import { AudioPlayerError, AudioResource } from "@discordjs/voice";
+import { User } from "discord.js";
 import { Song, Queue, Playlist } from "..";
 
 /**
@@ -16,15 +16,15 @@ import { Song, Queue, Playlist } from "..";
  * @param {string} [ytdlRequestOptions] Custom YTDL Request Options object
  */
 export interface PlayerOptions {
-    leaveOnEnd?: boolean,
-    leaveOnStop?: boolean,
-    leaveOnEmpty?: boolean,
-    deafenOnJoin?: boolean,
-    timeout?: number,
-    volume?: number,
-    quality?: 'low'|'high',
-    localAddress?: string,
-    ytdlRequestOptions?: object,
+  leaveOnEnd?: boolean;
+  leaveOnStop?: boolean;
+  leaveOnEmpty?: boolean;
+  deafenOnJoin?: boolean;
+  timeout?: number;
+  volume?: number;
+  quality?: "low" | "high";
+  localAddress?: string;
+  ytdlRequestOptions?: object;
 }
 
 /**
@@ -39,14 +39,14 @@ export interface PlayerOptions {
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
 export interface PlayOptions {
-    uploadDate?: 'hour'|'today'|'week'|'month'|'year',
-    duration?: 'short'|'long',
-    sortBy?: 'relevance'|'date'|'view count'|'rating',
-    timecode?: boolean,
-    index?: number;
-    requestedBy?: User,
-    localAddress?: string
-};
+  uploadDate?: "hour" | "today" | "week" | "month" | "year";
+  duration?: "short" | "long";
+  sortBy?: "relevance" | "date" | "view count" | "rating";
+  timecode?: boolean;
+  index?: number;
+  requestedBy?: User;
+  localAddress?: string;
+}
 
 /**
  * Playlist options
@@ -57,11 +57,11 @@ export interface PlayOptions {
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
 export interface PlaylistOptions {
-    maxSongs?: number,
-    requestedBy?: User,
-    shuffle?: boolean,
-    localAddress?: string
-};
+  maxSongs?: number;
+  requestedBy?: User;
+  shuffle?: boolean;
+  localAddress?: string;
+}
 
 /**
  * @typedef {object} ProgressBarOptions
@@ -71,10 +71,10 @@ export interface PlaylistOptions {
  * @property {string} [arrow=>] Bar ending
  */
 export interface ProgressBarOptions {
-    time?: boolean;
-    size?: number;
-    block?: string;
-    arrow?: string;
+  time?: boolean;
+  size?: number;
+  block?: string;
+  arrow?: string;
 }
 
 /**
@@ -89,13 +89,13 @@ export interface ProgressBarOptions {
  * @param {string} [quality=high] Player quality
  */
 export const DefaultPlayerOptions: PlayerOptions = {
-    leaveOnEnd: true,
-    leaveOnStop: true,
-    leaveOnEmpty: true,
-    deafenOnJoin: false,
-    timeout: 0,
-    volume: 100,
-    quality: 'high',
+  leaveOnEnd: true,
+  leaveOnStop: true,
+  leaveOnEmpty: true,
+  deafenOnJoin: false,
+  timeout: 0,
+  volume: 100,
+  quality: "high",
 };
 
 /**
@@ -105,8 +105,8 @@ export const DefaultPlayerOptions: PlayerOptions = {
  * @param {boolean} [timecode=false] If url with timecode (?t=) provided, will play from that moment
  */
 export const DefaultPlayOptions: PlayOptions = {
-    sortBy: 'relevance',
-    timecode: false
+  sortBy: "relevance",
+  timecode: false,
 };
 
 /**
@@ -116,8 +116,8 @@ export const DefaultPlayOptions: PlayOptions = {
  * @param {boolean} [shuffle=false] If it should shuffle the Songs
  */
 export const DefaultPlaylistOptions: PlaylistOptions = {
-    maxSongs: -1,
-    shuffle: false,
+  maxSongs: -1,
+  shuffle: false,
 };
 
 /**
@@ -129,11 +129,11 @@ export const DefaultPlaylistOptions: PlaylistOptions = {
  * @param {string} [arrow=>] Bar ending
  */
 export const DefaultProgressBarOptions: ProgressBarOptions = {
-    time: true,
-    size: 20,
-    block: '=',
-    arrow: '>'
-}
+  time: true,
+  size: 20,
+  block: "=",
+  arrow: ">",
+};
 
 /**
  * Raw Song object
@@ -146,13 +146,13 @@ export const DefaultProgressBarOptions: ProgressBarOptions = {
  * @property {boolean} isLive
  */
 export interface RawSong {
-    name: string,
-    author: string,
-    url: string,
-    thumbnail: string,
-    duration: string,
-    isLive: boolean
-    seekTime?: number;
+  name: string;
+  author: string;
+  url: string;
+  thumbnail: string;
+  duration: string;
+  isLive: boolean;
+  seekTime?: number;
 }
 
 /**
@@ -165,11 +165,11 @@ export interface RawSong {
  * @property {string} type
  */
 export interface RawPlaylist {
-    name: string,
-    author: string,
-    url: string,
-    songs: Song[],
-    type: 'playlist'|'album'
+  name: string;
+  author: string;
+  url: string;
+  songs: Song[];
+  type: "playlist" | "album";
 }
 
 /**
@@ -181,9 +181,9 @@ export interface RawPlaylist {
  * @typedef {number} RepeatMode
  */
 export enum RepeatMode {
-    DISABLED,
-    SONG,
-    QUEUE ,
+  DISABLED,
+  SONG,
+  QUEUE,
 }
 
 /**
@@ -247,15 +247,15 @@ export enum RepeatMode {
  */
 
 export interface PlayerEvents {
-    channelEmpty: [queue: Queue];
-    songAdd: [queue: Queue, song: Song];
-    playlistAdd: [queue: Queue, playlist: Playlist];
-    queueEnd: [queue: Queue];
-    songChanged: [queue: Queue, newSong: Song, oldSong: Song];
-    songFirst: [queue: Queue, song: Song];
-    clientDisconnect: [queue: Queue];
-    clientUndeafen: [queue: Queue];
-    error: [error: string, queue: Queue];
+  channelEmpty: [queue: Queue];
+  songAdd: [queue: Queue, song: Song];
+  playlistAdd: [queue: Queue, playlist: Playlist];
+  queueEnd: [queue: Queue];
+  songChanged: [queue: Queue, newSong: Song, oldSong: Song];
+  songFirst: [queue: Queue, song: Song];
+  clientDisconnect: [queue: Queue];
+  clientUndeafen: [queue: Queue];
+  error: [error: string, queue: Queue];
 }
 
 /**
@@ -277,14 +277,14 @@ export interface PlayerEvents {
  */
 
 export interface StreamConnectionEvents {
-    start: [AudioResource<Song>];
-    end: [AudioResource<Song>];
-    error: [AudioPlayerError];
+  start: [AudioResource<Song>];
+  end: [AudioResource<Song>];
+  error: [AudioPlayerError];
 }
 
 export interface RawApplePlaylist {
-    name: string
-    type: 'playlist'|'album'
-    author: string
-    tracks: { artist: string, title: string }[]
+  name: string;
+  type: "playlist" | "album";
+  author: string;
+  tracks: { artist: string; title: string }[];
 }

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest test/test.js",
+    "prettier": "prettier --write .",
     "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml",
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml --output docs/docs.json"
   },
@@ -59,6 +60,7 @@
     "eslint": "^7.32.0",
     "jest": "^27.0.6",
     "jsdoc-babel": "^0.5.0",
+    "prettier": "^2.4.1",
     "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
   },

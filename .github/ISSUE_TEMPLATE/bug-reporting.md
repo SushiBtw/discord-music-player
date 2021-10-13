@@ -4,7 +4,6 @@ about: Create a Bug Report
 title: "[BUG] Short bug description"
 labels: Bug
 assignees: SushiBtw
-
 ---
 
 **Bug Description**
@@ -12,7 +11,8 @@ A clear and concise description of what the bug is.
 
 **Reproduction Steps**
 Steps to reproduce the behavior:
-1. Use ``XYZ`` command with ``ABC`` options.
+
+1. Use `XYZ` command with `ABC` options.
 2. Observe the result.
 
 **Expected Result**
@@ -22,6 +22,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Versioning:**
+
 - OS: [e.g. Ubuntu 18.04]
 - Node Version [e.g. v16.6.0]
 - Module Version [e.g v6.2.0]
