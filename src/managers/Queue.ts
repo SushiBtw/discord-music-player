@@ -226,7 +226,8 @@ export class Queue {
             fmt: 's16le',
             encoderArgs: [],
             quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
-            highWaterMark: 1 << 25
+            highWaterMark: 1 << 25,
+            filter: 'audioonly'
         })
             .on('error', (error: { message: string; }) => {
                 if(!error.message.toLowerCase().includes("premature close"))
