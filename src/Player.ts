@@ -57,11 +57,11 @@ export class Player extends EventEmitter {
   ): Queue {
     options = Object.assign({} as PlayerOptions, this.options, options);
 
-    let guild = this.client.guilds.resolve(guildId);
+    const guild = this.client.guilds.resolve(guildId);
     if (!guild) throw new DMPError(DMPErrors.INVALID_GUILD);
     if (this.hasQueue(guildId)) return this.getQueue(guildId) as Queue;
 
-    let { data } = options;
+    const { data } = options;
     delete options.data;
     const queue = new Queue(this, guild, options);
     queue.data = data;
@@ -115,10 +115,10 @@ export class Player extends EventEmitter {
    * @returns {void}
    */
   _voiceUpdate(oldState: VoiceState, newState: VoiceState): void {
-    let queue = this.queues.get(oldState.guild.id);
+    const queue = this.queues.get(oldState.guild.id);
     if (!queue || !queue.connection) return;
 
-    let { deafenOnJoin, leaveOnEmpty, timeout } = queue.options;
+    const { deafenOnJoin, leaveOnEmpty, timeout } = queue.options;
 
     if (!newState.channelId && this.client.user?.id === oldState.member?.id) {
       queue.destroy();
@@ -130,8 +130,8 @@ export class Player extends EventEmitter {
     if (oldState.channelId === newState.channelId) return;
     if (!leaveOnEmpty || queue.connection.channel.members.size > 1) return;
     setTimeout(() => {
-      if (queue!.connection.channel.members.size > 1) return;
-      queue!.destroy(true);
+      if (queue.connection.channel.members.size > 1) return;
+      queue.destroy(true);
       this.emit("channelEmpty", queue);
     }, timeout);
   }

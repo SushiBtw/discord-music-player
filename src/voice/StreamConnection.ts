@@ -6,7 +6,6 @@
 import { EventEmitter } from "events";
 import {
   AudioPlayer,
-  AudioPlayerError,
   AudioPlayerStatus,
   AudioResource,
   createAudioPlayer,
@@ -28,7 +27,7 @@ export class StreamConnection extends EventEmitter {
   public readonly player: AudioPlayer;
   public channel: VoiceChannel | StageChannel;
   public resource?: AudioResource<Song>;
-  public paused: boolean = false;
+  public paused = false;
   private readyLock = false;
 
   /**
@@ -202,7 +201,9 @@ export class StreamConnection extends EventEmitter {
     try {
       this.player.stop(true);
       this.connection.destroy();
-    } catch (e) {}
+    } catch (e) {
+      // catch error
+    }
   }
 
   /**

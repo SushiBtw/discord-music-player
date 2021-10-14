@@ -24,7 +24,7 @@ export interface PlayerOptions {
   volume?: number;
   quality?: "low" | "high";
   localAddress?: string;
-  ytdlRequestOptions?: object;
+  ytdlRequestOptions?: any;
 }
 
 /**

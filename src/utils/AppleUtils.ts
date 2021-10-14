@@ -13,7 +13,7 @@ axiosRetry(axios, { retries: 3 });
  */
 async function findJSONLD(
   document: Document,
-  forceAll: boolean = false
+  forceAll = false
 ): Promise<RawApplePlaylist | undefined> {
   const scripts = DomUtils.findAll((el) => {
     if (el.type !== "script") return false;
@@ -26,7 +26,7 @@ async function findJSONLD(
     if ("@graph" in data) data = data["@graph"];
     if (data["@type"] === "MusicAlbum" && !forceAll) return data.byArtist.name;
     else if (data["@type"] === "MusicAlbum") {
-      let { name, byArtist, tracks } = data;
+      const { name, byArtist, tracks } = data;
       return {
         type: "playlist",
         name: name as string,
@@ -39,7 +39,7 @@ async function findJSONLD(
         }),
       };
     } else if (data["@type"] === "MusicPlaylist") {
-      let { name, author, track } = data;
+      const { name, author, track } = data;
       return {
         type: "playlist",
         name: name as string,
@@ -61,7 +61,7 @@ export async function getSong(
 ): Promise<{ artist: string; title: string }> {
   const res = await axios.get(url);
   const document = parseDocument(res.data);
-  let song: any = [];
+  const song: any = [];
   song.artist = await findJSONLD(document);
   const regexName = new RegExp(
     /https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//g

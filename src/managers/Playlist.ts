@@ -1,4 +1,3 @@
-import { User } from "discord.js";
 import { Player, Queue, RawPlaylist, Song } from "..";
 
 export class Playlist {
@@ -15,7 +14,7 @@ export class Playlist {
    * @param {Queue} queue
    * @param {User} [requestedBy]
    */
-  constructor(raw: RawPlaylist, queue: Queue, requestedBy?: User) {
+  constructor(raw: RawPlaylist, queue: Queue) {
     /**
      * Playlist instance
      * @name Playlist#player

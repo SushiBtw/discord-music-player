@@ -134,7 +134,7 @@ export class Song {
    * @param {?boolean} first
    * @private
    */
-  _setFirst(first: boolean = true) {
+  _setFirst(first = true) {
     this.isFirst = first;
   }
 

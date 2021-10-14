@@ -7,7 +7,7 @@ import {
 
 class ProgressBar {
   private queue: Queue;
-  options: ProgressBarOptions = DefaultProgressBarOptions;
+  options: Required<ProgressBarOptions>;
   bar: string;
   times: string;
 
@@ -65,12 +65,12 @@ class ProgressBar {
     const currentTime =
       this.queue.nowPlaying.seekTime + this.queue.connection.time;
     const progress = Math.round(
-      (size! * currentTime) / this.queue.nowPlaying.milliseconds
+      (size * currentTime) / this.queue.nowPlaying.milliseconds
     );
-    const emptyProgress = size! - progress;
+    const emptyProgress = size - progress;
 
     const progressString =
-      block!.repeat(progress) + arrow! + " ".repeat(emptyProgress);
+      block.repeat(progress) + arrow + " ".repeat(emptyProgress);
 
     this.bar = progressString;
     this.times = `${Utils.msToTime(currentTime)}/${

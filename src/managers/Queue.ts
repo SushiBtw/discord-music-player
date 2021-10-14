@@ -36,11 +36,11 @@ export class Queue {
   public guild: Guild;
   public connection: StreamConnection;
   public songs: Song[] = [];
-  public isPlaying: boolean = false;
+  public isPlaying = false;
   public data?: any = null;
   public options: PlayerOptions = DefaultPlayerOptions;
   public repeatMode: RepeatMode = RepeatMode.DISABLED;
-  public destroyed: boolean = false;
+  public destroyed = false;
 
   /**
    * Queue constructor
@@ -150,9 +150,9 @@ export class Queue {
     this.connection = _connection;
 
     if (channel.type === "GUILD_STAGE_VOICE") {
-      await channel.guild.me!.voice.setSuppressed(false).catch(async (_) => {
-        return await channel!.guild
-          .me!.voice.setRequestToSpeak(true)
+      await channel.guild.me?.voice.setSuppressed(false).catch(async () => {
+        return await channel?.guild.me?.voice
+          .setRequestToSpeak(true)
           .catch(() => null);
       });
     }
@@ -163,10 +163,10 @@ export class Queue {
         if (resource?.metadata?.isFirst && resource?.metadata?.seekTime === 0)
           this.player.emit("songFirst", this, this.nowPlaying);
       })
-      .on("end", async (resource) => {
+      .on("end", async () => {
         if (this.destroyed) return;
         this.isPlaying = false;
-        let oldSong = this.songs.shift();
+        const oldSong = this.songs.shift();
         if (
           this.songs.length === 0 &&
           this.repeatMode === RepeatMode.DISABLED
@@ -178,16 +178,18 @@ export class Queue {
             }, this.options.timeout);
           return;
         } else {
-          if (this.repeatMode === RepeatMode.SONG) {
-            this.songs.unshift(oldSong!);
-            this.songs[0]._setFirst(false);
-            this.player.emit("songChanged", this, this.songs[0], oldSong);
-            return this.play(this.songs[0] as Song, { immediate: true });
-          } else if (this.repeatMode === RepeatMode.QUEUE) {
-            this.songs.push(oldSong!);
-            this.songs[this.songs.length - 1]._setFirst(false);
-            this.player.emit("songChanged", this, this.songs[0], oldSong);
-            return this.play(this.songs[0] as Song, { immediate: true });
+          if (oldSong) {
+            if (this.repeatMode === RepeatMode.SONG) {
+              this.songs.unshift(oldSong);
+              this.songs[0]._setFirst(false);
+              this.player.emit("songChanged", this, this.songs[0], oldSong);
+              return this.play(this.songs[0] as Song, { immediate: true });
+            } else if (this.repeatMode === RepeatMode.QUEUE) {
+              this.songs.push(oldSong);
+              this.songs[this.songs.length - 1]._setFirst(false);
+              this.player.emit("songChanged", this, this.songs[0], oldSong);
+              return this.play(this.songs[0] as Song, { immediate: true });
+            }
           }
 
           this.player.emit("songChanged", this, this.songs[0], oldSong);
@@ -216,40 +218,40 @@ export class Queue {
     if (!this.connection?.connection)
       throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
     options = Object.assign({} as PlayOptions, DefaultPlayOptions, options);
-    let { data } = options;
+    const { data } = options;
     delete options.data;
     let song = await Utils.best(search, options, this).catch((error) => {
       throw new DMPError(error);
     });
     if (!options.immediate) song.data = data;
 
-    let songLength = this.songs.length;
-    if (!options?.immediate && songLength !== 0) {
-      if (options?.index! >= 0 && ++options.index! <= songLength)
-        this.songs.splice(options.index!, 0, song);
+    const songLength = this.songs.length;
+    if (options?.index && !options?.immediate && songLength !== 0) {
+      if (options?.index >= 0 && ++options.index <= songLength)
+        this.songs.splice(options.index, 0, song);
       else this.songs.push(song);
       this.player.emit("songAdd", this, song);
       return song;
-    } else if (!options?.immediate) {
+    } else if (options?.index && !options?.immediate) {
       song._setFirst();
-      if (options?.index! >= 0 && ++options.index! <= songLength)
-        this.songs.splice(options.index!, 0, song);
+      if (options?.index >= 0 && ++options.index <= songLength)
+        this.songs.splice(options.index, 0, song);
       else this.songs.push(song);
       this.player.emit("songAdd", this, song);
     } else if (options.seek) this.songs[0].seekTime = options.seek;
 
-    let quality = this.options.quality;
+    const quality = this.options.quality;
     song = this.songs[0];
     if (song.seekTime) options.seek = song.seekTime;
 
-    let stream = ytdl(song.url, {
+    const stream = ytdl(song.url, {
       requestOptions: this.player.options.ytdlRequestOptions ?? {},
       opusEncoded: false,
       seek: options?.seek ? options.seek / 1000 : 0,
       fmt: "s16le",
       encoderArgs: [],
       quality:
-        quality!.toLowerCase() === "low" ? "lowestaudio" : "highestaudio",
+        quality?.toLowerCase() === "low" ? "lowestaudio" : "highestaudio",
       highWaterMark: 1 << 25,
     }).on("error", (error: { message: string }) => {
       if (!error.message.toLowerCase().includes("premature close"))
@@ -271,9 +273,9 @@ export class Queue {
       }
     );
 
-    setTimeout((_) => {
-      this.connection.playAudioStream(resource).then((__) => {
-        this.setVolume(this.options.volume!);
+    setTimeout(() => {
+      this.connection.playAudioStream(resource).then(() => {
+        this.setVolume(this.options.volume ?? 5);
       });
     });
 
@@ -298,12 +300,12 @@ export class Queue {
       DefaultPlaylistOptions,
       options
     );
-    let playlist = await Utils.playlist(search, options, this).catch(
+    const playlist = await Utils.playlist(search, options, this).catch(
       (error) => {
         throw new DMPError(error);
       }
     );
-    let songLength = this.songs.length;
+    const songLength = this.songs.length;
     this.songs.push(...playlist.songs);
     this.player.emit("playlistAdd", this, playlist);
 
@@ -343,7 +345,7 @@ export class Queue {
   skip(): Song {
     if (this.destroyed) throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-    let skippedSong = this.songs[0];
+    const skippedSong = this.songs[0];
     this.connection.stop();
     return skippedSong;
   }
@@ -365,9 +367,10 @@ export class Queue {
   shuffle(): Song[] | undefined {
     if (this.destroyed) throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-    let currentSong = this.songs.shift();
+    const currentSong = this.songs.shift();
+    if (!currentSong) return;
     this.songs = Utils.shuffle(this.songs);
-    this.songs.unshift(currentSong!);
+    this.songs.unshift(currentSong);
 
     return this.songs;
   }
@@ -377,7 +380,7 @@ export class Queue {
    * @param {boolean} [state=true] Pause state, if none it will pause the Song
    * @returns {boolean}
    */
-  setPaused(state: boolean = true): boolean | undefined {
+  setPaused(state = true): boolean | undefined {
     if (this.destroyed) throw new DMPError(DMPErrors.QUEUE_DESTROYED);
     if (!this.isPlaying) throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
@@ -392,7 +395,7 @@ export class Queue {
   remove(index: number): Song | undefined {
     if (this.destroyed) throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-    let song = this.songs[index];
+    const song = this.songs[index];
     if (song) this.songs = this.songs.filter((s) => s !== song);
 
     return song;
@@ -403,7 +406,7 @@ export class Queue {
    * @type {number}
    */
   get volume(): number {
-    if (!this.connection) return DefaultPlayerOptions.volume!;
+    if (!this.connection) return DefaultPlayerOptions.volume ?? 0;
     return this.connection.volume;
   }
 
@@ -444,9 +447,9 @@ export class Queue {
    */
   clearQueue() {
     if (this.destroyed) throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-
-    let currentlyPlaying = this.songs.shift();
-    this.songs = [currentlyPlaying!];
+    const currentlyPlaying = this.songs.shift();
+    if (!currentlyPlaying) return;
+    this.songs = [currentlyPlaying];
   }
 
   /**
