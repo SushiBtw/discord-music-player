@@ -139,8 +139,10 @@ export class Queue {
                     this.player.emit('songFirst', this, this.nowPlaying);
             })
             .on('end', async (resource) => {
-                if(this.destroyed)
+                if(this.destroyed){
+                    this.player.emit('queueDestroyed', this);
                     return;
+                }
                 this.isPlaying = false;
                 let oldSong = this.songs.shift();
                 if (this.songs.length === 0 && this.repeatMode === RepeatMode.DISABLED) {
@@ -488,7 +490,9 @@ export class Queue {
         if (this.connection)
             this.connection.stop();
         if (leaveOnStop)
+        setTimeout(() => {
             this.connection?.leave();
+        }, this.options?.timeout ? this.options.timeout : 0);
         this.player.deleteQueue(this.guild.id);
     }
 

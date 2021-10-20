@@ -169,6 +169,9 @@ client.player
     .on('playlistAdd',  (queue, playlist) =>
         console.log(`Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`))
     // Emitted when there was no more music to play.
+    .on('queueDestroyed',  (queue) =>
+        console.log(`The queue was destroyed.`))
+    // Emitted when the queue was destroyed (either by ending or stopping).    
     .on('queueEnd',  (queue) =>
         console.log(`The queue has ended.`))
     // Emitted when a song changed.
