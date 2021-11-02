@@ -8,8 +8,8 @@
 Discord Music Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands.
 **Everything** is customizable, and everything can be done using this package - **there are no limitations!**
 
-This package supports YouTube Videos and Playlists, Spotify Songs and Playlists.
-Package is maintained by [SushiBtw](https://github.com/SushiBtw), but is an early fork of Androz2091.
+This package supports YouTube Videos & Playlists, Spotify Songs & Playlists, Apple Music Songs & Playlists.
+Package from version v7.0.0 is fully maintained by [SushiBtw](https://github.com/SushiBtw).
 
 ### Requirements:
 - [Discord.js v13](https://www.npmjs.com/package/discord.js),
@@ -28,6 +28,9 @@ npm install --save @discordjs/opus
 
 # Documentation
 **Discord Music Player documentation: [https://discord-music-player.js.org/](https://discord-music-player.js.org/)**
+
+### **Need some help?**
+Feel free to join [Discord-Music-Player Discord Server](https://discord.gg/6fejZNsmFC) and ask us about DMP.
 
 # Getting Started
 **The code bellow, will show you how to use DMP in your code.**
