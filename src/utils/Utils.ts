@@ -288,9 +288,7 @@ export class Utils {
                 AppleResult.songs = this.shuffle(AppleResult.songs);
 
             return new Playlist(AppleResult, Queue, SOptions.requestedBy);
-        }
-
-        if(SpotifyPlaylistLink) {
+        } else if(SpotifyPlaylistLink) {
             let SpotifyResultData = await getData(Search).catch(() => null);
             if(!SpotifyResultData || !['playlist', 'album'].includes(SpotifyResultData.type))
                 throw DMPErrors.INVALID_PLAYLIST;
@@ -302,7 +300,6 @@ export class Utils {
                 songs: [],
                 type: SpotifyResultData.type
             }
-
 
             SpotifyResult.songs = await Promise.all((SpotifyResultData.tracks ? SpotifyResultData.tracks.items : []).map(async (track: any, index: number) => {
                     if (Limit !== -1 && index >= Limit)
@@ -345,7 +342,7 @@ export class Utils {
 
             let YouTubeResult: RawPlaylist = {
                 name: YouTubeResultData.title,
-                author: YouTubeResultData instanceof IPlaylist ? YouTubeResultData.channel!.name : 'YouTube Mix',
+                author: YouTubeResultData instanceof IPlaylist ? YouTubeResultData.channel?.name ?? 'YouTube Mix' : 'YouTube Mix',
                 url: Search,
                 songs: [],
                 type: 'playlist'
