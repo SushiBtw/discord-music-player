@@ -57,7 +57,7 @@ class ProgressBar {
     private create() {
         const { size, arrow, block } = this.options;
         const currentTime = this.queue.nowPlaying.seekTime + this.queue.connection.time;
-        const progress = Math.round((size! * currentTime / this.queue.nowPlaying.millisecons));
+        const progress = Math.round((size! * currentTime / this.queue.nowPlaying.milliseconds));
         const emptyProgress = size! - progress;
 
         const progressString = block!.repeat(progress) + arrow! + ' '.repeat(emptyProgress);
