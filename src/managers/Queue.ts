@@ -224,7 +224,7 @@ export class Queue {
         let stream = ytdl(song.url, {
             requestOptions: this.player.options.ytdlRequestOptions ?? {},
             opusEncoded: false,
-            seek: options?.seek ? options.seek / 1000 : 0,
+            seek: options.seek ? options.seek / 1000 : 0,
             fmt: 's16le',
             encoderArgs: [],
             quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
@@ -232,7 +232,6 @@ export class Queue {
             filter: 'audioonly'
         })
             .on('error', (error: { message: string; }) => {
-                // avoid repeated error messages conflicting with the emit error in join()
                 if(!/Status code|premature close/i.test(error.message))
                     this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
                return;
@@ -312,14 +311,16 @@ export class Queue {
     }
 
     /**
-     * Skip the current Song and returns it
+     * Skips the current playing Song and returns it
+     * @param {number} [index=0]
      * @returns {Song}
      */
-    skip(): Song {
+    skip(index: number = 0): Song {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        this.songs.splice(1, index);
 
-        let skippedSong = this.songs[0];
+        const skippedSong = this.songs[0];
         this.connection.stop();
         return skippedSong;
     }
