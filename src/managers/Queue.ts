@@ -229,7 +229,8 @@ export class Queue {
             highWaterMark: 1 << 25
         })
             .on('error', (error: { message: string; }) => {
-                if(!error.message.toLowerCase().includes("premature close"))
+                // avoid repeated error messages conflicting with the emit error in join()
+                if(!/Status code|premature close/i.test(error.message))
                     this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
                return;
             });
@@ -296,7 +297,7 @@ export class Queue {
             return;
         if (time < 1)
             time = 0;
-        if (time >= this.nowPlaying.millisecons)
+        if (time >= this.nowPlaying.milliseconds)
             return this.skip();
 
         await this.play(this.nowPlaying, {
