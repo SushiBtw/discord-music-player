@@ -213,6 +213,12 @@ export enum RepeatMode {
  */
 
 /**
+ * Emitted when the queue was destroyed
+ * @event Player#queueDestroyed
+ * @param {Queue} queue Queue
+ */
+
+/**
  * Emitted when a song changed
  * @event Player#songChanged
  * @param {Queue} queue Queue
@@ -251,6 +257,7 @@ export interface PlayerEvents {
     songAdd: [queue: Queue, song: Song];
     playlistAdd: [queue: Queue, playlist: Playlist];
     queueEnd: [queue: Queue];
+    queueDestroyed: [queue: Queue];
     songChanged: [queue: Queue, newSong: Song, oldSong: Song];
     songFirst: [queue: Queue, song: Song];
     clientDisconnect: [queue: Queue];

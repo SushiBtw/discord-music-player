@@ -40,6 +40,9 @@ player.on('songAdd', (queue, song) => {
 player.on('queueEnd', (queue) => {
     queue.data.channel.send(`Queue ended, there is nothing to play.`);
 })
+player.on('queueDestroyed', (queue) => {
+    queue.data.channel.send(`Playback ended.`);
+})
 ```
 
 ## Utils

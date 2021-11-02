@@ -139,8 +139,10 @@ export class Queue {
                     this.player.emit('songFirst', this, this.nowPlaying);
             })
             .on('end', async (resource) => {
-                if(this.destroyed)
+                if(this.destroyed){
+                    this.player.emit('queueDestroyed', this);
                     return;
+                }
                 this.isPlaying = false;
                 let oldSong = this.songs.shift();
                 if (this.songs.length === 0 && this.repeatMode === RepeatMode.DISABLED) {
@@ -226,7 +228,8 @@ export class Queue {
             fmt: 's16le',
             encoderArgs: [],
             quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
-            highWaterMark: 1 << 25
+            highWaterMark: 1 << 25,
+            filter: 'audioonly'
         })
             .on('error', (error: { message: string; }) => {
                 // avoid repeated error messages conflicting with the emit error in join()
@@ -488,7 +491,9 @@ export class Queue {
         if (this.connection)
             this.connection.stop();
         if (leaveOnStop)
+        setTimeout(() => {
             this.connection?.leave();
+        }, this.options?.timeout ? this.options.timeout : 0);
         this.player.deleteQueue(this.guild.id);
     }
 
