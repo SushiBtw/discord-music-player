@@ -136,7 +136,7 @@ export class Player extends EventEmitter {
         if (!leaveOnEmpty || queue.connection.channel.members.size > 1) return;
         setTimeout(() => {
             if (queue!.connection.channel.members.size > 1) return;
-            if (queue!.connection.channel.members.size === 1 && queue!.connection.channel.members.get(this.client.user!.id)?.user.id === this.client.user?.id) {
+            if (queue!.connection.channel.members.has(this.client.user!.id)) {
                 queue!.destroy(true);
                 this.emit('channelEmpty', queue);
             }
