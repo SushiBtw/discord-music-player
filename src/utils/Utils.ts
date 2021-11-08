@@ -265,21 +265,24 @@ export class Utils {
                 type: AppleResultData.type
             }
 
-            AppleResult.songs = await Promise.all((AppleResultData.tracks).map(async (track: { artist: any; title: any; }, index: number) => {
-                    if (Limit !== -1 && index >= Limit)
-                        return null;
-                    let Result = await this.search(
-                        `${track.artist} - ${track.title}`,
-                        SOptions as PlayOptions,
-                        Queue
-                    ).catch(() => null);
-                    if (Result && Result[0]) {
-                        Result[0].data = SOptions.data;
-                        return Result[0];
-                    } else return null;
-                })
-                    .filter((V: any) => V) as unknown as Song[]
+            AppleResult.songs = (
+                await Promise.all(
+                    AppleResultData.tracks.map(async (track, index) => {
+                        if (Limit !== -1 && index >= Limit)
+                            return null;
+                        const Result = await this.search(
+                            `${track.artist} - ${track.title}`,
+                            SOptions,
+                            Queue
+                        ).catch(() => null);
+                        if (Result && Result[0]) {
+                            Result[0].data = SOptions.data;
+                            return Result[0];
+                        } else return null;
+                    })
+                )
             )
+                .filter((V): V is Song => V !== null);
 
             if (AppleResult.songs.length === 0)
                 throw DMPErrors.INVALID_PLAYLIST;
@@ -295,29 +298,32 @@ export class Utils {
 
             let SpotifyResult: RawPlaylist = {
                 name: SpotifyResultData.name,
-                author: SpotifyResultData.type === 'playlist' ? { name: SpotifyResultData.owner.display_name } : SpotifyResultData.artists[0].name,
+                author: SpotifyResultData.type === 'playlist' ? SpotifyResultData.owner.display_name : SpotifyResultData.artists[0].name,
                 url: Search,
                 songs: [],
                 type: SpotifyResultData.type
             }
 
-            SpotifyResult.songs = await Promise.all((SpotifyResultData.tracks ? SpotifyResultData.tracks.items : []).map(async (track: any, index: number) => {
-                    if (Limit !== -1 && index >= Limit)
-                        return null;
-                    if(SpotifyResult.type === 'playlist')
-                        track = track.track;
-                    let Result = await this.search(
-                        `${track.artists[0].name} - ${track.name}`,
-                        SOptions as PlayOptions,
-                        Queue
-                    ).catch(() => null);
-                    if(Result) {
-                        Result[0].data = SOptions.data;
-                        return Result[0];
-                    } else return null;
-                })
-                    .filter((V: any) => V) as Song[]
+            SpotifyResult.songs = (
+                await Promise.all(
+                    (SpotifyResultData.tracks?.items ?? []).map(async (track: any, index: number) => {
+                        if (Limit !== -1 && index >= Limit)
+                            return null;
+                        if (SpotifyResult.type === 'playlist')
+                            track = track.track
+                        const Result = await this.search(
+                            `${track.artists[0].name} - ${track.name}`,
+                            SOptions,
+                            Queue
+                        ).catch(() => null);
+                        if (Result) {
+                            Result[0].data = SOptions.data;
+                            return Result[0];
+                        } else return null;
+                    })
+                )
             )
+                .filter((V): V is Song => V !== null);
 
             if (SpotifyResult.songs.length === 0)
                 throw DMPErrors.INVALID_PLAYLIST;
@@ -360,12 +366,12 @@ export class Utils {
                     duration: this.msToTime((video.duration ?? 0) * 1000),
                     author: video.channel!.name,
                     isLive: video.isLive,
-                    thumbnail: video.thumbnails.best,
-                } as RawSong, Queue, SOptions.requestedBy);
+                    thumbnail: video.thumbnails.best!,
+                }, Queue, SOptions.requestedBy);
                 song.data = SOptions.data;
                 return song;
             })
-                .filter((V: any) => V) as Song[];
+                .filter((V): V is Song => V !== null);
 
             if (YouTubeResult.songs.length === 0)
                 throw DMPErrors.INVALID_PLAYLIST;
