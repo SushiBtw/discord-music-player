@@ -374,11 +374,7 @@ export class Queue {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-        let song = this.songs[index];
-        if (song)
-            this.songs = this.songs.filter((s) => s !== song);
-
-        return song;
+        return this.songs.splice(index, 1)[0];
     }
 
     /**
