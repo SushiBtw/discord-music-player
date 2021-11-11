@@ -9,7 +9,7 @@ import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, Pla
 export class Queue {
     public player: Player;
     public guild: Guild;
-    public connection: StreamConnection;
+    public connection: StreamConnection | undefined;
     public songs: Song[] = [];
     public isPlaying: boolean = false;
     public data?: any = null;
@@ -42,7 +42,7 @@ export class Queue {
         /**
          * Queue connection
          * @name Queue#connection
-         * @type {StreamConnection}
+         * @type {?StreamConnection}
          * @readonly
          */
 
@@ -184,7 +184,7 @@ export class Queue {
     async play(search: Song | string, options: PlayOptions & { immediate?: boolean, seek?: number, data?: any } = DefaultPlayOptions): Promise<Song> {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection?.connection)
+        if(!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         options = Object.assign(
             {} as PlayOptions,
@@ -243,7 +243,7 @@ export class Queue {
         });
 
         setTimeout(_ => {
-            this.connection.playAudioStream(resource)
+            this.connection!.playAudioStream(resource)
                 .then(__ => {
                     this.setVolume(this.options.volume!);
                 })
@@ -261,7 +261,7 @@ export class Queue {
     async playlist(search: Playlist | string, options: PlaylistOptions & { data?: any } = DefaultPlaylistOptions): Promise<Playlist> {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection?.connection)
+        if(!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         options = Object.assign(
             {} as PlaylistOptions & { data?: any },
@@ -299,10 +299,10 @@ export class Queue {
             return;
         if (time < 1)
             time = 0;
-        if (time >= this.nowPlaying.milliseconds)
+        if (time >= this.nowPlaying!.milliseconds)
             return this.skip();
 
-        await this.play(this.nowPlaying, {
+        await this.play(this.nowPlaying!, {
             immediate: true,
             seek: time
         });
@@ -318,6 +318,8 @@ export class Queue {
     skip(index: number = 0): Song {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.connection)
+            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         this.songs.splice(1, index);
 
         const skippedSong = this.songs[0];
@@ -359,6 +361,8 @@ export class Queue {
     setPaused(state: boolean = true): boolean|undefined {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.connection)
+            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         if(!this.isPlaying)
             throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
@@ -394,6 +398,8 @@ export class Queue {
     get paused(): boolean {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.connection)
+            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         if(!this.isPlaying)
             throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
@@ -408,6 +414,8 @@ export class Queue {
     setVolume(volume: number) {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if(!this.connection)
+            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
 
         this.options.volume = volume;
         return this.connection.setVolume(volume);
@@ -415,10 +423,10 @@ export class Queue {
 
     /**
      * Returns current playing song
-     * @type {Song}
+     * @type {?Song}
      */
-    get nowPlaying() {
-        return this.connection.resource?.metadata ?? this.songs[0];
+    get nowPlaying(): Song | undefined {
+        return this.connection?.resource?.metadata ?? this.songs[0];
     }
 
     /**
