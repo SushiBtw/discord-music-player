@@ -1,8 +1,6 @@
-import {Guild, GuildChannelResolvable, Snowflake, StageChannel, VoiceChannel} from "discord.js";
+import {Guild, GuildChannelResolvable, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
-import {AudioResource,
-    createAudioResource,
-    DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus } from "@discordjs/voice";
+import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus } from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
 import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar, DMPError, DMPErrors, DefaultPlayOptions, DefaultPlaylistOptions } from "..";
 
@@ -92,6 +90,7 @@ export class Queue {
             {} as PlayerOptions,
             options
         );
+        this.options.quality = this.options.quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio'
     }
 
     /**
@@ -181,77 +180,58 @@ export class Queue {
      * @param {PlayOptions} [options=DefaultPlayOptions]
      * @returns {Promise<Song>}
      */
-    async play(search: Song | string, options: PlayOptions & { immediate?: boolean, seek?: number, data?: any } = DefaultPlayOptions): Promise<Song> {
+    async play(search: Song | string, options: PlayOptions): Promise<Song> {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if(!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
-        options = Object.assign(
-            {} as PlayOptions,
-            DefaultPlayOptions,
-            options
-        );
-        let { data } = options;
-        delete options.data;
-        let song = await Utils.best(search, options, this)
+        options = {...DefaultPlayOptions, ...options};
+        let songAdded = await Utils.best(search, options, this)
             .catch(error => {
                 throw new DMPError(error);
             });
-        if(!options.immediate)
-            song.data = data;
 
-        let songLength = this.songs.length;
-        if(!options?.immediate && songLength !== 0) {
-            if(options?.index! >= 0 && ++options.index! <= songLength)
-                this.songs.splice(options.index!, 0, song);
-            else this.songs.push(song);
-            this.player.emit('songAdd', this, song);
-            return song;
-        } else if(!options?.immediate) {
-            song._setFirst();
-            if(options?.index! >= 0 && ++options.index! <= songLength)
-                this.songs.splice(options.index!, 0, song);
-            else this.songs.push(song);
-            this.player.emit('songAdd', this, song);
+        songAdded.data = options.data; // not sure if this does something
+
+        const songsListLength = this.songs.length;
+        if(options?.index! >= 0 && ++options.index! <= songsListLength){
+            this.songs.splice(options.index!, 0, songAdded);
+            this.player.emit('songAdd', this, songAdded);
+            return songAdded;
+        }
+
+        if(songsListLength === 0) songAdded._setFirst();
+        if(!options?.immediate) {
+            this.songs.push(songAdded);
+            this.player.emit('songAdd', this, songAdded);
+            if(songsListLength > 0) return songAdded;
         } else if(options.seek)
             this.songs[0].seekTime = options.seek;
 
-        let quality = this.options.quality;
-        song = this.songs[0];
-        if(song.seekTime)
-            options.seek = song.seekTime;
+        const currentSong = this.songs[0] || songAdded;
 
-        let stream = ytdl(song.url, {
-            requestOptions: this.player.options.ytdlRequestOptions ?? {},
+        const stream = ytdl(currentSong.url, {
+            requestOptions: this.player.options.ytdlRequestOptions,
             opusEncoded: false,
-            seek: options.seek ? options.seek / 1000 : 0,
+            seek: currentSong.seekTime ? currentSong.seekTime / 1000 : 0,
             fmt: 's16le',
             encoderArgs: [],
-            quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
+            quality: this.options.quality,
             highWaterMark: 1 << 25,
             filter: 'audioonly'
         })
             .on('error', (error: { message: string; }) => {
                 if(!/Status code|premature close/i.test(error.message))
-                    this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
-               return;
+                    this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this); // this should not change the error message
             });
-
         const resource: AudioResource<Song> = this.connection.createAudioStream(stream, {
-           metadata: song,
+           metadata: currentSong,
            inputType: StreamType.Raw
         });
-
-        setTimeout(_ => {
-            this.connection!.playAudioStream(resource)
-                .then(__ => {
-                    this.setVolume(this.options.volume!);
-                })
-        });
-
-        return song;
+        await this.connection!.playAudioStream(resource)
+        this.setVolume(this.options.volume!);
+        return currentSong;
     }
-
     /**
      * Plays or Queues a playlist (in a VoiceChannel)
      * @param {Playlist | string} search

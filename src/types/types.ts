@@ -13,7 +13,7 @@ import { Song, Queue, Playlist } from "..";
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
  * @param {string} [localAddress] Custom ipv4/ipv6 address
- * @param {string} [ytdlRequestOptions] Custom YTDL Request Options object
+ * @param {object} [ytdlRequestOptions = {}] Custom YTDL Request Options object
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean,
@@ -22,7 +22,7 @@ export interface PlayerOptions {
     deafenOnJoin?: boolean,
     timeout?: number,
     volume?: number,
-    quality?: 'low'|'high',
+    quality?: string,
     localAddress?: string,
     ytdlRequestOptions?: object,
 }
@@ -37,6 +37,9 @@ export interface PlayerOptions {
  * @param {number} [index] If the index was provided, it will add the song after the provided index in the Queue
  * @param {User} [requestedBy] The User who requested the Song
  * @param {string} [localAddress] Custom ipv4/ipv6 address
+ * @param {boolean} [immediate] If the song should be played immediately
+ * @param {number} [seek] If the song should be played from a specific point
+ * @param {any} [data] Any data that should be passed to the song
  */
 export interface PlayOptions {
     uploadDate?: 'hour'|'today'|'week'|'month'|'year',
@@ -45,7 +48,10 @@ export interface PlayOptions {
     timecode?: boolean,
     index?: number;
     requestedBy?: User,
-    localAddress?: string
+    localAddress?: string,
+    immediate?: boolean,
+    seek?: number,
+    data?: any,
 };
 
 /**
@@ -87,6 +93,7 @@ export interface ProgressBarOptions {
  * @param {number} [timeout=0] Voice channel leave timeout
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
+ * @param {object} [ytdlRequestOptions = {}] Custom YTDL Request Options object
  */
 export const DefaultPlayerOptions: PlayerOptions = {
     leaveOnEnd: true,
@@ -96,6 +103,7 @@ export const DefaultPlayerOptions: PlayerOptions = {
     timeout: 0,
     volume: 100,
     quality: 'high',
+    ytdlRequestOptions: {},
 };
 
 /**
@@ -106,7 +114,7 @@ export const DefaultPlayerOptions: PlayerOptions = {
  */
 export const DefaultPlayOptions: PlayOptions = {
     sortBy: 'relevance',
-    timecode: false
+    timecode: false,
 };
 
 /**
