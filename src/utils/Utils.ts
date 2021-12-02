@@ -66,7 +66,7 @@ export class Utils {
      * @param {number} [Limit=1]
      * @return {Promise<Song[]>}
      */
-    static async search(Search: string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue, Limit: number = 1): Promise<Song[]> {
+    static async searchSong(Search: string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue, Limit: number = 1): Promise<Song[]> {
         SOptions = Object.assign({}, DefaultPlayOptions, SOptions);
         let Filters;
 
