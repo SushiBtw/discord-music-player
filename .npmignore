@@ -1,4 +1,3 @@
-src/
 tslint.json
 tsconfig.json
 .idea/
@@ -7,6 +6,5 @@ tsconfig.json
 .eslintrc
 .eslintignore
 *.tgz
-docs
 jsdoc.json
 dmp-ts.iml
