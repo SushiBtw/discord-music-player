@@ -52,7 +52,7 @@ const { Player } = require("discord-music-player");
 const player = new Player(client, {
     leaveOnEmpty: false, // This options are optional.
 });
-// You can define the Player as *client.player* to easily access it.
+// You can define the Player as *client.player* to easly access it.
 client.player = player;
 
 client.on("ready", () => {

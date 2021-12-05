@@ -83,7 +83,7 @@ class Utils {
                     Filters = (_c = Array.from((yield ytsr_1.default.getFilters(Filters.url))
                         .get('Sort by'), ([name, value]) => ({ name, url: value.url }))
                         .find(o => o.name.toLowerCase().includes(SOptions === null || SOptions === void 0 ? void 0 : SOptions.sortBy))) !== null && _c !== void 0 ? _c : Filters;
-                let Result = yield (0, ytsr_1.default)(Filters.url, {
+                let Result = yield ytsr_1.default(Filters.url, {
                     limit: Limit,
                 });
                 let items = Result.items;
@@ -122,7 +122,7 @@ class Utils {
             let AppleLink = this.regexList.Apple.test(Search);
             if (AppleLink) {
                 try {
-                    let AppleResult = yield (0, AppleUtils_1.getSong)(Search);
+                    let AppleResult = yield AppleUtils_1.getSong(Search);
                     let SearchResult = yield this.search(`${AppleResult.artist} - ${AppleResult.title}`, SOptions, Queue);
                     return SearchResult[0];
                 }
@@ -132,7 +132,7 @@ class Utils {
             }
             else if (SpotifyLink) {
                 try {
-                    let SpotifyResult = yield (0, spotify_url_info_1.getPreview)(Search);
+                    let SpotifyResult = yield spotify_url_info_1.getPreview(Search);
                     let SearchResult = yield this.search(`${SpotifyResult.artist} - ${SpotifyResult.title}`, SOptions, Queue);
                     return SearchResult[0];
                 }
@@ -193,7 +193,7 @@ class Utils {
      * @return {Promise<Playlist>}
      */
     static playlist(Search, SOptions = __1.DefaultPlaylistOptions, Queue) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             if (Search instanceof __1.Playlist)
                 return Search;
@@ -202,7 +202,7 @@ class Utils {
             let YouTubePlaylistLink = this.regexList.YouTubePlaylist.test(Search);
             let ApplePlaylistLink = this.regexList.ApplePlaylist.test(Search);
             if (ApplePlaylistLink) {
-                let AppleResultData = yield (0, AppleUtils_1.getPlaylist)(Search).catch(() => null);
+                let AppleResultData = yield AppleUtils_1.getPlaylist(Search).catch(() => null);
                 if (!AppleResultData)
                     throw __1.DMPErrors.INVALID_PLAYLIST;
                 let AppleResult = {
@@ -212,18 +212,18 @@ class Utils {
                     songs: [],
                     type: AppleResultData.type
                 };
-                AppleResult.songs = (yield Promise.all(AppleResultData.tracks.map((track, index) => __awaiter(this, void 0, void 0, function* () {
+                AppleResult.songs = yield Promise.all((AppleResultData.tracks).map((track, index) => __awaiter(this, void 0, void 0, function* () {
                     if (Limit !== -1 && index >= Limit)
                         return null;
-                    const Result = yield this.search(`${track.artist} - ${track.title}`, SOptions, Queue).catch(() => null);
+                    let Result = yield this.search(`${track.artist} - ${track.title}`, SOptions, Queue).catch(() => null);
                     if (Result && Result[0]) {
                         Result[0].data = SOptions.data;
                         return Result[0];
                     }
                     else
                         return null;
-                }))))
-                    .filter((V) => V !== null);
+                }))
+                    .filter((V) => V));
                 if (AppleResult.songs.length === 0)
                     throw __1.DMPErrors.INVALID_PLAYLIST;
                 if (SOptions.shuffle)
@@ -231,30 +231,30 @@ class Utils {
                 return new __1.Playlist(AppleResult, Queue, SOptions.requestedBy);
             }
             else if (SpotifyPlaylistLink) {
-                let SpotifyResultData = yield (0, spotify_url_info_1.getData)(Search).catch(() => null);
+                let SpotifyResultData = yield spotify_url_info_1.getData(Search).catch(() => null);
                 if (!SpotifyResultData || !['playlist', 'album'].includes(SpotifyResultData.type))
                     throw __1.DMPErrors.INVALID_PLAYLIST;
                 let SpotifyResult = {
                     name: SpotifyResultData.name,
-                    author: SpotifyResultData.type === 'playlist' ? SpotifyResultData.owner.display_name : SpotifyResultData.artists[0].name,
+                    author: SpotifyResultData.type === 'playlist' ? { name: SpotifyResultData.owner.display_name } : SpotifyResultData.artists[0].name,
                     url: Search,
                     songs: [],
                     type: SpotifyResultData.type
                 };
-                SpotifyResult.songs = (yield Promise.all(((_c = (_b = SpotifyResultData.tracks) === null || _b === void 0 ? void 0 : _b.items) !== null && _c !== void 0 ? _c : []).map((track, index) => __awaiter(this, void 0, void 0, function* () {
+                SpotifyResult.songs = yield Promise.all((SpotifyResultData.tracks ? SpotifyResultData.tracks.items : []).map((track, index) => __awaiter(this, void 0, void 0, function* () {
                     if (Limit !== -1 && index >= Limit)
                         return null;
                     if (SpotifyResult.type === 'playlist')
                         track = track.track;
-                    const Result = yield this.search(`${track.artists[0].name} - ${track.name}`, SOptions, Queue).catch(() => null);
+                    let Result = yield this.search(`${track.artists[0].name} - ${track.name}`, SOptions, Queue).catch(() => null);
                     if (Result) {
                         Result[0].data = SOptions.data;
                         return Result[0];
                     }
                     else
                         return null;
-                }))))
-                    .filter((V) => V !== null);
+                }))
+                    .filter((V) => V));
                 if (SpotifyResult.songs.length === 0)
                     throw __1.DMPErrors.INVALID_PLAYLIST;
                 if (SOptions.shuffle)
@@ -275,7 +275,7 @@ class Utils {
                     throw __1.DMPErrors.INVALID_PLAYLIST;
                 let YouTubeResult = {
                     name: YouTubeResultData.title,
-                    author: YouTubeResultData instanceof youtubei_1.Playlist ? (_e = (_d = YouTubeResultData.channel) === null || _d === void 0 ? void 0 : _d.name) !== null && _e !== void 0 ? _e : 'YouTube Mix' : 'YouTube Mix',
+                    author: YouTubeResultData instanceof youtubei_1.Playlist ? (_c = (_b = YouTubeResultData.channel) === null || _b === void 0 ? void 0 : _b.name) !== null && _c !== void 0 ? _c : 'YouTube Mix' : 'YouTube Mix',
                     url: Search,
                     songs: [],
                     type: 'playlist'
@@ -297,7 +297,7 @@ class Utils {
                     song.data = SOptions.data;
                     return song;
                 })
-                    .filter((V) => V !== null);
+                    .filter((V) => V);
                 if (YouTubeResult.songs.length === 0)
                     throw __1.DMPErrors.INVALID_PLAYLIST;
                 if (SOptions.shuffle)

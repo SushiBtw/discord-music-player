@@ -77,10 +77,10 @@ class Song {
          */
         this.player = queue.player;
         this.queue = queue;
-        this.name = raw.name;
-        this.author = raw.author;
-        this.url = raw.url;
-        this.thumbnail = raw.thumbnail;
+        this.name = raw.name || raw.title;
+        this.author = raw.author || raw.artist;
+        this.url = raw.url || raw.permalink_url;
+        this.thumbnail = raw.thumbnail || raw.artwork_url;
         this.requestedBy = requestedBy;
         this.duration = raw.duration;
         this.isLive = raw.isLive;

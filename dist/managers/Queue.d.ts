@@ -1,10 +1,10 @@
-import { Guild, GuildChannelResolvable } from "discord.js";
+import { Client, Guild, GuildChannelResolvable } from "discord.js";
 import { StreamConnection } from "../voice/StreamConnection";
 import { Playlist, Song, Player, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar } from "..";
 export declare class Queue {
     player: Player;
     guild: Guild;
-    connection: StreamConnection | undefined;
+    connection: StreamConnection;
     songs: Song[];
     isPlaying: boolean;
     data?: any;
@@ -44,6 +44,12 @@ export declare class Queue {
     playlist(search: Playlist | string, options?: PlaylistOptions & {
         data?: any;
     }): Promise<Playlist>;
+
+    play_sc(search: Song | string, options?: PlayOptions & {
+        immediate?: boolean;
+        seek?: number;
+        data?: any;
+    }): Promise<Song>;
     /**
      * Seeks the current playing Song
      * @param {number} time
@@ -96,9 +102,9 @@ export declare class Queue {
     setVolume(volume: number): boolean;
     /**
      * Returns current playing song
-     * @type {?Song}
+     * @type {Song}
      */
-    get nowPlaying(): Song | undefined;
+    get nowPlaying(): Song;
     /**
      * Clears the Queue
      * @returns {void}
@@ -115,6 +121,7 @@ export declare class Queue {
      * @param {ProgressBarOptions} [options]
      * @returns {ProgressBar}
      */
+    getRepeatMode(): number;
     createProgressBar(options?: ProgressBarOptions): ProgressBar;
     /**
      * Set's custom queue data

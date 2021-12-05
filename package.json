@@ -1,12 +1,11 @@
 {
   "name": "discord-music-player",
-  "version": "8.3.1",
+  "version": "8.3.0",
   "description": "Complete framework to facilitate music commands using discord.js v13",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "tsc": "tsc -w --skipLibCheck",
     "test": "jest test/test.js",
     "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml",
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml --output docs/docs.json"
@@ -33,7 +32,7 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
-    "@discordjs/voice": "^0.7.2",
+    "@discordjs/voice": "^0.6.0",
     "axios": "^0.22.0",
     "axios-retry": "^3.2.0",
     "discord-ytdl-core": "^5.0.4",

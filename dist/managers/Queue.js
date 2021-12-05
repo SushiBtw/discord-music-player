@@ -17,6 +17,8 @@ const StreamConnection_1 = require("../voice/StreamConnection");
 const voice_1 = require("@discordjs/voice");
 const discord_ytdl_core_1 = __importDefault(require("discord-ytdl-core"));
 const __1 = require("..");
+const scdl = require('soundcloud-downloader').default;
+const { StreamType } = require("@discordjs/voice");
 class Queue {
     /**
      * Queue constructor
@@ -46,7 +48,7 @@ class Queue {
         /**
          * Queue connection
          * @name Queue#connection
-         * @type {?StreamConnection}
+         * @type {StreamConnection}
          * @readonly
          */
         /**
@@ -90,6 +92,8 @@ class Queue {
      * @param {GuildChannelResolvable} _channel
      * @returns {Promise<Queue>}
      */
+
+
     join(channelId) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.destroyed)
@@ -101,7 +105,7 @@ class Queue {
                 throw new __1.DMPError(__1.DMPErrors.UNKNOWN_VOICE);
             if (!channel.isVoice())
                 throw new __1.DMPError(__1.DMPErrors.CHANNEL_TYPE_INVALID);
-            let connection = (0, voice_1.joinVoiceChannel)({
+            let connection = voice_1.joinVoiceChannel({
                 guildId: channel.guild.id,
                 channelId: channel.id,
                 adapterCreator: channel.guild.voiceAdapterCreator,
@@ -109,7 +113,7 @@ class Queue {
             });
             let _connection;
             try {
-                connection = yield (0, voice_1.entersState)(connection, voice_1.VoiceConnectionStatus.Ready, 15 * 1000);
+                connection = yield voice_1.entersState(connection, voice_1.VoiceConnectionStatus.Ready, 15 * 1000);
                 _connection = new StreamConnection_1.StreamConnection(connection, channel);
             }
             catch (err) {
@@ -124,44 +128,62 @@ class Queue {
             }
             this.connection
                 .on('start', (resource) => {
-                var _a, _b;
-                this.isPlaying = true;
-                if (((_a = resource === null || resource === void 0 ? void 0 : resource.metadata) === null || _a === void 0 ? void 0 : _a.isFirst) && ((_b = resource === null || resource === void 0 ? void 0 : resource.metadata) === null || _b === void 0 ? void 0 : _b.seekTime) === 0)
-                    this.player.emit('songFirst', this, this.nowPlaying);
-            })
+                    var _a, _b;
+                    this.isPlaying = true;
+                    if (((_a = resource === null || resource === void 0 ? void 0 : resource.metadata) === null || _a === void 0 ? void 0 : _a.isFirst) && ((_b = resource === null || resource === void 0 ? void 0 : resource.metadata) === null || _b === void 0 ? void 0 : _b.seekTime) === 0) {
+                        this.player.emit('songFirst', this, this.nowPlaying);
+                        //this.player.emit("song_change", this, this.nowPlaying);
+                    }
+
+                })
                 .on('end', (resource) => __awaiter(this, void 0, void 0, function* () {
-                if (this.destroyed) {
-                    this.player.emit('queueDestroyed', this);
-                    return;
-                }
-                this.isPlaying = false;
-                let oldSong = this.songs.shift();
-                if (this.songs.length === 0 && this.repeatMode === __1.RepeatMode.DISABLED) {
-                    this.player.emit('queueEnd', this);
-                    if (this.options.leaveOnEnd)
-                        setTimeout(() => {
-                            if (!this.isPlaying)
-                                this.destroy();
-                        }, this.options.timeout);
-                    return;
-                }
-                else {
-                    if (this.repeatMode === __1.RepeatMode.SONG) {
-                        this.songs.unshift(oldSong);
-                        this.songs[0]._setFirst(false);
-                        this.player.emit('songChanged', this, this.songs[0], oldSong);
-                        return this.play(this.songs[0], { immediate: true });
+                    if (this.destroyed) {
+                        this.player.emit('queueDestroyed', this);
+                        return;
                     }
-                    else if (this.repeatMode === __1.RepeatMode.QUEUE) {
-                        this.songs.push(oldSong);
-                        this.songs[this.songs.length - 1]._setFirst(false);
-                        this.player.emit('songChanged', this, this.songs[0], oldSong);
-                        return this.play(this.songs[0], { immediate: true });
+                    this.isPlaying = false;
+                    let oldSong = this.songs.shift();
+
+
+                    //if (this.songs[0] && this.songs[0].song === undefined) {
+                    //   oldSong = this.songs.shift();
+                    //} else {
+                    // var songDeleted = true;
+                    //}
+
+
+                    if (this.songs.length === 0 && this.repeatMode === __1.RepeatMode.DISABLED) {
+                        this.player.emit('queueEnd', this);
+                        if (this.options.leaveOnEnd)
+                            setTimeout(() => {
+                                if (!this.isPlaying)
+                                    this.destroy();
+                            }, this.options.timeout);
+                        return;
                     }
-                    this.player.emit('songChanged', this, this.songs[0], oldSong);
-                    return this.play(this.songs[0], { immediate: true });
-                }
-            }))
+                    else {
+                        if (this.repeatMode === __1.RepeatMode.SONG) {
+                            this.songs.unshift(oldSong);
+                            //if (!this.songs.permalink_url.includes("soundcloud.com")) {
+                            //this.songs[0]._setFirst(false);
+                            //}
+                            this.player.emit('songChanged', this, this.songs[0], oldSong);
+                            //this.player.emit("songFirst", this, this.songs[0]);
+                            return this.play(this.songs[0], { immediate: true });
+                        }
+                        else if (this.repeatMode === __1.RepeatMode.QUEUE) {
+                            this.songs.push(oldSong);
+                            //if (this.songs[this.songs.length - 1].title) {
+                            //   this.songs[this.songs.length - 1]._setFirst//(false);
+                            // }
+                            this.player.emit('songChanged', this, this.songs[0], oldSong);
+                            return this.play(this.songs[0], { immediate: true });
+                        } else {
+                            this.player.emit('songChanged', this, this.songs[0], oldSong);
+                            return this.play(this.songs[0], { immediate: true });
+                        }
+                    }
+                }))
                 .on('error', (err) => this.player.emit('error', err.message, this));
             return this;
         });
@@ -172,33 +194,66 @@ class Queue {
      * @param {PlayOptions} [options=DefaultPlayOptions]
      * @returns {Promise<Song>}
      */
-    play(search, options = __1.DefaultPlayOptions) {
-        var _a;
+    async play(search, options = __1.DefaultPlayOptions) {
+        var _a, _b, is_sc = false;
+
+        let song;
+
+        var is_sc = String(search).includes("soundcloud.com") || String(search.permalink_url).includes("soundcloud.com");
+
+        //let search_str = search.toString();
+        if (is_sc === true) {
+
+            if (search.permalink_url !== undefined) {
+                search = search.permalink_url;
+            }
+            song = await scdl.getInfo(search);
+            song["isFirst"] = false; // scdl doesn't have this array, but it is necessary for this package
+        }
+
+
+
         return __awaiter(this, void 0, void 0, function* () {
             if (this.destroyed)
                 throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-            if (!this.connection)
+            if (!((_a = this.connection) === null || _a === void 0 ? void 0 : _a.connection))
                 throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
             options = Object.assign({}, __1.DefaultPlayOptions, options);
             let { data } = options;
             delete options.data;
-            let song = yield __1.Utils.best(search, options, this)
-                .catch(error => {
-                throw new __1.DMPError(error);
-            });
+            if (is_sc === false) {
+                song = yield __1.Utils.best(search, options, this).catch(error => {
+                    throw new __1.DMPError(error);
+                });
+            }
+
             if (!options.immediate)
                 song.data = data;
+
             let songLength = this.songs.length;
             if (!(options === null || options === void 0 ? void 0 : options.immediate) && songLength !== 0) {
+                console.log("first");
+
                 if ((options === null || options === void 0 ? void 0 : options.index) >= 0 && ++options.index <= songLength)
                     this.songs.splice(options.index, 0, song);
                 else
                     this.songs.push(song);
-                this.player.emit('songAdd', this, song);
+                this.player.emit("songAdd", this, song)
                 return song;
+
             }
-            else if (!(options === null || options === void 0 ? void 0 : options.immediate)) {
-                song._setFirst();
+            else if (!(options === null || options === void 0 ? void 0 : options.immediate)) { // else if song is first
+                console.log("second");
+                if (!is_sc) {
+                    song._setFirst();
+                }
+                //this.player.emit("songAdd", this, song)
+
+                // fix this later. Make it so set first applies to soundcloud
+                //} else {
+                //    this.player.emit('songFirst', this, song);
+                //}
+
                 if ((options === null || options === void 0 ? void 0 : options.index) >= 0 && ++options.index <= songLength)
                     this.songs.splice(options.index, 0, song);
                 else
@@ -211,57 +266,119 @@ class Queue {
             song = this.songs[0];
             if (song.seekTime)
                 options.seek = song.seekTime;
-            let stream = (0, discord_ytdl_core_1.default)(song.url, {
-                requestOptions: (_a = this.player.options.ytdlRequestOptions) !== null && _a !== void 0 ? _a : {},
-                opusEncoded: false,
-                seek: options.seek ? options.seek / 1000 : 0,
-                fmt: 's16le',
-                encoderArgs: [],
-                quality: quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
-                highWaterMark: 1 << 25,
-                filter: 'audioonly'
-            })
-                .on('error', (error) => {
-                if (!/Status code|premature close/i.test(error.message))
-                    this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
-                return;
-            });
-            const resource = this.connection.createAudioStream(stream, {
-                metadata: song,
-                inputType: voice_1.StreamType.Raw
-            });
-            setTimeout(_ => {
-                this.connection.playAudioStream(resource)
-                    .then(__ => {
-                    this.setVolume(this.options.volume);
+            if (!is_sc) {
+                let stream = discord_ytdl_core_1.default(song.url, {
+                    requestOptions: (_b = this.player.options.ytdlRequestOptions) !== null && _b !== void 0 ? _b : {},
+                    opusEncoded: false,
+                    seek: options.seek ? options.seek / 1000 : 0,
+                    fmt: 's16le',
+                    encoderArgs: [],
+                    quality: quality.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
+                    highWaterMark: 1 << 25,
+                    filter: 'audioonly'
+                })
+                    .on('error', (error) => {
+                        if (!/Status code|premature close/i.test(error.message))
+                            this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
+                        return;
+                    });
+                const resource = this.connection.createAudioStream(stream, {
+                    metadata: song,
+                    inputType: voice_1.StreamType.Raw
                 });
-            });
+                setTimeout(_ => {
+                    this.connection.playAudioStream(resource)
+                        .then(__ => {
+                            this.setVolume(this.options.volume);
+                        });
+                });
+            } else if (is_sc) {
+                scdl.download(search).then(stream => {
+                    console.log("Soundcloud file downloaded");
+                    const resource = this.connection.createAudioStream(stream, StreamType.Raw, song);
+
+                    setTimeout(async _ => {
+                        await this.connection.playAudioStream(resource)
+                            .then(async __ => {
+                                this.setVolume(this.options.volume);
+                            }).catch(error => {
+                                return;
+                            })
+                    });
+                    return song;
+                });
+
+            }
+
             return song;
         });
     }
+
+
+
     /**
      * Plays or Queues a playlist (in a VoiceChannel)
      * @param {Playlist | string} search
      * @param {PlaylistOptions} [options=DefaultPlaylistOptions]
      * @returns {Promise<Playlist>}
      */
-    playlist(search, options = __1.DefaultPlaylistOptions) {
+    async playlist(search, options = __1.DefaultPlaylistOptions) {
+        var _a;
+
+        var is_sc = String(search).includes("soundcloud.com") || String(search.permalink_url).includes("soundcloud.com");
+        let playlist;
+        if (is_sc === true) {
+
+            playlist = await scdl.getSetInfo(search).catch(error => {
+                console.log("Failure fetching soundcloud song. Maybe the link is wrong?");
+                return;
+            });
+
+
+        }
         return __awaiter(this, void 0, void 0, function* () {
             if (this.destroyed)
                 throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-            if (!this.connection)
+            if (!((_a = this.connection) === null || _a === void 0 ? void 0 : _a.connection))
                 throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
             options = Object.assign({}, __1.DefaultPlaylistOptions, options);
-            let playlist = yield __1.Utils.playlist(search, options, this)
-                .catch(error => {
-                throw new __1.DMPError(error);
-            });
+
+            //if (is_sc === false) {
+
+            if (!is_sc) {
+                playlist = yield __1.Utils.playlist(search, options, this)
+                    .catch(error => {
+                        throw new __1.DMPError(error);
+                    });
+            }
+            //}
             let songLength = this.songs.length;
-            this.songs.push(...playlist.songs);
-            this.player.emit('playlistAdd', this, playlist);
+            if (!is_sc) {
+                this.songs.push(...playlist.songs);
+            } else {
+                // '...' allows for all playlist tracks to be pushed at once rather than using a loop to do it. Super useful
+                this.songs.push(...playlist.tracks);
+            }
+
+            if (!is_sc) {
+                this.player.emit('playlistAdd', this, playlist);
+            }
             if (songLength === 0) {
-                playlist.songs[0]._setFirst();
-                yield this.play(playlist.songs[0], { immediate: true });
+                if (!is_sc) {
+                    playlist.songs[0]._setFirst();
+                    yield this.play(playlist.songs[0], { immediate: true });
+                } else if (is_sc) {
+                    //this.player.emit('songFirst', this, playlist);
+                    yield this.play(this.songs[0], { immediate: true });
+                    // if (playlist.track_count > 1) {
+                    //   for (var x = 1; x < playlist.track_count; x++) {
+                    //        this.play(playlist.tracks[x].permalink_url);
+                    //    }
+                    // }
+                    //yield this.play(playlist.tracks[0].permalink_url, { immediate: true });
+                } else {
+                    return message.error("Error: Song is not a playlist")
+                }
             }
             return playlist;
         });
@@ -298,12 +415,13 @@ class Queue {
     skip(index = 0) {
         if (this.destroyed)
             throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-        if (!this.connection)
-            throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
-        this.songs.splice(1, index);
-        const skippedSong = this.songs[0];
-        this.connection.stop();
-        return skippedSong;
+        if (this.songs.length > 1) {
+            console.log(this.songs.length)
+            this.songs.splice(1, index);
+            const skippedSong = this.songs[1];
+            this.connection.stop();
+            return skippedSong;
+        } else { return; }
     }
     /**
      * Stops playing the Music and cleans the Queue
@@ -334,8 +452,6 @@ class Queue {
     setPaused(state = true) {
         if (this.destroyed)
             throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-        if (!this.connection)
-            throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
         if (!this.isPlaying)
             throw new __1.DMPError(__1.DMPErrors.NOTHING_PLAYING);
         return this.connection.setPauseState(state);
@@ -348,7 +464,10 @@ class Queue {
     remove(index) {
         if (this.destroyed)
             throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-        return this.songs.splice(index, 1)[0];
+        let song = this.songs[index];
+        if (song)
+            this.songs = this.songs.filter((s) => s !== song);
+        return song;
     }
     /**
      * Gets the current volume
@@ -366,8 +485,6 @@ class Queue {
     get paused() {
         if (this.destroyed)
             throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-        if (!this.connection)
-            throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
         if (!this.isPlaying)
             throw new __1.DMPError(__1.DMPErrors.NOTHING_PLAYING);
         return this.connection.paused;
@@ -380,18 +497,16 @@ class Queue {
     setVolume(volume) {
         if (this.destroyed)
             throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-        if (!this.connection)
-            throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
         this.options.volume = volume;
         return this.connection.setVolume(volume);
     }
     /**
      * Returns current playing song
-     * @type {?Song}
+     * @type {Song}
      */
     get nowPlaying() {
-        var _a, _b, _c;
-        return (_c = (_b = (_a = this.connection) === null || _a === void 0 ? void 0 : _a.resource) === null || _b === void 0 ? void 0 : _b.metadata) !== null && _c !== void 0 ? _c : this.songs[0];
+        var _a, _b;
+        return (_b = (_a = this.connection.resource) === null || _a === void 0 ? void 0 : _a.metadata) !== null && _b !== void 0 ? _b : this.songs[0];
     }
     /**
      * Clears the Queue
@@ -417,6 +532,10 @@ class Queue {
             return false;
         this.repeatMode = repeatMode;
         return true;
+    }
+
+    getRepeatMode() {
+        return this.repeatMode;
     }
     /**
      * Creates Progress Bar class

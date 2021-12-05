@@ -31,12 +31,6 @@ class ProgressBar {
          * @name ProgressBar#times
          * @type {string}
          */
-        if (queue.destroyed)
-            throw new __1.DMPError(__1.DMPErrors.QUEUE_DESTROYED);
-        if (!queue.connection)
-            throw new __1.DMPError(__1.DMPErrors.NO_VOICE_CONNECTION);
-        if (!queue.isPlaying)
-            throw new __1.DMPError(__1.DMPErrors.NOTHING_PLAYING);
         this.queue = queue;
         this.options = Object.assign({}, this.options, options);
         this.create();

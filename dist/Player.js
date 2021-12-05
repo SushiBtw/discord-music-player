@@ -116,12 +116,10 @@ class Player extends events_1.default {
         if (!leaveOnEmpty || queue.connection.channel.members.size > 1)
             return;
         setTimeout(() => {
-            if (queue.connection.channel.members.size > 1)
+            if (queue.connection.channel.members.size > 1 || queue.songs.length !== 0)
                 return;
-            if (queue.connection.channel.members.has(this.client.user.id)) {
-                queue.destroy(true);
-                this.emit('channelEmpty', queue);
-            }
+            queue.destroy(true);
+            this.emit('channelEmpty', queue);
         }, timeout);
     }
 }

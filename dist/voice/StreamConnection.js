@@ -18,7 +18,7 @@ const events_1 = require("events");
 const voice_1 = require("@discordjs/voice");
 const util_1 = require("util");
 const __1 = require("..");
-const wait = (0, util_1.promisify)(setTimeout);
+const wait = util_1.promisify(setTimeout);
 class StreamConnection extends events_1.EventEmitter {
     /**
      * StreamConnection constructor
@@ -38,7 +38,7 @@ class StreamConnection extends events_1.EventEmitter {
          * The AudioPlayer
          * @type {AudioPlayer}
          */
-        this.player = (0, voice_1.createAudioPlayer)();
+        this.player = voice_1.createAudioPlayer();
         /**
          * The VoiceChannel or StageChannel
          * @type {VoiceChannel | StageChannel}
@@ -48,7 +48,7 @@ class StreamConnection extends events_1.EventEmitter {
             if (newState.status === voice_1.VoiceConnectionStatus.Disconnected) {
                 if (newState.reason === voice_1.VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
                     try {
-                        yield (0, voice_1.entersState)(this.connection, voice_1.VoiceConnectionStatus.Connecting, 5000);
+                        yield voice_1.entersState(this.connection, voice_1.VoiceConnectionStatus.Connecting, 5000);
                     }
                     catch (_a) {
                         this.leave();
@@ -82,24 +82,25 @@ class StreamConnection extends events_1.EventEmitter {
         }));
         this.player
             .on('stateChange', (oldState, newState) => {
-            if (newState.status === voice_1.AudioPlayerStatus.Idle && oldState.status !== voice_1.AudioPlayerStatus.Idle) {
-                if (!this.paused) {
-                    this.emit('end', this.resource);
-                    delete this.resource;
-                    return;
+                if (newState.status === voice_1.AudioPlayerStatus.Idle && oldState.status !== voice_1.AudioPlayerStatus.Idle) {
+                    if (!this.paused) {
+                        this.emit('end', this.resource);
+                        delete this.resource;
+                        return;
+                    }
                 }
-            }
-            else if (newState.status === voice_1.AudioPlayerStatus.Playing) {
-                if (!this.paused) {
-                    this.emit('start', this.resource);
-                    return;
+                else if (newState.status === voice_1.AudioPlayerStatus.Playing) {
+                    if (!this.paused) {
+                        this.emit('start', this.resource);
+                        return;
+                    }
                 }
-            }
-        })
+            })
             .on('error', data => {
-            this.emit('error', data);
-        });
+                this.emit('error', data);
+            });
         this.connection.subscribe(this.player);
+
     }
     /**
      *
@@ -108,7 +109,7 @@ class StreamConnection extends events_1.EventEmitter {
      * @returns {AudioResource<Song>}
      */
     createAudioStream(stream, options) {
-        this.resource = (0, voice_1.createAudioResource)(stream, {
+        this.resource = voice_1.createAudioResource(stream, {
             inputType: options.inputType,
             inlineVolume: true,
             metadata: options.metadata
@@ -121,7 +122,7 @@ class StreamConnection extends events_1.EventEmitter {
      */
     _enterState() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield (0, voice_1.entersState)(this.connection, voice_1.VoiceConnectionStatus.Ready, 20000);
+            yield voice_1.entersState(this.connection, voice_1.VoiceConnectionStatus.Ready, 20000);
         });
     }
     /**
@@ -131,12 +132,18 @@ class StreamConnection extends events_1.EventEmitter {
      */
     playAudioStream(resource) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!resource)
+            if (!resource) {
+                console.log("Stream not a resource");
                 throw new __1.DMPError(__1.DMPErrors.RESOURCE_NOT_READY);
-            if (!this.resource)
+            }
+            if (!this.resource) {
+                console.log("Stream not a resource")
                 this.resource = resource;
-            if (this.connection.state.status !== voice_1.VoiceConnectionStatus.Ready)
+            }
+            if (this.connection.state.status !== voice_1.VoiceConnectionStatus.Ready) {
+                console.log("good")
                 yield this._enterState();
+            }
             this.player.play(resource);
             return this;
         });

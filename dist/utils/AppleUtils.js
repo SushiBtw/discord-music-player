@@ -16,7 +16,7 @@ exports.getPlaylist = exports.getSong = void 0;
 const axios_1 = __importDefault(require("axios"));
 const htmlparser2_1 = require("htmlparser2");
 const axios_retry_1 = __importDefault(require("axios-retry"));
-(0, axios_retry_1.default)(axios_1.default, { retries: 3 });
+axios_retry_1.default(axios_1.default, { retries: 3 });
 /**
  * @param {Document} document
  * @param {boolean} forceAll
@@ -68,7 +68,7 @@ function findJSONLD(document, forceAll = false) {
 function getSong(url) {
     return __awaiter(this, void 0, void 0, function* () {
         const res = yield axios_1.default.get(url);
-        const document = (0, htmlparser2_1.parseDocument)(res.data);
+        const document = htmlparser2_1.parseDocument(res.data);
         let song = [];
         song.artist = yield findJSONLD(document);
         const regexName = new RegExp(/https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//g);
@@ -85,7 +85,7 @@ exports.getSong = getSong;
 function getPlaylist(url) {
     return __awaiter(this, void 0, void 0, function* () {
         const res = yield axios_1.default.get(url);
-        const document = (0, htmlparser2_1.parseDocument)(res.data);
+        const document = htmlparser2_1.parseDocument(res.data);
         return yield findJSONLD(document, true);
     });
 }

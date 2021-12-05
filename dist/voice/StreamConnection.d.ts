@@ -52,7 +52,7 @@ export declare class StreamConnection extends EventEmitter {
      * Stops and ends the connection
      * @returns {boolean}
      */
-    stop(): any;
+    stop(): boolean;
     /**
      * Disconnect and leave from the voice channel
      * @returns {void}
@@ -67,7 +67,7 @@ export declare class StreamConnection extends EventEmitter {
      * Gets the stream time
      * @type {number}
      */
-    get time(): any;
+    get time(): number;
     /**
      * Sets the current volume
      * @param {number} volume
