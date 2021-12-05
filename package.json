@@ -31,7 +31,6 @@
   "author": "SushiBtw",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/opus": "^0.6.0",
     "@discordjs/voice": "^0.6.0",
     "axios": "^0.22.0",
     "axios-retry": "^3.2.0",
