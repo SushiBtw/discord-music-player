@@ -9,6 +9,7 @@ import { Song, Queue, Playlist } from "..";
  * @param {boolean} [leaveOnEmpty=true] If it should leave on empty voice channel
  * @param {boolean} [deafenOnJoin=false] If it should deafen on join
  * @param {number} [timeout=0] Voice channel leave timeout
+ * @param {number} [stop_timeout=0] Voice channel leave timeout
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
  * @param {string} [localAddress] Custom ipv4/ipv6 address
@@ -20,6 +21,7 @@ export interface PlayerOptions {
     leaveOnEmpty?: boolean;
     deafenOnJoin?: boolean;
     timeout?: number;
+    stop_timeout?: number;
     volume?: number;
     quality?: 'low' | 'high';
     localAddress?: string;
@@ -80,6 +82,7 @@ export interface ProgressBarOptions {
  * @param {boolean} [leaveOnEmpty=true] If it should leave on empty voice channel
  * @param {boolean} [deafenOnJoin=false] If it should deafen on join
  * @param {number} [timeout=0] Voice channel leave timeout
+*  @param {number} [stop_timeout=0] Voice channel leave timeout
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
  */

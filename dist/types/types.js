@@ -11,6 +11,7 @@ exports.RepeatMode = exports.DefaultProgressBarOptions = exports.DefaultPlaylist
  * @param {boolean} [leaveOnEmpty=true] If it should leave on empty voice channel
  * @param {boolean} [deafenOnJoin=false] If it should deafen on join
  * @param {number} [timeout=0] Voice channel leave timeout
+ *  @param {number} [stop_timeout=0] Voice channel leave timeout
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
  */
@@ -20,6 +21,7 @@ exports.DefaultPlayerOptions = {
     leaveOnEmpty: true,
     deafenOnJoin: false,
     timeout: 0,
+    stop_timeout: 0,
     volume: 100,
     quality: 'high',
 };

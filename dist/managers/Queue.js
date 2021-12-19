@@ -576,7 +576,7 @@ class Queue {
             setTimeout(() => {
                 var _a;
                 (_a = this.connection) === null || _a === void 0 ? void 0 : _a.leave();
-            }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.timeout) ? this.options.timeout : 0);
+            }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.stop_timeout) ? this.options.stop_timeout : 0);
         this.player.deleteQueue(this.guild.id);
     }
 }
