@@ -13,7 +13,7 @@ export class Queue {
     public songs: Song[] = [];
     public isPlaying: boolean = false;
     public data?: any = null;
-    public options: PlayerOptions = DefaultPlayerOptions;
+    public options: PlayerOptions;
     public repeatMode: RepeatMode = RepeatMode.DISABLED;
     public destroyed: boolean = false;
 
@@ -88,10 +88,7 @@ export class Queue {
 
         this.guild = guild;
 
-        this.options = Object.assign(
-            {} as PlayerOptions,
-            options
-        );
+        this.options = {...DefaultPlayerOptions, ...options};
     }
 
     /**
@@ -151,7 +148,7 @@ export class Queue {
                     if(this.options.leaveOnEnd)
                         setTimeout(() => {
                             if(!this.isPlaying)
-                                this.destroy();
+                                this.leave();
                         }, this.options.timeout)
                     return;
                 } else {
@@ -335,7 +332,14 @@ export class Queue {
         if(this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-        return this.destroy();
+        if(this.options.leaveOnStop){
+            setTimeout(() => {
+                this.leave();
+            }, this.options.timeout);
+        } else {
+            this.clearQueue()
+            this.skip()
+        }
     }
 
     /**
@@ -485,20 +489,12 @@ export class Queue {
     }
 
     /**
-     * Destroys the queue
-     * @param {boolean} leaveOnStop
+     * Disconnects the player
      * @returns {void}
-     * @private
      */
-    destroy(leaveOnStop = this.options.leaveOnStop) {
-        if(this.destroyed) return;
+    leave(): void {
         this.destroyed = true;
-        if (this.connection)
-            this.connection.stop();
-        if (leaveOnStop)
-        setTimeout(() => {
-            this.connection?.leave();
-        }, this.options?.timeout ? this.options.timeout : 0);
+        this.connection?.leave();
         this.player.deleteQueue(this.guild.id);
     }
 

@@ -126,7 +126,7 @@ export class Player extends EventEmitter {
         let { deafenOnJoin, leaveOnEmpty, timeout } = queue.options;
 
         if (!newState.channelId && this.client.user?.id === oldState.member?.id) {
-            queue.destroy();
+            queue.leave();
             return void this.emit('clientDisconnect', queue);
         } else if(deafenOnJoin && oldState.serverDeaf && !newState.serverDeaf) {
             this.emit('clientUndeafen', queue);
@@ -137,7 +137,7 @@ export class Player extends EventEmitter {
         setTimeout(() => {
             if (queue!.connection!.channel.members.size > 1) return;
             if (queue!.connection!.channel.members.has(this.client.user!.id)) {
-                queue!.destroy(true);
+                queue!.leave();
                 this.emit('channelEmpty', queue);
             }
         }, timeout);

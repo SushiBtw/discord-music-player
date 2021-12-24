@@ -61,9 +61,10 @@ export class StreamConnection extends EventEmitter {
             if (newState.status === VoiceConnectionStatus.Disconnected) {
                 if (newState.reason === VoiceConnectionDisconnectReason.WebSocketClose && newState.closeCode === 4014) {
                     try {
+                        // Attempting to re-join the voice channel, after possibly changing channels
                         await entersState(this.connection, VoiceConnectionStatus.Connecting, 5_000);
                     } catch {
-                        this.leave();
+                        // It was mannually disconnected and the connection is closed in Player.js _voiceUpdate
                     }
                 } else if (this.connection.rejoinAttempts < 5) {
                     await wait((this.connection.rejoinAttempts + 1) * 5_000);
@@ -184,11 +185,8 @@ export class StreamConnection extends EventEmitter {
      * @returns {void}
      */
     leave() {
-        try {
-            this.player.stop(true);
-            this.connection.destroy();
-        }
-        catch (e) {}
+        this.player.stop(true);
+        this.connection.destroy();
     }
 
     /**
