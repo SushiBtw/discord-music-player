@@ -54,12 +54,14 @@ export interface PlayOptions {
  * @param {number} [maxSongs=-1] Max songs
  * @param {User} [requestedBy] The User who requested the Song
  * @param {boolean} [shuffle=false] If it should shuffle the Songs
+ * @param {number} [index] If the index was provided, it will add all songs of the playlist after the provided index in the Queue
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
 export interface PlaylistOptions {
     maxSongs?: number,
     requestedBy?: User,
     shuffle?: boolean,
+    index?: number,
     localAddress?: string
 };
 
