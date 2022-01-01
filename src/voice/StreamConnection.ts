@@ -82,8 +82,7 @@ export class StreamConnection extends EventEmitter {
                 try {
                     await this._enterState();
                 } catch {
-                    if (this.connection.state.status !== VoiceConnectionStatus.Destroyed)
-                        this.leave();
+                    this.leave();
                 } finally {
                     this.readyLock = false;
                 }
@@ -186,7 +185,8 @@ export class StreamConnection extends EventEmitter {
      */
     leave() {
         this.player.stop(true);
-        this.connection.destroy();
+        if (this.connection.state.status !== VoiceConnectionStatus.Destroyed)
+            this.connection.destroy();
     }
 
     /**
