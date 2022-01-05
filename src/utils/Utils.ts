@@ -7,7 +7,7 @@ import {
 import { User } from "discord.js";
 import YTSR, { Video } from 'ytsr';
 import {getData, getPreview } from "spotify-url-info";
-import { getSong, getPlaylist } from "./AppleUtils";
+import { getSong, getPlaylist } from "apple-music-metadata";
 import {Client, Video as IVideo, VideoCompact, Playlist as IPlaylist} from "youtubei";
 let YouTube = new Client();
 
@@ -156,12 +156,14 @@ export class Utils {
         if (AppleLink) {
             try {
                 let AppleResult = await getSong(Search);
-                let SearchResult = await this.search(
-                    `${AppleResult.artist} - ${AppleResult.title}`,
-                    SOptions,
-                    Queue
-                );
-                return SearchResult[0];
+                if (AppleResult) {
+                    let SearchResult = await this.search(
+                        `${AppleResult.artist} - ${AppleResult.title}`,
+                        SOptions,
+                        Queue
+                    );
+                    return SearchResult[0];
+                }
             }
             catch(e) {
                 throw DMPErrors.INVALID_APPLE;
