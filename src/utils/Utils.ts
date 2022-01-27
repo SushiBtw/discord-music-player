@@ -66,7 +66,7 @@ export class Utils {
      * @param {number} [Limit=1]
      * @return {Promise<Song[]>}
      */
-    static async search(Search: string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue, Limit: number = 1): Promise<Song[]> {
+    static async searchSong(Search: string, SOptions: PlayOptions = DefaultPlayOptions, Queue: Queue, Limit: number = 1): Promise<Song[]> {
         SOptions = Object.assign({}, DefaultPlayOptions, SOptions);
         let Filters;
 
@@ -156,7 +156,7 @@ export class Utils {
         if (AppleLink) {
             try {
                 let AppleResult = await getSong(Search);
-                let SearchResult = await this.search(
+                let SearchResult = await this.searchSong(
                     `${AppleResult.artist} - ${AppleResult.title}`,
                     SOptions,
                     Queue
@@ -169,7 +169,7 @@ export class Utils {
         } else if(SpotifyLink) {
             try {
                 let SpotifyResult = await getPreview(Search);
-                let SearchResult = await this.search(
+                let SearchResult = await this.searchSong(
                     `${SpotifyResult.artist} - ${SpotifyResult.title}`,
                     SOptions,
                     Queue
@@ -223,7 +223,7 @@ export class Utils {
         );
 
         if(!_Song)
-            _Song = (await this.search(
+            _Song = (await this.searchSong(
                 Search,
                 SOptions,
                 Queue
@@ -270,7 +270,7 @@ export class Utils {
                     AppleResultData.tracks.map(async (track, index) => {
                         if (Limit !== -1 && index >= Limit)
                             return null;
-                        const Result = await this.search(
+                        const Result = await this.searchSong(
                             `${track.artist} - ${track.title}`,
                             SOptions,
                             Queue
@@ -311,7 +311,7 @@ export class Utils {
                             return null;
                         if (SpotifyResult.type === 'playlist')
                             track = track.track
-                        const Result = await this.search(
+                        const Result = await this.searchSong(
                             `${track.artists[0].name} - ${track.name}`,
                             SOptions,
                             Queue

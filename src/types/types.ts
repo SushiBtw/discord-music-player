@@ -46,7 +46,7 @@ export interface PlayOptions {
     index?: number;
     requestedBy?: User,
     localAddress?: string
-};
+}
 
 /**
  * Playlist options
@@ -61,7 +61,7 @@ export interface PlaylistOptions {
     requestedBy?: User,
     shuffle?: boolean,
     localAddress?: string
-};
+}
 
 /**
  * @typedef {object} ProgressBarOptions
