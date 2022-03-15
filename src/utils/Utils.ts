@@ -222,7 +222,7 @@ export class Utils {
             Queue
         ).catch(error => {
             if(!(error instanceof TypeError)){
-                throw new DMPError(error) //Ignore typeError
+                throw DMPErrors.UNKNOWN //Ignore typeError
             }
         });
 
