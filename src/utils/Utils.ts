@@ -220,7 +220,11 @@ export class Utils {
             Search,
             SOptions,
             Queue
-        );
+        ).catch(error => {
+            if(!(error instanceof TypeError)){
+                throw DMPErrors.UNKNOWN //Ignore typeError
+            }
+        });
 
         if(!_Song)
             _Song = (await this.search(
