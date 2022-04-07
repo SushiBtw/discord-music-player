@@ -270,7 +270,9 @@ export class Queue {
                 throw new DMPError(error);
             });
         let songLength = this.songs.length;
-        this.songs.push(...playlist.songs);
+        if(options?.index! >= 0 && ++options.index! <= songLength)
+            this.songs.splice(options.index!, 0, ...playlist.songs);
+        else this.songs.push(...playlist.songs);
         this.player.emit('playlistAdd', this, playlist);
 
         if(songLength === 0) {
