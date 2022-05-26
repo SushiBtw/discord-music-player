@@ -6,13 +6,13 @@ import {AudioResource,
 import ytdl from "discord-ytdl-core";
 import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar, DMPError, DMPErrors, DefaultPlayOptions, DefaultPlaylistOptions } from "..";
 
-export class Queue {
+export class Queue<T = unknown> {
     public player: Player;
     public guild: Guild;
     public connection: StreamConnection;
     public songs: Song[] = [];
     public isPlaying: boolean = false;
-    public data?: any = null;
+    public data?: T;
     public options: PlayerOptions = DefaultPlayerOptions;
     public repeatMode: RepeatMode = RepeatMode.DISABLED;
     public destroyed: boolean = false;

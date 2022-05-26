@@ -246,16 +246,17 @@ export enum RepeatMode {
  * @param {Queue} queue Queue
  */
 
-export interface PlayerEvents {
-    channelEmpty: [queue: Queue];
-    songAdd: [queue: Queue, song: Song];
-    playlistAdd: [queue: Queue, playlist: Playlist];
-    queueEnd: [queue: Queue];
-    songChanged: [queue: Queue, newSong: Song, oldSong: Song];
-    songFirst: [queue: Queue, song: Song];
-    clientDisconnect: [queue: Queue];
-    clientUndeafen: [queue: Queue];
-    error: [error: string, queue: Queue];
+export interface PlayerEvents<T = unknown> {
+    channelEmpty: [queue: Queue<T>];
+    songAdd: [queue: Queue<T>, song: Song];
+    playlistAdd: [queue: Queue<T>, playlist: Playlist];
+    queueEnd: [queue: Queue<T>];
+    queueDestroyed: [queue: Queue<T>];
+    songChanged: [queue: Queue<T>, newSong: Song, oldSong: Song];
+    songFirst: [queue: Queue<T>, song: Song];
+    clientDisconnect: [queue: Queue<T>];
+    clientUndeafen: [queue: Queue<T>];
+    error: [error: string, queue: Queue<T>];
 }
 
 /**
