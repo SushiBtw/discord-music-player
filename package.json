@@ -33,6 +33,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
     "@discordjs/voice": "^0.6.0",
+    "apple-music-metadata": "^1.0.10",
     "axios": "^0.22.0",
     "axios-retry": "^3.2.0",
     "discord-ytdl-core": "^5.0.4",
