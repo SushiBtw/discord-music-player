@@ -1,10 +1,24 @@
-import {Guild, GuildChannelResolvable, Snowflake, ChannelType, StageChannel, VoiceChannel} from "discord.js";
+import {ChannelType, Guild, GuildChannelResolvable, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
-import {AudioResource,
-    createAudioResource,
-    DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus } from "@discordjs/voice";
+import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus} from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
-import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar, DMPError, DMPErrors, DefaultPlayOptions, DefaultPlaylistOptions } from "..";
+import {
+    DefaultPlayerOptions,
+    DefaultPlaylistOptions,
+    DefaultPlayOptions,
+    DMPError,
+    DMPErrors,
+    Player,
+    PlayerOptions,
+    Playlist,
+    PlaylistOptions,
+    PlayOptions,
+    ProgressBar,
+    ProgressBarOptions,
+    RepeatMode,
+    Song,
+    Utils
+} from "..";
 
 export class Queue<T = unknown> {
     public player: Player;
@@ -92,20 +106,53 @@ export class Queue<T = unknown> {
     }
 
     /**
+     * Gets the current volume
+     * @type {number}
+     */
+    get volume(): number {
+        if (!this.connection)
+            return DefaultPlayerOptions.volume!;
+        return this.connection.volume;
+    }
+
+    /**
+     * Gets the paused state of the player
+     * @type {boolean}
+     */
+    get paused(): boolean {
+        if (this.destroyed)
+            throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        if (!this.connection)
+            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
+        if (!this.isPlaying)
+            throw new DMPError(DMPErrors.NOTHING_PLAYING);
+
+        return this.connection.paused;
+    }
+
+    /**
+     * Returns current playing song
+     * @type {?Song}
+     */
+    get nowPlaying(): Song | undefined {
+        return this.connection?.resource?.metadata ?? this.songs[0];
+    }
+
+    /**
      * Joins a voice channel
-     * @param {GuildChannelResolvable} _channel
      * @returns {Promise<Queue>}
+     * @param channelId
      */
     async join(channelId: GuildChannelResolvable) {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-        if(this.connection)
+        if (this.connection)
             return this;
         const channel = this.guild.channels.resolve(channelId) as StageChannel | VoiceChannel;
-        if(!channel)
+        if (!channel)
             throw new DMPError(DMPErrors.UNKNOWN_VOICE);
-        if (channel.type !== ChannelType.GuildVoice)
+        if (!Utils.isVoiceChannel(channel))
             throw new DMPError(DMPErrors.CHANNEL_TYPE_INVALID);
         let connection = joinVoiceChannel({
             guildId: channel.guild.id,
@@ -136,7 +183,7 @@ export class Queue<T = unknown> {
                     this.player.emit('songFirst', this, this.nowPlaying);
             })
             .on('end', async (resource) => {
-                if(this.destroyed){
+                if (this.destroyed) {
                     this.player.emit('queueDestroyed', this);
                     return;
                 }
@@ -145,9 +192,9 @@ export class Queue<T = unknown> {
                 if (this.songs.length === 0 && this.repeatMode === RepeatMode.DISABLED) {
 
                     this.player.emit('queueEnd', this);
-                    if(this.options.leaveOnEnd)
+                    if (this.options.leaveOnEnd)
                         setTimeout(() => {
-                            if(!this.isPlaying)
+                            if (!this.isPlaying)
                                 this.leave();
                         }, this.options.timeout)
                     return;
@@ -156,16 +203,16 @@ export class Queue<T = unknown> {
                         this.songs.unshift(oldSong!);
                         this.songs[0]._setFirst(false);
                         this.player.emit('songChanged', this, this.songs[0], oldSong);
-                        return this.play(this.songs[0] as Song, { immediate: true });
+                        return this.play(this.songs[0] as Song, {immediate: true});
                     } else if (this.repeatMode === RepeatMode.QUEUE) {
                         this.songs.push(oldSong!);
                         this.songs[this.songs.length - 1]._setFirst(false);
                         this.player.emit('songChanged', this, this.songs[0], oldSong);
-                        return this.play(this.songs[0] as Song, { immediate: true });
+                        return this.play(this.songs[0] as Song, {immediate: true});
                     }
 
                     this.player.emit('songChanged', this, this.songs[0], oldSong);
-                    return this.play(this.songs[0] as Song, { immediate: true });
+                    return this.play(this.songs[0] as Song, {immediate: true});
                 }
             })
             .on('error', (err) => this.player.emit('error', err.message, this));
@@ -179,43 +226,43 @@ export class Queue<T = unknown> {
      * @returns {Promise<Song>}
      */
     async play(search: Song | string, options: PlayOptions & { immediate?: boolean, seek?: number, data?: any } = DefaultPlayOptions): Promise<Song> {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection)
+        if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         options = Object.assign(
             {} as PlayOptions,
             DefaultPlayOptions,
             options
         );
-        let { data } = options;
+        let {data} = options;
         delete options.data;
         let song = await Utils.best(search, options, this)
             .catch(error => {
                 throw new DMPError(error);
             });
-        if(!options.immediate)
+        if (!options.immediate)
             song.data = data;
 
         let songLength = this.songs.length;
-        if(!options?.immediate && songLength !== 0) {
-            if(options?.index! >= 0 && ++options.index! <= songLength)
+        if (!options?.immediate && songLength !== 0) {
+            if (options?.index! >= 0 && ++options.index! <= songLength)
                 this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
             return song;
-        } else if(!options?.immediate) {
+        } else if (!options?.immediate) {
             song._setFirst();
-            if(options?.index! >= 0 && ++options.index! <= songLength)
+            if (options?.index! >= 0 && ++options.index! <= songLength)
                 this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
-        } else if(options.seek)
+        } else if (options.seek)
             this.songs[0].seekTime = options.seek;
 
         let quality = this.options.quality;
         song = this.songs[0];
-        if(song.seekTime)
+        if (song.seekTime)
             options.seek = song.seekTime;
 
         let stream = ytdl(song.url, {
@@ -229,14 +276,14 @@ export class Queue<T = unknown> {
             filter: 'audioonly'
         })
             .on('error', (error: { message: string; }) => {
-                if(!/Status code|premature close/i.test(error.message))
+                if (!/Status code|premature close/i.test(error.message))
                     this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
-               return;
+                return;
             });
 
         const resource: AudioResource<Song> = this.connection.createAudioStream(stream, {
-           metadata: song,
-           inputType: StreamType.Raw
+            metadata: song,
+            inputType: StreamType.Raw
         });
 
         setTimeout(_ => {
@@ -256,9 +303,9 @@ export class Queue<T = unknown> {
      * @returns {Promise<Playlist>}
      */
     async playlist(search: Playlist | string, options: PlaylistOptions & { data?: any } = DefaultPlaylistOptions): Promise<Playlist> {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection)
+        if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         options = Object.assign(
             {} as PlaylistOptions & { data?: any },
@@ -270,14 +317,14 @@ export class Queue<T = unknown> {
                 throw new DMPError(error);
             });
         let songLength = this.songs.length;
-        if(options?.index! >= 0 && ++options.index! <= songLength)
+        if (options?.index! >= 0 && ++options.index! <= songLength)
             this.songs.splice(options.index!, 0, ...playlist.songs);
         else this.songs.push(...playlist.songs);
         this.player.emit('playlistAdd', this, playlist);
 
-        if(songLength === 0) {
+        if (songLength === 0) {
             playlist.songs[0]._setFirst();
-            await this.play(playlist.songs[0], { immediate: true });
+            await this.play(playlist.songs[0], {immediate: true});
         }
 
         return playlist;
@@ -289,12 +336,12 @@ export class Queue<T = unknown> {
      * @returns {boolean}
      */
     async seek(time: number) {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.isPlaying)
+        if (!this.isPlaying)
             throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
-        if(isNaN(time))
+        if (isNaN(time))
             return;
         if (time < 1)
             time = 0;
@@ -315,9 +362,9 @@ export class Queue<T = unknown> {
      * @returns {Song}
      */
     skip(index: number = 0): Song {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection)
+        if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         this.songs.splice(1, index);
 
@@ -331,10 +378,10 @@ export class Queue<T = unknown> {
      * @returns {void}
      */
     stop(): void {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
-        if(this.options.leaveOnStop){
+        if (this.options.leaveOnStop) {
             setTimeout(() => {
                 this.leave();
             }, this.options.timeout);
@@ -348,8 +395,8 @@ export class Queue<T = unknown> {
      * Shuffles the Queue
      * @returns {Song[]}
      */
-    shuffle(): Song[]|undefined {
-        if(this.destroyed)
+    shuffle(): Song[] | undefined {
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
         let currentSong = this.songs.shift();
@@ -364,12 +411,12 @@ export class Queue<T = unknown> {
      * @param {boolean} [state=true] Pause state, if none it will pause the Song
      * @returns {boolean}
      */
-    setPaused(state: boolean = true): boolean|undefined {
-        if(this.destroyed)
+    setPaused(state: boolean = true): boolean | undefined {
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection)
+        if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
-        if(!this.isPlaying)
+        if (!this.isPlaying)
             throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
         return this.connection.setPauseState(state);
@@ -380,36 +427,11 @@ export class Queue<T = unknown> {
      * @param {number} index
      * @returns {Song|undefined}
      */
-    remove(index: number): Song|undefined {
-        if(this.destroyed)
+    remove(index: number): Song | undefined {
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
         return this.songs.splice(index, 1)[0];
-    }
-
-    /**
-     * Gets the current volume
-     * @type {number}
-     */
-    get volume(): number {
-        if (!this.connection)
-            return DefaultPlayerOptions.volume!;
-        return this.connection.volume;
-    }
-
-    /**
-     * Gets the paused state of the player
-     * @type {boolean}
-     */
-    get paused(): boolean {
-        if(this.destroyed)
-            throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection)
-            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
-        if(!this.isPlaying)
-            throw new DMPError(DMPErrors.NOTHING_PLAYING);
-
-        return this.connection.paused;
     }
 
     /**
@@ -418,9 +440,9 @@ export class Queue<T = unknown> {
      * @returns {boolean}
      */
     setVolume(volume: number) {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.connection)
+        if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
 
         this.options.volume = volume;
@@ -428,23 +450,15 @@ export class Queue<T = unknown> {
     }
 
     /**
-     * Returns current playing song
-     * @type {?Song}
-     */
-    get nowPlaying(): Song | undefined {
-        return this.connection?.resource?.metadata ?? this.songs[0];
-    }
-
-    /**
      * Clears the Queue
      * @returns {void}
      */
     clearQueue() {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
         let currentlyPlaying = this.songs.shift();
-        this.songs = [ currentlyPlaying! ];
+        this.songs = [currentlyPlaying!];
     }
 
     /**
@@ -453,7 +467,7 @@ export class Queue<T = unknown> {
      * @returns {boolean}
      */
     setRepeatMode(repeatMode: RepeatMode): boolean {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
         if (![RepeatMode.DISABLED, RepeatMode.QUEUE, RepeatMode.SONG].includes(repeatMode))
@@ -470,9 +484,9 @@ export class Queue<T = unknown> {
      * @returns {ProgressBar}
      */
     createProgressBar(options?: ProgressBarOptions): ProgressBar {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        if(!this.isPlaying)
+        if (!this.isPlaying)
             throw new DMPError(DMPErrors.NOTHING_PLAYING);
 
         return new ProgressBar(this, options);
@@ -484,7 +498,7 @@ export class Queue<T = unknown> {
      * @returns {void}
      */
     setData(data: any): void {
-        if(this.destroyed)
+        if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
         this.data = data;

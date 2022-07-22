@@ -1,8 +1,8 @@
-# Migrating to Discord Music Player v8
+# Migrating to Discord Music Player v9
 
-### Note: Version 8 has some breaking changes, your old code from Version 7 will not longer work.
+### Note: Version 8 and 9 has some breaking changes, your old code from Version 7 will no longer work.
 
-The **Version 8** update brings support for [Discord.js v13](https://www.npmjs.com/package/discord.js), new features and better Queue management.
+The **Version 8 & 9** update brings support for [Discord.js v14 & v13](https://www.npmjs.com/package/discord.js), new features and better Queue management.
 We use the new [@discordjs/voice](https://www.npmjs.com/package/@discordjs/voice) package, that makes the music even better!
 
 ## Code example

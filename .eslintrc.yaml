@@ -1,6 +1,5 @@
 # .eslintrc.yaml
 ---
-extends: airbnb-base
 env:
   node: true
   mocha: true
