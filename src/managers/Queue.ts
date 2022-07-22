@@ -1,4 +1,4 @@
-import {Guild, GuildChannelResolvable, Snowflake, StageChannel, VoiceChannel} from "discord.js";
+import {Guild, GuildChannelResolvable, Snowflake, ChannelType, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
 import {AudioResource,
     createAudioResource,
@@ -105,7 +105,7 @@ export class Queue {
         const channel = this.guild.channels.resolve(channelId) as StageChannel | VoiceChannel;
         if(!channel)
             throw new DMPError(DMPErrors.UNKNOWN_VOICE);
-        if (!channel.isVoice())
+        if (channel.type !== ChannelType.GuildVoice)
             throw new DMPError(DMPErrors.CHANNEL_TYPE_INVALID);
         let connection = joinVoiceChannel({
             guildId: channel.guild.id,
@@ -123,9 +123,9 @@ export class Queue {
         }
         this.connection = _connection;
 
-        if (channel.type === "GUILD_STAGE_VOICE") {
-            await channel.guild.me!.voice.setSuppressed(false).catch(async _ => {
-                return await channel!.guild.me!.voice.setRequestToSpeak(true).catch(() => null);
+        if (channel.type === ChannelType.GuildStageVoice) {
+            await channel.guild.members.me!.voice.setSuppressed(false).catch(async _ => {
+                return await channel!.guild.members.me!.voice.setRequestToSpeak(true).catch(() => null);
             });
         }
 
