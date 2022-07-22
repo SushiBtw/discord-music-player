@@ -140,8 +140,8 @@ export class Queue<T = unknown> {
 
     /**
      * Joins a voice channel
+     * @param {GuildChannelResolvable} channelId
      * @returns {Promise<Queue>}
-     * @param channelId
      */
     async join(channelId: GuildChannelResolvable) {
         if (this.destroyed)
