@@ -444,7 +444,17 @@ export class Utils {
     }
 
     static isVoiceChannel(Channel: GuildChannel): boolean {
-        return [ChannelType.GuildVoice, ChannelType.GuildStageVoice].includes(Channel.type);
+        let type = Channel.type as ChannelType | string;
+        if (typeof type === 'string')
+            return ['GUILD_VOICE', 'GUILD_STAGE_VOICE'].includes(type);
+        else return [ChannelType.GuildVoice, ChannelType.GuildStageVoice].includes(type);
+    }
+
+    static isStageVoiceChannel(Channel: GuildChannel): boolean {
+        let type = Channel.type as ChannelType | string;
+        if (typeof type === 'string')
+            return type === 'GUILD_STAGE_VOICE';
+        else return type === ChannelType.GuildStageVoice;
     }
 
 }

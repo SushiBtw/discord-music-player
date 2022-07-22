@@ -1,4 +1,4 @@
-import {ChannelType, Guild, GuildChannelResolvable, StageChannel, VoiceChannel} from "discord.js";
+import {Guild, GuildChannelResolvable, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
 import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus} from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
@@ -170,7 +170,7 @@ export class Queue<T = unknown> {
         }
         this.connection = _connection;
 
-        if (channel.type === ChannelType.GuildStageVoice) {
+        if (Utils.isStageVoiceChannel(channel)) {
             await channel.guild.members.me!.voice.setSuppressed(false).catch(async _ => {
                 return await channel!.guild.members.me!.voice.setRequestToSpeak(true).catch(() => null);
             });
