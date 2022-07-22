@@ -59,6 +59,7 @@ class DMPError extends Error {
  * - SEARCH_NULL = 'SearchIsNull',
  * - INVALID_PLAYLIST = 'InvalidPlaylist',
  * - INVALID_SPOTIFY = 'InvalidSpotify'
+ * - UNKNOWN_SONG = 'UnknownSong'
  * @typedef {string} DMPErrors
  */
 export enum DMPErrors {
@@ -74,7 +75,9 @@ export enum DMPErrors {
     INVALID_GUILD = 'InvalidGuild',
     SEARCH_NULL = 'SearchIsNull',
     INVALID_PLAYLIST = 'InvalidPlaylist',
-    INVALID_SPOTIFY = 'InvalidSpotify'
+    INVALID_SPOTIFY = 'InvalidSpotify',
+    INVALID_APPLE = 'InvalidApple',
+    UNKNOWN_SONG = 'UnknownSong'
 }
 
 /**
@@ -108,7 +111,9 @@ export const DMPErrorMessages = {
     InvalidGuild: 'The provided Guild was invalid.',
     SearchIsNull: 'The was no YouTube song found by that query.',
     InvalidSpotify: 'The was no Spotify song found with that link.',
-    InvalidPlaylist: 'There was no Playlist found with that link.'
+    InvalidPlaylist: 'There was no Playlist found with that link.',
+    InvalidApple: 'There was no Apple music song with that link',
+    UnknownSong: 'There is no song found by that index.'
 }
 
 export { DMPError };

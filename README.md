@@ -8,8 +8,8 @@
 Discord Music Player is a powerful [Node.js](https://nodejs.org) module that allows you to easily implement music commands.
 **Everything** is customizable, and everything can be done using this package - **there are no limitations!**
 
-This package supports YouTube Videos and Playlists, Spotify Songs and Playlists.
-Package is maintained by [SushiBtw](https://github.com/SushiBtw), but is an early fork of Androz2091.
+This package supports YouTube Videos & Playlists, Spotify Songs & Playlists, Apple Music Songs & Playlists.
+Package from version v7.0.0 is fully maintained by [SushiBtw](https://github.com/SushiBtw).
 
 ### Requirements:
 - [Discord.js v13](https://www.npmjs.com/package/discord.js),
@@ -29,9 +29,15 @@ npm install --save @discordjs/opus
 # Documentation
 **Discord Music Player documentation: [https://discord-music-player.js.org/](https://discord-music-player.js.org/)**
 
+### **Need some help?**
+Feel free to join [Discord-Music-Player Discord Server](https://discord.gg/6fejZNsmFC) and ask us about DMP.
+
 # Getting Started
 **The code bellow, will show you how to use DMP in your code.**
+
 *Please define your **Player** after the **client/bot** definition.*
+
+[!] Remember to include the related voice **Intents** at the client options. [!]
 ```js
 const Discord = require("discord.js");
 const client = new Discord.Client({
@@ -46,7 +52,7 @@ const { Player } = require("discord-music-player");
 const player = new Player(client, {
     leaveOnEmpty: false, // This options are optional.
 });
-// You can define the Player as *client.player* to easly access it.
+// You can define the Player as *client.player* to easily access it.
 client.player = player;
 
 client.on("ready", () => {
@@ -166,6 +172,9 @@ client.player
     .on('playlistAdd',  (queue, playlist) =>
         console.log(`Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`))
     // Emitted when there was no more music to play.
+    .on('queueDestroyed',  (queue) =>
+        console.log(`The queue was destroyed.`))
+    // Emitted when the queue was destroyed (either by ending or stopping).    
     .on('queueEnd',  (queue) =>
         console.log(`The queue has ended.`))
     // Emitted when a song changed.

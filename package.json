@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "8.1.0-dev",
+  "version": "8.3.3",
   "description": "Complete framework to facilitate music commands using discord.js v13",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/SushiBtw/discord-music-player.git"
+    "url": "git+https://github.com/SushiBtw/discord-music-player.git"
   },
   "bugs": {
     "url": "https://github.com/SushiBtw/discord-music-player/issues"
@@ -33,11 +33,15 @@
   "dependencies": {
     "@discordjs/opus": "^0.6.0",
     "@discordjs/voice": "^0.6.0",
+    "axios": "^0.22.0",
+    "axios-retry": "^3.2.0",
     "discord-ytdl-core": "^5.0.4",
+    "domhandler": "^4.2.2",
     "ffmpeg-static": "^4.4.0",
-    "spotify-url-info": "^2.2.3",
-    "youtubei": "^0.0.1-rc.24",
+    "htmlparser2": "^7.1.2",
     "libsodium-wrappers": "^0.7.9",
+    "spotify-url-info": "^2.2.3",
+    "youtubei": "^0.0.1-rc.34",
     "ytdl-core": "^4.9.1",
     "ytsr": "^3.5.3"
   },
@@ -50,12 +54,16 @@
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
     "assert-diff": "^3.0.2",
-    "discord.js": "^13.1.0",
+    "discord.js": "^14.0.2",
     "discord.js-docgen": "github:discordjs/docgen#ts-patch",
     "eslint": "^7.32.0",
     "jest": "^27.0.6",
     "jsdoc-babel": "^0.5.0",
     "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
   }
 }

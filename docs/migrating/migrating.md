@@ -40,6 +40,9 @@ player.on('songAdd', (queue, song) => {
 player.on('queueEnd', (queue) => {
     queue.data.channel.send(`Queue ended, there is nothing to play.`);
 })
+player.on('queueDestroyed', (queue) => {
+    queue.data.channel.send(`Playback ended.`);
+})
 ```
 
 ## Utils
@@ -139,3 +142,8 @@ let song = await queue.play('F1 music', {
     localAddress: 'CustomIPv6YouOwn'
 });
 ```
+
+## Missing something? Found a Bug?
+Feel free to join [Discord-Music-Player Discord Server](https://discord.gg/6fejZNsmFC) and ask us about DMP.
+
+Create a Bug Report/Question Report via [Discord-Music-Player Github](https://github.com/SushiBtw/discord-music-player/issues).

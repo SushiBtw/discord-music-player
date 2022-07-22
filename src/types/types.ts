@@ -8,12 +8,12 @@ import { Song, Queue, Playlist } from "..";
  * @param {boolean} [leaveOnEnd=true] If it should leave on end
  * @param {boolean} [leaveOnStop=true] If it should leave on stop
  * @param {boolean} [leaveOnEmpty=true] If it should leave on empty voice channel
- * @param {boolean} [deafenOnJoin=false] If it should defean on join
+ * @param {boolean} [deafenOnJoin=false] If it should deafen on join
  * @param {number} [timeout=0] Voice channel leave timeout
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
  * @param {string} [localAddress] Custom ipv4/ipv6 address
- * @param {string} [ytdlCookie] Custom YouTube cookie to avoid erros and bypass some features
+ * @param {string} [ytdlRequestOptions] Custom YTDL Request Options object
  */
 export interface PlayerOptions {
     leaveOnEnd?: boolean,
@@ -24,7 +24,7 @@ export interface PlayerOptions {
     volume?: number,
     quality?: 'low'|'high',
     localAddress?: string,
-    ytdlCookie?: string,
+    ytdlRequestOptions?: object,
 }
 
 /**
@@ -54,12 +54,14 @@ export interface PlayOptions {
  * @param {number} [maxSongs=-1] Max songs
  * @param {User} [requestedBy] The User who requested the Song
  * @param {boolean} [shuffle=false] If it should shuffle the Songs
+ * @param {number} [index] If the index was provided, it will add all songs of the playlist after the provided index in the Queue
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
 export interface PlaylistOptions {
     maxSongs?: number,
     requestedBy?: User,
     shuffle?: boolean,
+    index?: number,
     localAddress?: string
 };
 
@@ -83,7 +85,7 @@ export interface ProgressBarOptions {
  * @param {boolean} [leaveOnEnd=true] If it should leave on end
  * @param {boolean} [leaveOnStop=true] If it should leave on stop
  * @param {boolean} [leaveOnEmpty=true] If it should leave on empty voice channel
- * @param {boolean} [deafenOnJoin=false] If it should defean on join
+ * @param {boolean} [deafenOnJoin=false] If it should deafen on join
  * @param {number} [timeout=0] Voice channel leave timeout
  * @param {number} [volume=100] Player volume
  * @param {string} [quality=high] Player quality
@@ -213,6 +215,12 @@ export enum RepeatMode {
  */
 
 /**
+ * Emitted when the queue was destroyed
+ * @event Player#queueDestroyed
+ * @param {Queue} queue Queue
+ */
+
+/**
  * Emitted when a song changed
  * @event Player#songChanged
  * @param {Queue} queue Queue
@@ -281,4 +289,11 @@ export interface StreamConnectionEvents {
     start: [AudioResource<Song>];
     end: [AudioResource<Song>];
     error: [AudioPlayerError];
+}
+
+export interface RawApplePlaylist {
+    name: string
+    type: 'playlist'|'album'
+    author: string
+    tracks: { artist: string, title: string }[]
 }

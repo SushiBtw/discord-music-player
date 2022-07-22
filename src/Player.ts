@@ -62,7 +62,7 @@ export class Player<OptionsData = any> extends EventEmitter {
         let guild = this.client.guilds.resolve(guildId);
         if(!guild)
             throw new DMPError(DMPErrors.INVALID_GUILD);
-        if(this.hasQueue(guildId))
+        if(this.hasQueue(guildId) && !this.getQueue(guildId)?.destroyed)
             return this.getQueue(guildId) as Queue<D>;
 
         let { data } = options;
@@ -126,7 +126,7 @@ export class Player<OptionsData = any> extends EventEmitter {
         let { deafenOnJoin, leaveOnEmpty, timeout } = queue.options;
 
         if (!newState.channelId && this.client.user?.id === oldState.member?.id) {
-            queue.destroy();
+            queue.leave();
             return void this.emit('clientDisconnect', queue);
         } else if(deafenOnJoin && oldState.serverDeaf && !newState.serverDeaf) {
             this.emit('clientUndeafen', queue);
@@ -135,9 +135,11 @@ export class Player<OptionsData = any> extends EventEmitter {
         if (oldState.channelId === newState.channelId) return;
         if (!leaveOnEmpty || queue.connection.channel.members.size > 1) return;
         setTimeout(() => {
-            if (queue!.connection.channel.members.size > 1) return;
-            queue!.destroy(true);
-            this.emit('channelEmpty', queue);
+            if (queue!.connection!.channel.members.size > 1) return;
+            if (queue!.connection!.channel.members.has(this.client.user!.id)) {
+                queue!.leave();
+                this.emit('channelEmpty', queue);
+            }
         }, timeout);
     }
 }

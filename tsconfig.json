@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "es2020",
     "module": "commonjs",
     "allowJs": true,
     "declaration": true,
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
-    "strictPropertyInitialization": false,
     "esModuleInterop": true,
     "pretty": true,
     "resolveJsonModule": true
