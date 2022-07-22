@@ -1,4 +1,4 @@
-import {Guild, GuildChannelResolvable, Snowflake, StageChannel, VoiceChannel} from "discord.js";
+import {Guild, GuildChannelResolvable, Snowflake, ChannelType, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
 import {AudioResource,
     createAudioResource,
@@ -6,14 +6,14 @@ import {AudioResource,
 import ytdl from "discord-ytdl-core";
 import { Playlist, Song, Player, Utils, DefaultPlayerOptions, PlayerOptions, PlayOptions, PlaylistOptions, RepeatMode, ProgressBarOptions, ProgressBar, DMPError, DMPErrors, DefaultPlayOptions, DefaultPlaylistOptions } from "..";
 
-export class Queue {
+export class Queue<T = unknown> {
     public player: Player;
     public guild: Guild;
     public connection: StreamConnection | undefined;
     public songs: Song[] = [];
     public isPlaying: boolean = false;
-    public data?: any = null;
-    public options: PlayerOptions;
+    public data?: T;
+    public options: PlayerOptions = DefaultPlayerOptions;
     public repeatMode: RepeatMode = RepeatMode.DISABLED;
     public destroyed: boolean = false;
 
@@ -105,7 +105,7 @@ export class Queue {
         const channel = this.guild.channels.resolve(channelId) as StageChannel | VoiceChannel;
         if(!channel)
             throw new DMPError(DMPErrors.UNKNOWN_VOICE);
-        if (!channel.isVoice())
+        if (channel.type !== ChannelType.GuildVoice)
             throw new DMPError(DMPErrors.CHANNEL_TYPE_INVALID);
         let connection = joinVoiceChannel({
             guildId: channel.guild.id,
@@ -123,9 +123,9 @@ export class Queue {
         }
         this.connection = _connection;
 
-        if (channel.type === "GUILD_STAGE_VOICE") {
-            await channel.guild.me!.voice.setSuppressed(false).catch(async _ => {
-                return await channel!.guild.me!.voice.setRequestToSpeak(true).catch(() => null);
+        if (channel.type === ChannelType.GuildStageVoice) {
+            await channel.guild.members.me!.voice.setSuppressed(false).catch(async _ => {
+                return await channel!.guild.members.me!.voice.setRequestToSpeak(true).catch(() => null);
             });
         }
 
@@ -270,7 +270,9 @@ export class Queue {
                 throw new DMPError(error);
             });
         let songLength = this.songs.length;
-        this.songs.push(...playlist.songs);
+        if(options?.index! >= 0 && ++options.index! <= songLength)
+            this.songs.splice(options.index!, 0, ...playlist.songs);
+        else this.songs.push(...playlist.songs);
         this.player.emit('playlistAdd', this, playlist);
 
         if(songLength === 0) {

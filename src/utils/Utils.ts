@@ -222,7 +222,11 @@ export class Utils {
             Search,
             SOptions,
             Queue
-        );
+        ).catch(error => {
+            if(!(error instanceof TypeError)){
+                throw DMPErrors.UNKNOWN //Ignore typeError
+            }
+        });
 
         if(!_Song)
             _Song = (await this.search(
@@ -318,7 +322,7 @@ export class Utils {
                             SOptions,
                             Queue
                         ).catch(() => null);
-                        if (Result) {
+                        if (Result && Result[0]) {
                             Result[0].data = SOptions.data;
                             return Result[0];
                         } else return null;

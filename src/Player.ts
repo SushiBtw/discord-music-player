@@ -4,9 +4,9 @@ import { DMPError, DMPErrors } from ".";
 import { Queue } from "./managers/Queue";
 import { PlayerOptions, DefaultPlayerOptions, PlayerEvents } from "./types/types";
 
-export class Player extends EventEmitter {
+export class Player<OptionsData = any> extends EventEmitter {
     public client: Client;
-    public queues: Collection<Snowflake, Queue> = new Collection();
+    public queues: Collection<Snowflake, Queue<OptionsData>> = new Collection();
     public options: PlayerOptions = DefaultPlayerOptions;
 
     /**
@@ -38,7 +38,7 @@ export class Player extends EventEmitter {
          * Player queues
          * @type {Collection<Snowflake, Queue>}
          */
-        this.queues = new Collection<Snowflake, Queue>();
+        this.queues = new Collection<Snowflake, Queue<OptionsData>>();
 
         this.client.on('voiceStateUpdate',
             (oldState, newState) =>
@@ -52,7 +52,7 @@ export class Player extends EventEmitter {
      * @param {PlayerOptions} [options=this.options]
      * @returns {Queue}
      */
-    createQueue(guildId: Snowflake, options: PlayerOptions & { data?: any } = this.options): Queue {
+    createQueue<D extends OptionsData>(guildId: Snowflake, options: PlayerOptions & { data?: D } = this.options): Queue<D> {
         options = Object.assign(
             {} as PlayerOptions,
             this.options,
@@ -63,15 +63,15 @@ export class Player extends EventEmitter {
         if(!guild)
             throw new DMPError(DMPErrors.INVALID_GUILD);
         if(this.hasQueue(guildId) && !this.getQueue(guildId)?.destroyed)
-            return this.getQueue(guildId) as Queue;
+            return this.getQueue(guildId) as Queue<D>;
 
         let { data } = options;
         delete options.data;
-        const queue = new Queue(this, guild, options);
+        const queue = new Queue<D>(this, guild, options);
         queue.data = data;
         this.setQueue(guildId, queue);
 
-        return queue as Queue;
+        return queue as Queue<D>;
     }
 
     /**
@@ -98,7 +98,7 @@ export class Player extends EventEmitter {
      * @param {Queue} queue
      * @returns {void}
      */
-    setQueue(guildId: Snowflake, queue: Queue): void {
+    setQueue(guildId: Snowflake, queue: Queue<OptionsData>): void {
         this.queues.set(guildId, queue);
     }
 
@@ -144,6 +144,6 @@ export class Player extends EventEmitter {
     }
 }
 
-export declare interface Player {
-    on<K extends keyof PlayerEvents>(event: K, listener: (...args: PlayerEvents[K]) => void): this;
+export declare interface Player<OptionsData = any> {
+    on<K extends keyof PlayerEvents = any>(event: K, listener: (...args: PlayerEvents<OptionsData>[K]) => void): this;
 }

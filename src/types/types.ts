@@ -54,12 +54,14 @@ export interface PlayOptions {
  * @param {number} [maxSongs=-1] Max songs
  * @param {User} [requestedBy] The User who requested the Song
  * @param {boolean} [shuffle=false] If it should shuffle the Songs
+ * @param {number} [index] If the index was provided, it will add all songs of the playlist after the provided index in the Queue
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
 export interface PlaylistOptions {
     maxSongs?: number,
     requestedBy?: User,
     shuffle?: boolean,
+    index?: number,
     localAddress?: string
 };
 
@@ -252,17 +254,17 @@ export enum RepeatMode {
  * @param {Queue} queue Queue
  */
 
-export interface PlayerEvents {
-    channelEmpty: [queue: Queue];
-    songAdd: [queue: Queue, song: Song];
-    playlistAdd: [queue: Queue, playlist: Playlist];
-    queueEnd: [queue: Queue];
-    queueDestroyed: [queue: Queue];
-    songChanged: [queue: Queue, newSong: Song, oldSong: Song];
-    songFirst: [queue: Queue, song: Song];
-    clientDisconnect: [queue: Queue];
-    clientUndeafen: [queue: Queue];
-    error: [error: string, queue: Queue];
+export interface PlayerEvents<T = unknown> {
+    channelEmpty: [queue: Queue<T>];
+    songAdd: [queue: Queue<T>, song: Song];
+    playlistAdd: [queue: Queue<T>, playlist: Playlist];
+    queueEnd: [queue: Queue<T>];
+    queueDestroyed: [queue: Queue<T>];
+    songChanged: [queue: Queue<T>, newSong: Song, oldSong: Song];
+    songFirst: [queue: Queue<T>, song: Song];
+    clientDisconnect: [queue: Queue<T>];
+    clientUndeafen: [queue: Queue<T>];
+    error: [error: string, queue: Queue<T>];
 }
 
 /**
