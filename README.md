@@ -42,6 +42,7 @@ Feel free to join [Discord-Music-Player Discord Server](https://discord.gg/6fejZ
 const Discord = require("discord.js");
 const client = new Discord.Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES]
+    // intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates] for discord.js v14
 });
 const settings = {
     prefix: '!',
@@ -245,3 +246,7 @@ let queue = player.getQueue(message.guild.id);
 let { initMessage } = queue.nowPlaying.data;
 await initMessage.channel.send(`This message object is hold in Song :D`);
 ```
+
+## Example bots made with this package
+
+- [Music bot](https://github.com/elbkr/music-bot) by [elbkr](https://github.com/elbkr)

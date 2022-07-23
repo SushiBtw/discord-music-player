@@ -229,7 +229,7 @@ export class Queue<T = unknown> {
      * @param {PlayOptions} [options=DefaultPlayOptions]
      * @returns {Promise<Song>}
      */
-    async play(search: Song | string, options: PlayOptions & { immediate?: boolean, seek?: number, data?: any } = DefaultPlayOptions): Promise<Song> {
+    async play(search: Song | string, options: PlayOptions & { immediate?: boolean, data?: any } = DefaultPlayOptions): Promise<Song> {
         if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if (!this.connection)
@@ -248,6 +248,9 @@ export class Queue<T = unknown> {
         if (!options.immediate)
             song.data = data;
 
+        if (options?.seek)
+            song.seekTime = options.seek;
+
         let songLength = this.songs.length;
         if (!options?.immediate && songLength !== 0) {
             if (options?.index! >= 0 && ++options.index! <= songLength)
@@ -261,8 +264,7 @@ export class Queue<T = unknown> {
                 this.songs.splice(options.index!, 0, song);
             else this.songs.push(song);
             this.player.emit('songAdd', this, song);
-        } else if (options.seek)
-            this.songs[0].seekTime = options.seek;
+        }
 
         let quality = this.options.quality;
         song = this.songs[0];
