@@ -1,6 +1,6 @@
 {
   "name": "discord-music-player",
-  "version": "9.1.0",
+  "version": "9.1.1",
   "description": "Complete framework to facilitate music commands using discord.js v14 and v13.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,7 +44,7 @@
     "libsodium-wrappers": "^0.7.9",
     "spotify-url-info": "^3.1.7",
     "youtubei": "^0.0.1-rc.34",
-    "ytdl-core": "^4.11.0",
+    "ytdl-core": "^4.11.2",
     "ytsr": "^3.6.0"
   },
   "devDependencies": {
