@@ -6,12 +6,16 @@
     "declaration": true,
     "rootDir": "src",
     "outDir": "dist",
-    "strict": true,
+    "skipLibCheck": true,
+    "strict": false,
     "esModuleInterop": true,
     "pretty": true,
     "resolveJsonModule": true
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

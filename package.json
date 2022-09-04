@@ -1,11 +1,11 @@
 {
   "name": "discord-music-player",
-  "version": "9.0.2",
+  "version": "9.1.0",
   "description": "Complete framework to facilitate music commands using discord.js v14 and v13.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build tsconfig.json",
     "test": "jest test/test.js",
     "docs:test": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml",
     "docs": "docgen --jsdoc jsdoc.json --source src/*.ts src/**/*.ts --custom docs/custom.yml --output docs/docs.json"
@@ -42,7 +42,7 @@
     "ffmpeg-static": "^5.0.2",
     "htmlparser2": "^7.1.2",
     "libsodium-wrappers": "^0.7.9",
-    "spotify-url-info": "^2.2.3",
+    "spotify-url-info": "^3.1.7",
     "youtubei": "^0.0.1-rc.34",
     "ytdl-core": "^4.11.0",
     "ytsr": "^3.6.0"
@@ -56,9 +56,10 @@
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
     "assert-diff": "^3.0.2",
-    "discord.js": "^14.0.2",
+    "discord.js": "^14.3.0",
     "discord.js-docgen": "github:discordjs/docgen#ts-patch",
     "eslint": "^7.32.0",
+    "isomorphic-unfetch": "^3.1.0",
     "jest": "^27.0.6",
     "jsdoc-babel": "^0.5.0",
     "ts-node": "^10.2.0",
