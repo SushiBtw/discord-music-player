@@ -229,7 +229,7 @@ export class Queue<T = unknown> {
      * @param {PlayOptions} [options=DefaultPlayOptions]
      * @returns {Promise<Song>}
      */
-    async play(search: Song | string, options: PlayOptions & { immediate?: boolean, data?: any } = DefaultPlayOptions): Promise<Song> {
+    async play(search: Song | string, options: PlayOptions & { immediate?: boolean, seek?: number, data?: T } = DefaultPlayOptions): Promise<Song> {
         if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if (!this.connection)
@@ -308,13 +308,13 @@ export class Queue<T = unknown> {
      * @param {PlaylistOptions} [options=DefaultPlaylistOptions]
      * @returns {Promise<Playlist>}
      */
-    async playlist(search: Playlist | string, options: PlaylistOptions & { data?: any } = DefaultPlaylistOptions): Promise<Playlist> {
+    async playlist(search: Playlist | string, options: PlaylistOptions & { data?: T } = DefaultPlaylistOptions): Promise<Playlist> {
         if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
         if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
         options = Object.assign(
-            {} as PlaylistOptions & { data?: any },
+            {} as PlaylistOptions & { data?: T },
             DefaultPlaylistOptions,
             options
         );
@@ -503,7 +503,7 @@ export class Queue<T = unknown> {
      * @param {any} data
      * @returns {void}
      */
-    setData(data: any): void {
+    setData(data: T): void {
         if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
 
