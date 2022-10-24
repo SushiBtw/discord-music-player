@@ -409,6 +409,8 @@ export class Queue<T = unknown> {
         this.songs.splice(oldIndex, 1);
         this.songs.splice(newIndex, 0, song);
 
+        this.player.emit('songMoved', this, song, oldIndex, newIndex);
+
         return true;
     }
 

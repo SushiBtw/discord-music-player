@@ -192,6 +192,9 @@ client.player
     // Emitted when deafenOnJoin is true and the bot was undeafened
     .on('clientUndeafen', (queue) =>
         console.log(`I got undefeanded.`))
+    // Emitted when a song was moved in the queue to a new position
+    .on('songMoved', (queue, song, oldIndex, newIndex) =>
+        console.log(`Song ${song} was moved from ${oldIndex} to ${newIndex}.`))
     // Emitted when there was an error in runtime
     .on('error', (error, queue) => {
         console.log(`Error: ${error} in ${queue.guild.name}`);
