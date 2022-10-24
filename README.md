@@ -158,6 +158,10 @@ client.on('messageCreate', async (message) => {
         // [======>              ][00:35/2:20]
         console.log(ProgressBar.prettier);
     }
+
+    if(command === 'move'){
+        guildQueue.move(parseInt(args[0]), parseInt(args[1]));
+    }
 })
 ```
 
