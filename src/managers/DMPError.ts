@@ -60,6 +60,7 @@ class DMPError extends Error {
  * - INVALID_PLAYLIST = 'InvalidPlaylist',
  * - INVALID_SPOTIFY = 'InvalidSpotify'
  * - UNKNOWN_SONG = 'UnknownSong'
+ * - INVALID_INDEX = 'InvalidIndex'
  * @typedef {string} DMPErrors
  */
 export enum DMPErrors {
@@ -77,7 +78,8 @@ export enum DMPErrors {
     INVALID_PLAYLIST = 'InvalidPlaylist',
     INVALID_SPOTIFY = 'InvalidSpotify',
     INVALID_APPLE = 'InvalidApple',
-    UNKNOWN_SONG = 'UnknownSong'
+    UNKNOWN_SONG = 'UnknownSong',
+    INVALID_INDEX = 'InvalidIndex'
 }
 
 /**
@@ -96,6 +98,8 @@ export enum DMPErrors {
  * - SearchIsNull: `The was no YouTube song found by that query.`,
  * - InvalidSpotify: `The was no Spotify song found with that link.`,
  * - InvalidPlaylist: `There was no Playlist found with that link.`
+ * - UnknownSong: `There was no Song found with that link.`
+ * - InvalidIndex: `The provided index was not valid.`
  * @typedef {DMPErrorMessages}
  */
 export const DMPErrorMessages = {
@@ -113,7 +117,8 @@ export const DMPErrorMessages = {
     InvalidSpotify: 'The was no Spotify song found with that link.',
     InvalidPlaylist: 'There was no Playlist found with that link.',
     InvalidApple: 'There was no Apple music song with that link',
-    UnknownSong: 'There is no song found by that index.'
+    UnknownSong: 'There is no song found by that index.',
+    InvalidIndex: 'The provided index was not valid.'
 }
 
 export { DMPError };
