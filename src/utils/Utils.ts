@@ -306,6 +306,41 @@ export class Utils {
             return new Playlist(AppleResult, Queue, SOptions.requestedBy);
         } else if (SpotifyPlaylistLink) {
             let SpotifyResultData = await getData(Search).catch(() => null);
+            let spotifyTracks = SpotifyResultData.tracks?.items ?? [];
+
+            // Playlist has more than 100 songs, fetching remaining songs...
+            if (
+              SpotifyResultData.tracks.items.length < SpotifyResultData.tracks.total
+            ) {
+              const tracksNextEndpoint = SpotifyResultData.tracks.next;
+              if (tracksNextEndpoint) {
+                // Create Guest Token
+                const tokenResponse = await fetch(
+                  'https://open.spotify.com/get_access_token?reason=transport&productType=web_player',
+                  {
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                  }
+                );
+                const { accessToken } = await tokenResponse.json();
+
+                let fetchNext = tracksNextEndpoint;
+                // Fetch playlist tracks through pagination until there is nothing left to fetch
+                do {
+                  const tracksResponse = await fetch(fetchNext, {
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${accessToken}`,
+                    },
+                  });
+                  const { items, next } = await tracksResponse.json();
+                  spotifyTracks = spotifyTracks.concat(items);
+                  fetchNext = next;
+                } while (fetchNext);
+              }
+            }
+            
             if (!SpotifyResultData || !['playlist', 'album'].includes(SpotifyResultData.type))
                 throw DMPErrors.INVALID_PLAYLIST;
 
@@ -319,7 +354,7 @@ export class Utils {
 
             SpotifyResult.songs = (
                 await Promise.all(
-                    (SpotifyResultData.tracks?.items ?? []).map(async (track: any, index: number) => {
+                    (spotifyTracks ?? []).map(async (track: any, index: number) => {
                         if (Limit !== -1 && index >= Limit)
                             return null;
                         if (SpotifyResult.type === 'playlist')
