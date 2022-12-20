@@ -380,6 +380,41 @@ export class Queue<T = unknown> {
     }
 
     /**
+     * Moves a Song to a new position.
+     * The indices can't be the same or start with 0, because 0 is the current playing Song
+     * @param {number} oldIndex - The old index of the Song
+     * @param {number} [newIndex] - The new index of the Song, if not provided, the Song will be moved to the beginning
+     * @returns {boolean}
+     */
+    move(oldIndex: number, newIndex?: number): boolean {
+        if (this.destroyed)
+            throw new DMPError(DMPErrors.QUEUE_DESTROYED);
+        
+        if (!this.connection)
+            throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
+        
+        if (newIndex === undefined)
+            newIndex = 1;
+        
+        if (oldIndex === undefined || oldIndex < 1 || oldIndex >= this.songs.length)
+            throw new DMPError(DMPErrors.INVALID_INDEX);  
+        
+        if (newIndex < 1 || newIndex >= this.songs.length)
+            throw new DMPError(DMPErrors.INVALID_INDEX);
+        
+        if (oldIndex === newIndex)
+            throw new DMPError(DMPErrors.INVALID_INDEX);
+        
+        const song = this.songs[oldIndex];
+        this.songs.splice(oldIndex, 1);
+        this.songs.splice(newIndex, 0, song);
+
+        this.player.emit('songMoved', this, song, oldIndex, newIndex);
+
+        return true;
+    }
+
+    /**
      * Stops playing the Music and cleans the Queue
      * @returns {void}
      */
