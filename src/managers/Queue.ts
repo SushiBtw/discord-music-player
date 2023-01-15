@@ -2,7 +2,6 @@ import { Guild, GuildChannelResolvable, GuildMember, StageChannel, VoiceChannel 
 import { StreamConnection } from "../voice/StreamConnection";
 import { AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus, DiscordGatewayAdapterCreator } from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
-import fs from 'fs';
 import scdl from 'soundcloud-downloader';
 import {
     DefaultPlayerOptions,
