@@ -11,14 +11,17 @@ import {
     Song,
 } from "..";
 import fetch from 'isomorphic-unfetch';
-import YTSR, {Video} from 'ytsr';
+import YTSR, { Video } from 'ytsr';
+import scdl from 'soundcloud-downloader';
 import Spotify from "spotify-url-info";
-import {getPlaylist, getSong} from "apple-music-metadata";
-import {Client, Playlist as IPlaylist, Video as IVideo, VideoCompact} from "youtubei";
-import {ChannelType, GuildChannel} from "discord.js";
+import { getPlaylist, getSong } from "apple-music-metadata";
+import { Client, Playlist as IPlaylist, Video as IVideo, VideoCompact } from "youtubei";
+import { ChannelType, GuildChannel } from "discord.js";
+
+
 
 let YouTube = new Client();
-const {getData, getPreview} = Spotify(fetch);
+const { getData, getPreview } = Spotify(fetch);
 
 export class Utils {
     static regexList = {
@@ -30,6 +33,8 @@ export class Utils {
         SpotifyPlaylist: /https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:(album|playlist)\/|\?uri=spotify:playlist:)((\w|-)+)(?:(?=\?)(?:[?&]foo=(\d*)(?=[&#]|$)|(?![?&]foo=)[^#])+)?(?=#|$)/,
         Apple: /https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//,
         ApplePlaylist: /https?:\/\/music\.apple\.com\/.+?\/.+?\/(.+?)\//,
+        SoundCloud: /^(https?:\/\/)?(www.)?(m\.)?soundcloud\.com\/[\w\-\.]+(\/)+[\w\-\.]+/,
+        SoundCloudPlaylist: /^(https?:\/\/)?(www.)?(m\.)?soundcloud\.com\/[\w\-\.]+(\/)+(sets)+/
     }
 
     /**
@@ -88,34 +93,34 @@ export class Utils {
             // Custom Options - Upload date: null
             if (SOptions?.uploadDate !== null)
                 Filters = Array.from(
-                        (
-                            await YTSR.getFilters(Filters.url!)
-                        )
-                            .get('Upload date')!, ([name, value]) => ({name, url: value.url})
+                    (
+                        await YTSR.getFilters(Filters.url!)
                     )
-                        .find(o => o.name.toLowerCase().includes(SOptions?.uploadDate!))
+                        .get('Upload date')!, ([name, value]) => ({ name, url: value.url })
+                )
+                    .find(o => o.name.toLowerCase().includes(SOptions?.uploadDate!))
                     ?? Filters;
 
             // Custom Options - Duration: null
             if (SOptions?.duration !== null)
                 Filters = Array.from(
-                        (
-                            await YTSR.getFilters(Filters.url!)
-                        )
-                            .get('Duration')!, ([name, value]) => ({name, url: value.url})
+                    (
+                        await YTSR.getFilters(Filters.url!)
                     )
-                        .find(o => o.name.toLowerCase().startsWith(SOptions?.duration!))
+                        .get('Duration')!, ([name, value]) => ({ name, url: value.url })
+                )
+                    .find(o => o.name.toLowerCase().startsWith(SOptions?.duration!))
                     ?? Filters;
 
             // Custom Options - Sort by: relevance
             if (SOptions?.sortBy !== null && SOptions?.sortBy !== 'relevance')
                 Filters = Array.from(
-                        (
-                            await YTSR.getFilters(Filters.url!)
-                        )
-                            .get('Sort by')!, ([name, value]) => ({name, url: value.url})
+                    (
+                        await YTSR.getFilters(Filters.url!)
                     )
-                        .find(o => o.name.toLowerCase().includes(SOptions?.sortBy!))
+                        .get('Sort by')!, ([name, value]) => ({ name, url: value.url })
+                )
+                    .find(o => o.name.toLowerCase().includes(SOptions?.sortBy!))
                     ?? Filters;
 
             let Result = await YTSR(
@@ -161,8 +166,22 @@ export class Utils {
             this.regexList.YouTubeVideo.test(Search);
         let AppleLink =
             this.regexList.Apple.test(Search);
+        let SoundCloudLink = this.regexList.SoundCloud.test(Search);
 
-        if (AppleLink) {
+        if (SoundCloudLink) {
+            let SoundCloudResult = await scdl.getInfo(Search);
+
+            return new Song({
+                name: SoundCloudResult.title,
+                url: SoundCloudResult.permalink_url,
+                duration: this.msToTime((SoundCloudResult.duration ?? 0) * 1000),
+                domain: "SoundCloud",
+                author: SoundCloudResult.user.username || SoundCloudResult.user.full_name,
+                isLive: false,
+                thumbnail: SoundCloudResult.artwork_url,
+            } as RawSong, Queue, SOptions.requestedBy);
+
+        } else if (AppleLink) {
             try {
                 let AppleResult = await getSong(Search);
                 if (AppleResult) {
@@ -204,6 +223,7 @@ export class Utils {
                 name: VideoResult.title,
                 url: Search,
                 duration: this.msToTime((VideoResult.duration ?? 0) * 1000),
+                domain: "YouTube",
                 author: VideoResult.channel.name,
                 isLive: VideoResult.isLiveContent,
                 thumbnail: VideoResult.thumbnails.best,
@@ -263,8 +283,46 @@ export class Utils {
             this.regexList.YouTubePlaylist.test(Search);
         let ApplePlaylistLink =
             this.regexList.ApplePlaylist.test(Search);
+        let SoundCloudPlaylistLink = this.regexList.SoundCloudPlaylist.test(Search);
 
-        if (ApplePlaylistLink) {
+        if (SoundCloudPlaylistLink) {
+
+            let SoundCloudResultData = await scdl.getSetInfo(Search).catch(() => { throw DMPErrors.INVALID_PLAYLIST; })
+
+            let SoundCloudResult: RawPlaylist = {
+                name: SoundCloudResultData.permalink,
+                author: SoundCloudResultData.user.username,
+                url: Search,
+                songs: [],
+                type: 'playlist'
+            }
+
+            SoundCloudResult.songs = SoundCloudResultData.tracks.map((track, index) => {
+                if (Limit !== -1 && index >= Limit)
+                    return null;
+                let song = new Song({
+                    name: track.title,
+                    url: track.permalink_url,
+                    domain: 'SoundCloud',
+                    duration: this.msToTime((track.duration ?? 0) * 1000),
+                    author: track.user.username || track.user.full_name,
+                    isLive: false,
+                    thumbnail: track.artwork_url,
+                }, Queue, SOptions.requestedBy);
+                song.data = SOptions.data;
+                return song;
+            })
+                .filter((V): V is Song => V !== null);
+
+            if (SoundCloudResult.songs.length === 0)
+                throw DMPErrors.INVALID_PLAYLIST;
+
+            if (SOptions.shuffle)
+                SoundCloudResult.songs = this.shuffle(SoundCloudResult.songs);
+
+            return new Playlist(SoundCloudResult, Queue, SOptions.requestedBy);
+
+        } else if (ApplePlaylistLink) {
 
             let AppleResultData = await getPlaylist(Search).catch(() => null);
             if (!AppleResultData)
@@ -376,6 +434,7 @@ export class Utils {
                 let song = new Song({
                     name: video.title,
                     url: `https://youtube.com/watch?v=${video.id}`,
+                    domain: 'YouTube',
                     duration: this.msToTime((video.duration ?? 0) * 1000),
                     author: video.channel!.name,
                     isLive: video.isLive,
