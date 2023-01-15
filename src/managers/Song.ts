@@ -9,6 +9,7 @@ export class Song {
     public url: string;
     public thumbnail: string;
     public requestedBy?: User;
+    public domain: string;
     public duration: string;
     public isLive: boolean;
     public isFirst: boolean;
@@ -67,6 +68,12 @@ export class Song {
          */
 
         /**
+         * Song domain
+         * @name Song#domain
+         * @type {string}
+         */
+
+        /**
          * Song duration
          * @name Song#duration
          * @type {string}
@@ -111,6 +118,8 @@ export class Song {
         this.thumbnail = raw.thumbnail;
 
         this.requestedBy = requestedBy;
+
+        this.domain = raw.domain;
 
         this.duration = raw.duration;
 
