@@ -1,5 +1,5 @@
-import {AudioPlayerError, AudioResource } from "@discordjs/voice";
-import {User} from "discord.js";
+import { AudioPlayerError, AudioResource } from "@discordjs/voice";
+import { User } from "discord.js";
 import { Song, Queue, Playlist } from "..";
 
 /**
@@ -22,7 +22,7 @@ export interface PlayerOptions {
     deafenOnJoin?: boolean,
     timeout?: number,
     volume?: number,
-    quality?: 'low'|'high',
+    quality?: 'low' | 'high',
     localAddress?: string,
     ytdlRequestOptions?: object,
 }
@@ -40,9 +40,9 @@ export interface PlayerOptions {
  * @param {string} [localAddress] Custom ipv4/ipv6 address
  */
 export interface PlayOptions {
-    uploadDate?: 'hour'|'today'|'week'|'month'|'year',
-    duration?: 'short'|'long',
-    sortBy?: 'relevance'|'date'|'view count'|'rating',
+    uploadDate?: 'hour' | 'today' | 'week' | 'month' | 'year',
+    duration?: 'short' | 'long',
+    sortBy?: 'relevance' | 'date' | 'view count' | 'rating',
     timecode?: boolean;
     seek?: number;
     index?: number;
@@ -146,6 +146,7 @@ export const DefaultProgressBarOptions: ProgressBarOptions = {
  * @property {string} author
  * @property {string} url
  * @property {string} thumbnail
+ * @property {string} domain
  * @property {string} duration
  * @property {boolean} isLive
  */
@@ -154,6 +155,7 @@ export interface RawSong {
     author: string,
     url: string,
     thumbnail: string,
+    domain: string,
     duration: string,
     isLive: boolean
     seekTime?: number;
@@ -173,7 +175,7 @@ export interface RawPlaylist {
     author: string,
     url: string,
     songs: Song[],
-    type: 'playlist'|'album'
+    type: 'playlist' | 'album'
 }
 
 /**
@@ -187,7 +189,7 @@ export interface RawPlaylist {
 export enum RepeatMode {
     DISABLED,
     SONG,
-    QUEUE ,
+    QUEUE,
 }
 
 /**
@@ -305,7 +307,7 @@ export interface StreamConnectionEvents {
 
 export interface RawApplePlaylist {
     name: string
-    type: 'playlist'|'album'
+    type: 'playlist' | 'album'
     author: string
     tracks: { artist: string, title: string }[]
 }
