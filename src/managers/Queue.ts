@@ -279,7 +279,7 @@ export class Queue<T = unknown> {
             encoderArgs: [],
             quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
             highWaterMark: 1 << 25,
-            filter: 'audioonly'
+            filter: !song.duration ? null : 'audioonly'
         })
             .on('error', (error: { message: string; }) => {
                 if (!/Status code|premature close/i.test(error.message))
