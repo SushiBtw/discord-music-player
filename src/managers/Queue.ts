@@ -160,6 +160,18 @@ export class Queue<T = unknown> {
             adapterCreator: channel.guild.voiceAdapterCreator,
             selfDeaf: this.options.deafenOnJoin
         });
+        connection.on('stateChange', (oldState, newState) => {
+            const oldNetworking = Reflect.get(oldState, 'networking');
+            const newNetworking = Reflect.get(newState, 'networking');
+          
+            const networkStateChangeHandler = (_oldNetworkState, newNetworkState) => {
+                const newUdp = Reflect.get(newNetworkState, 'udp');
+                clearInterval(newUdp?.keepAliveInterval);
+            }
+          
+            oldNetworking?.off('stateChange', networkStateChangeHandler);
+            newNetworking?.on('stateChange', networkStateChangeHandler);
+        });
         let _connection: StreamConnection;
         try {
             connection = await entersState(connection, VoiceConnectionStatus.Ready, 15 * 1000);
