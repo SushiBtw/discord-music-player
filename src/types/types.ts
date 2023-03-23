@@ -250,6 +250,15 @@ export enum RepeatMode {
  */
 
 /**
+ * Emitted when a song was moved in the queue to a new position
+ * @event Player#songMoved
+ * @param {Queue} queue Queue
+ * @param {Song} song Song
+ * @param {number} oldIndex Old index
+ * @param {number} newIndex New index
+ */
+
+/**
  * Emitted when there was an error with the Player
  * @event Player#error
  * @param {string} error Error string
@@ -266,6 +275,7 @@ export interface PlayerEvents<T = unknown> {
     songFirst: [queue: Queue<T>, song: Song];
     clientDisconnect: [queue: Queue<T>];
     clientUndeafen: [queue: Queue<T>];
+    songMoved: [queue: Queue<T>, song: Song, oldIndex: number, newIndex: number];
     error: [error: string, queue: Queue<T>];
 }
 
