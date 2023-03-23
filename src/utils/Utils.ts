@@ -306,25 +306,36 @@ export class Utils {
             return new Playlist(AppleResult, Queue, SOptions.requestedBy);
         } else if (SpotifyPlaylistLink) {
             let SpotifyResultData = await getData(Search).catch(() => null);
-            let spotifyTracks = SpotifyResultData.tracks?.items ?? [];
+            const playlistId = SpotifyResultData.id;
+
+            // Create Spotify Guest Token
+            const tokenResponse = await fetch(
+                'https://open.spotify.com/get_access_token?reason=transport&productType=web_player',
+                {
+                    headers: {
+                    'Content-Type': 'application/json',
+                    },
+                }
+            );
+            const { accessToken } = await tokenResponse.json();
+
+            // Fetch Playlist By Id
+            const playlistResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            SpotifyResultData = await playlistResponse.json();
+            let spotifyTracks = SpotifyResultData.tracks.items ?? [];
 
             // Playlist has more than 100 songs, fetching remaining songs...
             if (
-              SpotifyResultData.tracks.items.length < SpotifyResultData.tracks.total
+                SpotifyResultData.tracks.items.length < SpotifyResultData.tracks.total
             ) {
               const tracksNextEndpoint = SpotifyResultData.tracks.next;
               if (tracksNextEndpoint) {
-                // Create Guest Token
-                const tokenResponse = await fetch(
-                  'https://open.spotify.com/get_access_token?reason=transport&productType=web_player',
-                  {
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                  }
-                );
-                const { accessToken } = await tokenResponse.json();
-
                 let fetchNext = tracksNextEndpoint;
                 // Fetch playlist tracks through pagination until there is nothing left to fetch
                 do {
