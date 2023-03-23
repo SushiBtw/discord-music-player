@@ -68,5 +68,11 @@
   "directories": {
     "doc": "docs",
     "test": "test"
+  },
+  "overrides": {
+    "ytsr": "github:Yonle/node-ytsr"
+  },
+  "resolutions": {
+    "ytsr": "github:Yonle/node-ytsr"
   }
 }
