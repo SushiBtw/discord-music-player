@@ -18,7 +18,7 @@ import {Client, Playlist as IPlaylist, Video as IVideo, VideoCompact} from "yout
 import {ChannelType, GuildChannel} from "discord.js";
 
 let YouTube = new Client();
-const {getData, getPreview} = Spotify(fetch);
+const {getPreview} = Spotify(fetch);
 
 export class Utils {
     static regexList = {
@@ -305,8 +305,26 @@ export class Utils {
 
             return new Playlist(AppleResult, Queue, SOptions.requestedBy);
         } else if (SpotifyPlaylistLink) {
-            let SpotifyResultData = await getData(Search).catch(() => null);
-            const playlistId = SpotifyResultData.id;
+            const playlistSearch = 'playlist/';
+            const albumSearch = 'album/';
+            const indexOfPlaylist = Search.indexOf(playlistSearch);
+            const indexOfAlbum = Search.indexOf(albumSearch);
+            let endpoint = '';
+
+            if (indexOfPlaylist > 0) {
+                endpoint = 'playlists';
+            } else if (indexOfAlbum > 0) {
+                endpoint = 'albums';
+            }
+
+            let indexToUse = 0;
+            if (endpoint === 'playlists') {
+                indexToUse = indexOfPlaylist + playlistSearch.length;
+            } else if (endpoint === 'albums') {
+                indexToUse = indexOfAlbum + albumSearch.length;
+            }
+
+            const searchId = Search.substring(indexToUse).split('?')[0];
 
             // Create Spotify Guest Token
             const tokenResponse = await fetch(
@@ -318,22 +336,25 @@ export class Utils {
                 }
             );
             const { accessToken } = await tokenResponse.json();
+            
+            let SpotifyResultData;
+            let spotifyTracks = [];
 
-            // Fetch Playlist By Id
-            const playlistResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
+            if (endpoint && searchId) {
+                // Fetch Playlist/Album By Id
+                const trackResponse = await fetch(`https://api.spotify.com/v1/${endpoint}/${searchId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
 
-            SpotifyResultData = await playlistResponse.json();
-            let spotifyTracks = SpotifyResultData.tracks.items ?? [];
+                SpotifyResultData = await trackResponse.json();
+                spotifyTracks = SpotifyResultData.tracks.items ?? [];
+            }
 
             // Playlist has more than 100 songs, fetching remaining songs...
-            if (
-                SpotifyResultData.tracks.items.length < SpotifyResultData.tracks.total
-            ) {
+            if (SpotifyResultData && spotifyTracks.length < SpotifyResultData.tracks.total) {
               const tracksNextEndpoint = SpotifyResultData.tracks.next;
               if (tracksNextEndpoint) {
                 let fetchNext = tracksNextEndpoint;
