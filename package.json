@@ -45,8 +45,8 @@
     "libsodium-wrappers": "^0.7.9",
     "spotify-url-info": "^3.1.7",
     "youtubei": "^0.0.1-rc.34",
-    "ytdl-core": "^4.11.2",
-    "ytsr": "^3.6.0"
+    "ytdl-core": "^4.11.4",
+    "ytsr": "^3.8.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
@@ -68,11 +68,5 @@
   "directories": {
     "doc": "docs",
     "test": "test"
-  },
-  "overrides": {
-    "ytsr": "github:Yonle/node-ytsr"
-  },
-  "resolutions": {
-    "ytsr": "github:Yonle/node-ytsr"
   }
 }
