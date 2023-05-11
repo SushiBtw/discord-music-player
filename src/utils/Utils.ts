@@ -378,7 +378,7 @@ export class Utils {
 
             let SpotifyResult: RawPlaylist = {
                 name: SpotifyResultData.name,
-                author: SpotifyResultData.type === 'playlist' ? SpotifyResultData.owner.display_name : SpotifyResultData.artists[0].name,
+                author: SpotifyResultData.type === 'playlist' ? SpotifyResultData.owner?.display_name : SpotifyResultData.artists[0].name,
                 url: Search,
                 songs: [],
                 type: SpotifyResultData.type
