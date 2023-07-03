@@ -11,17 +11,17 @@ import {
     Song,
 } from "..";
 import fetch from 'isomorphic-unfetch';
-import YTSR, { Video } from 'ytsr';
+import YTSR, {Video} from 'ytsr';
 import scdl from 'soundcloud-downloader';
 import Spotify from "spotify-url-info";
-import { getPlaylist, getSong } from "apple-music-metadata";
-import { Client, Playlist as IPlaylist, Video as IVideo, VideoCompact } from "youtubei";
-import { ChannelType, GuildChannel } from "discord.js";
+import {getPlaylist, getSong} from "apple-music-metadata";
+import {Client, Playlist as IPlaylist, Video as IVideo, VideoCompact} from "youtubei";
+import {ChannelType, GuildChannel} from "discord.js";
 
 
 
 let YouTube = new Client();
-const { getData, getPreview } = Spotify(fetch);
+const {getData, getPreview} = Spotify(fetch);
 
 export class Utils {
     static regexList = {
@@ -96,7 +96,7 @@ export class Utils {
                     (
                         await YTSR.getFilters(Filters.url!)
                     )
-                        .get('Upload date')!, ([name, value]) => ({ name, url: value.url })
+                        .get('Upload date')!, ([name, value]) => ({name, url: value.url})
                 )
                     .find(o => o.name.toLowerCase().includes(SOptions?.uploadDate!))
                     ?? Filters;
@@ -107,7 +107,7 @@ export class Utils {
                     (
                         await YTSR.getFilters(Filters.url!)
                     )
-                        .get('Duration')!, ([name, value]) => ({ name, url: value.url })
+                        .get('Duration')!, ([name, value]) => ({name, url: value.url})
                 )
                     .find(o => o.name.toLowerCase().startsWith(SOptions?.duration!))
                     ?? Filters;
@@ -118,7 +118,7 @@ export class Utils {
                     (
                         await YTSR.getFilters(Filters.url!)
                     )
-                        .get('Sort by')!, ([name, value]) => ({ name, url: value.url })
+                        .get('Sort by')!, ([name, value]) => ({name, url: value.url})
                 )
                     .find(o => o.name.toLowerCase().includes(SOptions?.sortBy!))
                     ?? Filters;
@@ -287,7 +287,7 @@ export class Utils {
 
         if (SoundCloudPlaylistLink) {
 
-            let SoundCloudResultData = await scdl.getSetInfo(Search).catch(() => { throw DMPErrors.INVALID_PLAYLIST; })
+            let SoundCloudResultData = await scdl.getSetInfo(Search).catch(() => {throw DMPErrors.INVALID_PLAYLIST;})
 
             let SoundCloudResult: RawPlaylist = {
                 name: SoundCloudResultData.permalink,

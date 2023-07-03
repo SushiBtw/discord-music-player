@@ -1,6 +1,6 @@
-import { Guild, GuildChannelResolvable, GuildMember, StageChannel, VoiceChannel } from "discord.js";
-import { StreamConnection } from "../voice/StreamConnection";
-import { AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus, DiscordGatewayAdapterCreator } from "@discordjs/voice";
+import {Guild, GuildChannelResolvable, GuildMember, StageChannel, VoiceChannel} from "discord.js";
+import {StreamConnection} from "../voice/StreamConnection";
+import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus, DiscordGatewayAdapterCreator} from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
 import scdl from 'soundcloud-downloader';
 import {
@@ -103,7 +103,7 @@ export class Queue<T = unknown> {
 
         this.guild = guild;
 
-        this.options = { ...DefaultPlayerOptions, ...options };
+        this.options = {...DefaultPlayerOptions, ...options};
     }
 
     /**
@@ -208,16 +208,16 @@ export class Queue<T = unknown> {
                         this.songs.unshift(oldSong!);
                         this.songs[0]._setFirst(false);
                         this.player.emit('songChanged', this, this.songs[0], oldSong);
-                        return this.play(this.songs[0] as Song, { immediate: true });
+                        return this.play(this.songs[0] as Song, {immediate: true});
                     } else if (this.repeatMode === RepeatMode.QUEUE) {
                         this.songs.push(oldSong!);
                         this.songs[this.songs.length - 1]._setFirst(false);
                         this.player.emit('songChanged', this, this.songs[0], oldSong);
-                        return this.play(this.songs[0] as Song, { immediate: true });
+                        return this.play(this.songs[0] as Song, {immediate: true});
                     }
 
                     this.player.emit('songChanged', this, this.songs[0], oldSong);
-                    return this.play(this.songs[0] as Song, { immediate: true });
+                    return this.play(this.songs[0] as Song, {immediate: true});
                 }
             })
             .on('error', (err) => this.player.emit('error', err.message, this));
@@ -240,7 +240,7 @@ export class Queue<T = unknown> {
             DefaultPlayOptions,
             options
         );
-        let { data } = options;
+        let {data} = options;
         delete options.data;
         let song = await Utils.best(search, options, this)
             .catch(error => {
@@ -341,7 +341,7 @@ export class Queue<T = unknown> {
 
         if (songLength === 0) {
             playlist.songs[0]._setFirst();
-            await this.play(playlist.songs[0], { immediate: true });
+            await this.play(playlist.songs[0], {immediate: true});
         }
 
         return playlist;
