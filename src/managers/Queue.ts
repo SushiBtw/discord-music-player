@@ -1,7 +1,8 @@
 import {Guild, GuildChannelResolvable, GuildMember, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
-import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus} from "@discordjs/voice";
+import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus, DiscordGatewayAdapterCreator} from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
+import scdl from 'soundcloud-downloader';
 import {
     DefaultPlayerOptions,
     DefaultPlaylistOptions,
@@ -157,7 +158,7 @@ export class Queue<T = unknown> {
         let connection = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
-            adapterCreator: channel.guild.voiceAdapterCreator,
+            adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: this.options.deafenOnJoin
         });
         let _connection: StreamConnection;
@@ -271,25 +272,35 @@ export class Queue<T = unknown> {
         if (song.seekTime)
             options.seek = song.seekTime;
 
-        let stream = ytdl(song.url, {
-            requestOptions: this.player.options.ytdlRequestOptions ?? {},
-            opusEncoded: false,
-            seek: options.seek ? options.seek / 1000 : 0,
-            fmt: 's16le',
-            encoderArgs: [],
-            quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
-            highWaterMark: 1 << 25,
-            filter: 'audioonly'
-        })
-            .on('error', (error: { message: string; }) => {
-                if (!/Status code|premature close/i.test(error.message))
-                    this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
+        let stream = null
+        if (song.domain === "SoundCloud") {
+            try {
+                stream = await scdl.download(song.url);
+            } catch (error) {
+                this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
                 return;
-            });
+            }
+        } else {
+            stream = ytdl(song.url, {
+                requestOptions: this.player.options.ytdlRequestOptions ?? {},
+                opusEncoded: false,
+                seek: options.seek ? options.seek / 1000 : 0,
+                fmt: 's16le',
+                encoderArgs: [],
+                quality: quality!.toLowerCase() === 'low' ? 'lowestaudio' : 'highestaudio',
+                highWaterMark: 1 << 25,
+                filter: 'audioonly'
+            })
+                .on('error', (error: { message: string; }) => {
+                    if (!/Status code|premature close/i.test(error.message))
+                        this.player.emit('error', error.message === 'Video unavailable' ? 'VideoUnavailable' : error.message, this);
+                    return;
+                });
+        }
 
         const resource: AudioResource<Song> = this.connection.createAudioStream(stream, {
             metadata: song,
-            inputType: StreamType.Raw
+            inputType: song.domain == 'SoundCloud' ? StreamType.Arbitrary : StreamType.Raw
         });
 
         setTimeout(_ => {
@@ -389,22 +400,22 @@ export class Queue<T = unknown> {
     move(oldIndex: number, newIndex?: number): boolean {
         if (this.destroyed)
             throw new DMPError(DMPErrors.QUEUE_DESTROYED);
-        
+
         if (!this.connection)
             throw new DMPError(DMPErrors.NO_VOICE_CONNECTION);
-        
+
         if (newIndex === undefined)
             newIndex = 1;
-        
+
         if (oldIndex === undefined || oldIndex < 1 || oldIndex >= this.songs.length)
-            throw new DMPError(DMPErrors.INVALID_INDEX);  
-        
+            throw new DMPError(DMPErrors.INVALID_INDEX);
+
         if (newIndex < 1 || newIndex >= this.songs.length)
             throw new DMPError(DMPErrors.INVALID_INDEX);
-        
+
         if (oldIndex === newIndex)
             throw new DMPError(DMPErrors.INVALID_INDEX);
-        
+
         const song = this.songs[oldIndex];
         this.songs.splice(oldIndex, 1);
         this.songs.splice(newIndex, 0, song);

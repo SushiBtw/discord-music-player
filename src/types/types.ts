@@ -1,4 +1,4 @@
-import {AudioPlayerError, AudioResource } from "@discordjs/voice";
+import {AudioPlayerError, AudioResource} from "@discordjs/voice";
 import {User} from "discord.js";
 import { Song, Queue, Playlist } from "..";
 
@@ -146,6 +146,7 @@ export const DefaultProgressBarOptions: ProgressBarOptions = {
  * @property {string} author
  * @property {string} url
  * @property {string} thumbnail
+ * @property {string} domain
  * @property {string} duration
  * @property {boolean} isLive
  */
@@ -154,6 +155,7 @@ export interface RawSong {
     author: string,
     url: string,
     thumbnail: string,
+    domain: string,
     duration: string,
     isLive: boolean
     seekTime?: number;
