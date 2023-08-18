@@ -1,6 +1,6 @@
 import {Guild, GuildChannelResolvable, GuildMember, StageChannel, VoiceChannel} from "discord.js";
 import {StreamConnection} from "../voice/StreamConnection";
-import {AudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus} from "@discordjs/voice";
+import {AudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus} from "@discordjs/voice";
 import ytdl from "discord-ytdl-core";
 import {
     DefaultPlayerOptions,
@@ -157,7 +157,7 @@ export class Queue<T = unknown> {
         let connection = joinVoiceChannel({
             guildId: channel.guild.id,
             channelId: channel.id,
-            adapterCreator: channel.guild.voiceAdapterCreator,
+            adapterCreator: channel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
             selfDeaf: this.options.deafenOnJoin
         });
         let _connection: StreamConnection;
